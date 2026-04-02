@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.baitaplon.signincontroller">
+   <children>
+      <Label layoutY="-2.0" prefHeight="26.0" prefWidth="600.0" style="-fx-background-color: #0f9ee5;" text="   ĐĂNG NHẬP" wrapText="true" />
+      <PasswordField fx:id="txtpassfield" layoutX="159.0" layoutY="244.0" prefHeight="26.0" prefWidth="300.0" promptText="PASSWORD" />
+      <Button fx:id="signinbtn" defaultButton="true" layoutX="160.0" layoutY="296.0" mnemonicParsing="false" onAction="#handle_signin" prefHeight="38.0" prefWidth="300.0" style="-fx-background-color: green;" text="sign in" textAlignment="JUSTIFY">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Button>
+      <Button fx:id="signupbtn" cancelButton="true" contentDisplay="CENTER" layoutX="161.0" layoutY="342.0" mnemonicParsing="false" onAction="#handle_signup" prefHeight="38.0" prefWidth="300.0" style="-fx-background-color: blue;" text="sign up" textFill="#1aaea2">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Button>
+      <TextField fx:id="txtphonenumberfield" layoutX="159.0" layoutY="200.0" prefHeight="26.0" prefWidth="300.0" promptText="PHONE NUMBER" />
+      <Label contentDisplay="CENTER" layoutX="179.0" layoutY="81.0" prefHeight="111.0" prefWidth="260.0" text="    Company Account" textAlignment="JUSTIFY" textFill="#d4ba0e">
+         <font>
+            <Font name="System Bold" size="24.0" />
+         </font>
+         <effect>
+            <Glow />
+         </effect>
+      </Label>
+   </children>
+</AnchorPane>
