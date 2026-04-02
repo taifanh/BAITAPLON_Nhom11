@@ -1,4 +1,4 @@
-package org.example.baitaplon;
+package models;
 
 public abstract class User {
     private String name;

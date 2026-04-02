@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #3498db;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.baitaplon.signupcontroller">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #3498db;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.signupcontroller">
    <children>
       <Pane prefHeight="400.0" prefWidth="519.0" style="-fx-background-color: white;">
          <children>

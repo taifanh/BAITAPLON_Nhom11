@@ -1,4 +1,6 @@
-package org.example.baitaplon;
+package controllers;
+
+import models.User;
 
 public final class UserSession {
     private static User currentUser;
