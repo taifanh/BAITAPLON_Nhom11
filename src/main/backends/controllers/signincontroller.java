@@ -49,7 +49,7 @@ public class signincontroller {
 
             UserSession.setCurrentUser(userOptional.get());
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("userinfo.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/views/userinfo.fxml"));
             Parent root = loader.load();
             userinfocontroller controller = loader.getController();
             controller.setUser(userOptional.get());
@@ -66,7 +66,7 @@ public class signincontroller {
     }
 
     public void handle_signup(ActionEvent event) throws IOException {
-        Parent signupRoot = FXMLLoader.load(getClass().getResource("signup.fxml"));
+        Parent signupRoot = FXMLLoader.load(getClass().getResource("/org/example/views/signup.fxml"));
         Scene sceneSignup = new Scene(signupRoot);
 
         Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();

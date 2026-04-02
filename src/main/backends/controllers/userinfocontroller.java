@@ -54,7 +54,7 @@ public class userinfocontroller {
     @FXML
     public void handle_sign_out(ActionEvent event) throws IOException {
         UserSession.clear();
-        Parent root = FXMLLoader.load(getClass().getResource("signin.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/org/example/views/signin.fxml"));
         Scene scene = new Scene(root);
 
         Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();

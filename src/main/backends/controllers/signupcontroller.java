@@ -53,7 +53,7 @@ public class signupcontroller {
             userJsonStore.saveUser(new User(name, email, phoneNumber, password));
             showAlert(Alert.AlertType.INFORMATION, "OK", null, "Dang ky thanh cong. Du lieu da duoc luu vao file JSON.");
 
-            Parent signinRoot = FXMLLoader.load(getClass().getResource("signin.fxml"));
+            Parent signinRoot = FXMLLoader.load(getClass().getResource("/org/example/views/signin.fxml"));
             Scene sceneSignin = new Scene(signinRoot);
 
             Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
