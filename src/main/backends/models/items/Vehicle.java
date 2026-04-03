@@ -1,6 +1,8 @@
-package com.example.model;
+package models.items;
 
-public class Vehicle extends Item{
+import models.core.Item;
+
+public class Vehicle extends Item {
     public Vehicle(String id,String name,double prices,String info){
         super(id, name, prices, info);
     }

@@ -11,7 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import models.User;
+import models.core.Account;
 
 import java.io.IOException;
 
@@ -50,7 +50,7 @@ public class signupcontroller {
                 return;
             }
 
-            userJsonStore.saveUser(new User(name, email, phoneNumber, password));
+            userJsonStore.saveUser(new Account(name, email, phoneNumber, password));
             showAlert(Alert.AlertType.INFORMATION, "OK", null, "Dang ky thanh cong. Du lieu da duoc luu vao file JSON.");
 
             Parent signinRoot = FXMLLoader.load(getClass().getResource("/org/example/views/signin.fxml"));

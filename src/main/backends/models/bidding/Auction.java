@@ -1,4 +1,6 @@
-package com.example.model;
+package models.bidding;
+
+import models.core.Item;
 
 import java.util.ArrayList;
 import  java.util.Date;

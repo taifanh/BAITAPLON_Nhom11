@@ -9,7 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import models.User;
+import models.core.Account;
 
 import java.io.IOException;
 
@@ -29,7 +29,7 @@ public class userinfocontroller {
     @FXML
     private CheckBox passhide;
 
-    private User user;
+    private Account user;
 
     @FXML
     public void initialize() {
@@ -39,7 +39,7 @@ public class userinfocontroller {
         }
     }
 
-    public void setUser(User user) {
+    public void setUser(Account user) {
         this.user = user;
         if (user == null) {
             return;

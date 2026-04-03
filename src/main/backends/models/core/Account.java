@@ -1,0 +1,25 @@
+package models.core;
+
+public abstract class Account extends Entity {
+    protected String name,phoneNumber,Email,password;
+    public Account(String id, String name, String phoneNumber, String Email, String password){
+        super(id);
+        this.name=name;
+        this.phoneNumber=phoneNumber;
+        this.Email=Email;
+        this.password=password;
+    }
+    public String getName(){
+        return name;
+    }
+    public String getPhoneNumber(){
+        return phoneNumber;
+    }
+    public String getEmail(){
+        return Email;
+    }
+    public String getPassword(){
+        return password;
+    }
+
+}

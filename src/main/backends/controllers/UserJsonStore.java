@@ -3,7 +3,7 @@ package controllers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import models.User;
+import models.core.Account;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,7 +14,7 @@ import java.util.Optional;
 
 public class UserJsonStore {
     private static final Path USERS_FILE = Path.of("data", "users.json");
-    private static final TypeReference<List<User>> USER_LIST_TYPE = new TypeReference<>() {};
+    private static final TypeReference<List<Account>> USER_LIST_TYPE = new TypeReference<>() {};
 
     private final ObjectMapper objectMapper;
 
@@ -23,12 +23,12 @@ public class UserJsonStore {
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
-    public List<User> getAllUsers() throws IOException {
+    public List<Account> getAllUsers() throws IOException {
         ensureStorageExists();
         return new ArrayList<>(objectMapper.readValue(USERS_FILE.toFile(), USER_LIST_TYPE));
     }
 
-    public Optional<User> authenticate(String phoneNumber, String password) throws IOException {
+    public Optional<Account> authenticate(String phoneNumber, String password) throws IOException {
         return getAllUsers().stream()
                 .filter(user -> user.getPhoneNumber().equals(phoneNumber) && user.getPassword().equals(password))
                 .findFirst();
@@ -38,8 +38,8 @@ public class UserJsonStore {
         return getAllUsers().stream().anyMatch(user -> user.getPhoneNumber().equals(phoneNumber));
     }
 
-    public void saveUser(User user) throws IOException {
-        List<User> users = getAllUsers();
+    public void saveUser(Account user) throws IOException {
+        List<Account> users = getAllUsers();
         users.add(user);
         objectMapper.writeValue(USERS_FILE.toFile(), users);
     }
@@ -50,7 +50,7 @@ public class UserJsonStore {
             Files.createDirectories(parent);
         }
         if (Files.notExists(USERS_FILE)) {
-            objectMapper.writeValue(USERS_FILE.toFile(), new ArrayList<User>());
+            objectMapper.writeValue(USERS_FILE.toFile(), new ArrayList<Account>());
         }
     }
 }

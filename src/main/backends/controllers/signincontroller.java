@@ -11,7 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import models.User;
+import models.core.Account;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -41,7 +41,7 @@ public class signincontroller {
         }
 
         try {
-            Optional<User> userOptional = userJsonStore.authenticate(phoneNumber, password);
+            Optional<Account> userOptional = userJsonStore.authenticate(phoneNumber, password);
             if (userOptional.isEmpty()) {
                 showAlert(Alert.AlertType.ERROR, "Loi", "Dang nhap that bai", "Sai tai khoan hoac mat khau. Vui long thu lai.");
                 return;
