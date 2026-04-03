@@ -1,4 +1,4 @@
-package com.example.model;
+package models;
 
 public class Bidder extends User{
     public Bidder(String id,String name,String phoneNumber,String Email,String password){

@@ -1,4 +1,4 @@
-package com.example.model;
+package models;
 
 public class Electronics extends Item{
     public  Electronics(String id,String name,double prices,String info){

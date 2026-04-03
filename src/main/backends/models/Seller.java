@@ -1,4 +1,4 @@
-package com.example.model;
+package models;
 
 public class Seller extends User{
     public Seller(String id,String name,String phoneNumber,String Email,String password){

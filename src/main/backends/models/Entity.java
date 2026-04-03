@@ -1,4 +1,4 @@
-package com.example.model;
+package models;
 
 public abstract class Entity {
     protected String id;

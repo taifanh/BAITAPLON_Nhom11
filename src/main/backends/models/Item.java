@@ -1,4 +1,4 @@
-package com.example.model;
+package models;
 
 public abstract class Item extends Entity {
     protected String name;
