@@ -3,6 +3,7 @@ package controllers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import models.accounts.User;
 import models.core.Account;
 
 import java.io.IOException;
@@ -38,7 +39,7 @@ public class UserJsonStore {
         return getAllUsers().stream().anyMatch(user -> user.getPhoneNumber().equals(phoneNumber));
     }
 
-    public void saveUser(Account user) throws IOException {
+    public void saveUser(User user) throws IOException {
         List<Account> users = getAllUsers();
         users.add(user);
         objectMapper.writeValue(USERS_FILE.toFile(), users);
