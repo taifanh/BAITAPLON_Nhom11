@@ -12,7 +12,6 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import models.accounts.User;
-import models.core.Account;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -51,14 +50,14 @@ public class signincontroller {
             UserSession.setCurrentUser(userOptional.get());
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/views/userinfo.fxml"));
-            Parent root = loader.load(); // phần giao diện người dùng
+            Parent root = loader.load();
             userinfocontroller controller = loader.getController();
             controller.setUser(userOptional.get());
 
             Scene sceneMain = new Scene(root);
             Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
             window.setScene(sceneMain);
-            window.setTitle("Main menu");
+            window.setTitle("Thong tin nguoi dung");
             window.centerOnScreen();
             window.show();
         } catch (IOException e) {

@@ -1,16 +1,22 @@
 package models.core;
 
-import controllers.UserJsonStore;
-
-import java.io.IOException;
-import java.util.Random;
-
 public abstract class Entity {
     protected String id;
 
-    public Entity() {}
+    public Entity(String phonenumber   ){
+        StringBuffer  sb = new StringBuffer("USER");// cần thêm nhận phân biệt admin***
 
-    public String getId() {
+        for ( int i =1 ; i< phonenumber.length() ; i++){
+
+            String tempt = String.valueOf(Integer.valueOf(phonenumber.charAt(i)-1));
+
+            sb.append( tempt );
+        }// mã hóa số điện thoại thành dãy ID
+
+        this.id = sb.toString();
+    }
+
+    public String getId(){
         return id;
     }
 

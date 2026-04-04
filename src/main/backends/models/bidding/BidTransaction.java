@@ -1,4 +1,6 @@
-package models;
+package models.bidding;
+
+import models.core.Item;
 
 import java.util.Date;
 

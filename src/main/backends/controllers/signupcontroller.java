@@ -12,7 +12,6 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import models.accounts.User;
-import models.core.Account;
 
 import java.io.IOException;
 
@@ -51,7 +50,7 @@ public class signupcontroller {
                 return;
             }
 
-            userJsonStore.saveUser(new User(name, phoneNumber, email, password));
+            userJsonStore.saveUser(new User(name, email, phoneNumber, password));
             showAlert(Alert.AlertType.INFORMATION, "OK", null, "Dang ky thanh cong. Du lieu da duoc luu vao file JSON.");
 
             Parent signinRoot = FXMLLoader.load(getClass().getResource("/org/example/views/signin.fxml"));
@@ -73,15 +72,5 @@ public class signupcontroller {
         alert.setHeaderText(header);
         alert.setContentText(content);
         alert.showAndWait();
-    }
-    public void handle_sign_in(ActionEvent event) throws IOException {
-        Parent signupRoot = FXMLLoader.load(getClass().getResource("/org/example/views/signin.fxml"));
-        Scene sceneSignup = new Scene(signupRoot);
-
-        Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        window.setScene(sceneSignup);
-        window.setTitle("sign in!");
-        window.centerOnScreen();
-        window.show();
     }
 }

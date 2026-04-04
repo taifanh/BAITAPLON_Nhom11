@@ -1,4 +1,4 @@
-package models;
+package models.core;
 
 public abstract class Item extends Entity {
     protected String name;
