@@ -9,7 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import models.User;
+import models.accounts.User;
 
 import java.io.IOException;
 

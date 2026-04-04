@@ -1,6 +1,8 @@
-package models;
+package models.items;
 
-public class Art extends Item{
+import models.core.Item;
+
+public class Art extends Item {
     public Art(String id,String name,double prices,String info){
         super(id, name, prices, info);
     }

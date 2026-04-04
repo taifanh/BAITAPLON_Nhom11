@@ -1,6 +1,6 @@
 package controllers;
 
-import models.User;
+import models.accounts.User;
 
 public final class UserSession {
     private static User currentUser;
