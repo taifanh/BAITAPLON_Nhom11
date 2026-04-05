@@ -1,4 +1,4 @@
-package main.backends.models.items;
+package models.items;
 
 import models.core.Item;
 
