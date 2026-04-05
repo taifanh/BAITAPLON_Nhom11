@@ -1,4 +1,4 @@
-package main.backends.models.items;
+package models.items;
 
 public enum ItemType {
     Electronics, Art, Vehicle;

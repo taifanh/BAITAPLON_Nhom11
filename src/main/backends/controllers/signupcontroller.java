@@ -50,7 +50,7 @@ public class signupcontroller {
                 return;
             }
 
-            userJsonStore.saveUser(new Account(name, email, phoneNumber, password));
+            userJsonStore.saveUser(new Account(null,name, email, phoneNumber, password));
             showAlert(Alert.AlertType.INFORMATION, "OK", null, "Dang ky thanh cong. Du lieu da duoc luu vao file JSON.");
 
             Parent signinRoot = FXMLLoader.load(getClass().getResource("/org/example/views/signin.fxml"));

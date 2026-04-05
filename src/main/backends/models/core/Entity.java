@@ -9,4 +9,11 @@ public abstract class Entity {
         return id;
     }
 //    public abstract Entity newObject();
+    public static String makeItemId(Long x){
+        int len=8;
+        String ID=String.valueOf(x);
+        len-=ID.length();
+        for(int i=0;i<len;i++) ID="0"+ID;
+        return ID;
+    }
 }
