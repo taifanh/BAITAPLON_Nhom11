@@ -1,6 +1,6 @@
 package models.core;
 
-public abstract class Account extends Entity {
+public class Account extends Entity {
     protected String name,phoneNumber,Email,password;
     public Account(String id, String name, String phoneNumber, String Email, String password){
         super(id);
