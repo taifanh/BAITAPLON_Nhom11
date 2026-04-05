@@ -1,55 +1,40 @@
 package models.accounts;
 
-import models.core.Entity;
+import models.bidding.CanBidding;
+import models.core.Account;
+import models.core.Item;
+import models.items.ItemType;
+import models.items.itemFactory;
+import models.selling.CanSelling;
 
-public class User extends Entity {
-    protected String name;
-    protected String phoneNumber;
-    protected String email;
-    protected String password;
+import java.util.Scanner;
 
-
-    // constructor khi load tưf file
-    public User(String id,String name,String phoneNumber,String email,String password){
-        super(id);
-        this.name=name;
-        this.phoneNumber=phoneNumber;
-        this.email=email;
-        this.password=password;
+public class User extends Account implements CanBidding, CanSelling {
+    public User(String id, String name, String phoneNumber, String email, String password) {
+        super(id, name, phoneNumber, email, password);
     }
 
-    // constructor khi mới đăng kí
     public User(String name, String email, String phoneNumber, String password) {
-        this(phoneNumber, name, phoneNumber, email, password);
+        this(buildGeneratedId(phoneNumber), name, phoneNumber, email, password);
     }
 
-    public String getName() {return name;}
-
-    public void setName(String name) {
-        this.name = name;
+    private static String buildGeneratedId(String phoneNumber) {
+        StringBuilder builder = new StringBuilder("USER");
+        for (int i = 1; i < phoneNumber.length(); i++) {
+            builder.append(phoneNumber.charAt(i) - 1);
+        }
+        return builder.toString();
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+    @Override
+    public void sellItem() {
+        Scanner sc=new Scanner(System.in);
+        String type=sc.nextLine();
+        ItemType t=ItemType.valueOf(type);
+        String name=sc.nextLine();
+        double prices=sc.nextDouble();
+        String info=sc.nextLine();
+        Item item= itemFactory.createItem(t,name,prices,info);
+        System.out.println(item.getId());
     }
 }
