@@ -1,18 +1,18 @@
 package controllers;
 
-import models.core.Account;
+import models.accounts.User;
 
 public final class UserSession {
-    private static Account currentUser;
+    private static User currentUser;
 
     private UserSession() {
     }
 
-    public static Account getCurrentUser() {
+    public static User getCurrentUser() {
         return currentUser;
     }
 
-    public static void setCurrentUser(Account user) {
+    public static void setCurrentUser(User user) {
         currentUser = user;
     }
 

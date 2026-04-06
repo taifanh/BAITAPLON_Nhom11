@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.chart.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #3498db;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.userinfocontroller">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #3498db;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.userinfocontroller">
    <children>
-      <TabPane prefHeight="400.0" prefWidth="498.0" tabClosingPolicy="UNAVAILABLE">
+      <TabPane prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
           <Tab fx:id="userinfotab" text="user information">
                <content>
@@ -21,7 +26,7 @@
                               <TextField fx:id="infoname" layoutX="120.0" layoutY="64.0" prefHeight="26.0" prefWidth="230.0" />
                               <TextField fx:id="infoemail" layoutX="120.0" layoutY="112.0" prefHeight="26.0" prefWidth="230.0" />
                               <TextField fx:id="infopassword" layoutX="120.0" layoutY="166.0" prefHeight="26.0" prefWidth="234.0" />
-                              <CheckBox fx:id="passhide" layoutX="377.0" layoutY="166.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="62.0" text="hide" />
+                              <CheckBox fx:id="passshow" layoutX="377.0" layoutY="166.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="62.0" text="show" />
                               <Label layoutX="27.0" layoutY="220.0" prefHeight="26.0" prefWidth="87.0" text="Phone number" />
                               <TextField fx:id="infophonenumber" layoutX="120.0" layoutY="221.0" prefHeight="26.0" prefWidth="233.0" />
                            </children>
@@ -30,23 +35,12 @@
                   </ScrollPane>
                </content>
             </Tab>
-          <Tab fx:id="productinfotab" text="product information">
+            <Tab text="Tab Bidding">
                <content>
                   <ScrollPane prefHeight="200.0" prefWidth="200.0">
-                     <content>
-                        <Pane prefHeight="522.0" prefWidth="498.0">
-                           <children>
-                              <StackedBarChart layoutX="34.0" layoutY="152.0" prefHeight="356.0" prefWidth="420.0">
-                                <xAxis>
-                                  <CategoryAxis side="BOTTOM" />
-                                </xAxis>
-                                <yAxis>
-                                  <NumberAxis side="LEFT" />
-                                </yAxis>
-                              </StackedBarChart>
-                           </children>
-                        </Pane>
-                     </content>
+                    <content>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="530.0" prefWidth="536.0" />
+                    </content>
                   </ScrollPane>
                </content>
             </Tab>

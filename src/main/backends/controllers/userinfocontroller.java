@@ -9,7 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import models.core.Account;
+import models.accounts.User;
 
 import java.io.IOException;
 
@@ -27,19 +27,19 @@ public class userinfocontroller {
     private TextField infophonenumber;
 
     @FXML
-    private CheckBox passhide;
+    private CheckBox passshow;
 
-    private Account user;
+    private User user;
 
     @FXML
     public void initialize() {
-        passhide.selectedProperty().addListener((observable, oldValue, newValue) -> refreshPasswordField());
+        passshow.selectedProperty().addListener((observable, oldValue, newValue) -> refreshPasswordField());
         if (UserSession.getCurrentUser() != null) {
             setUser(UserSession.getCurrentUser());
         }
     }
 
-    public void setUser(Account user) {
+    public void setUser(User user) {
         this.user = user;
         if (user == null) {
             return;
@@ -68,7 +68,7 @@ public class userinfocontroller {
         if (user == null) {
             return;
         }
-        if (passhide.isSelected()) {
+        if (!passshow.isSelected()) {
             infopassword.setText("*".repeat(user.getPassword().length()));
         } else {
             infopassword.setText(user.getPassword());

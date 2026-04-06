@@ -11,7 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import models.core.Account;
+import models.accounts.User;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -29,7 +29,7 @@ public class signincontroller {
     @FXML
     public Button signupbtn;
 
-    private final UserJsonStore userJsonStore = new UserJsonStore();
+    private final UserStore userStore = new UserStore();
 
     public void handle_signin(ActionEvent event) {
         String phoneNumber = txtphonenumberfield.getText() == null ? "" : txtphonenumberfield.getText().trim();
@@ -41,7 +41,7 @@ public class signincontroller {
         }
 
         try {
-            Optional<Account> userOptional = userJsonStore.authenticate(phoneNumber, password);
+            Optional<User> userOptional = userStore.authenticate(phoneNumber, password);
             if (userOptional.isEmpty()) {
                 showAlert(Alert.AlertType.ERROR, "Loi", "Dang nhap that bai", "Sai tai khoan hoac mat khau. Vui long thu lai.");
                 return;
@@ -61,7 +61,7 @@ public class signincontroller {
             window.centerOnScreen();
             window.show();
         } catch (IOException e) {
-            showAlert(Alert.AlertType.ERROR, "Loi doc file", "Khong the dang nhap", "Khong the doc du lieu nguoi dung tu file JSON.");
+            showAlert(Alert.AlertType.ERROR, "Loi co so du lieu", "Khong the dang nhap", "Khong the doc du lieu nguoi dung tu SQLite.");
         }
     }
 

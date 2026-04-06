@@ -11,7 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import models.core.Account;
+import models.accounts.User;
 
 import java.io.IOException;
 
@@ -31,7 +31,7 @@ public class signupcontroller {
     @FXML
     public Button signup_ok;
 
-    private final UserJsonStore userJsonStore = new UserJsonStore();
+    private final UserStore userStore = new UserStore();
 
     public void handle_signup_ok(ActionEvent event) {
         String name = txtnameup.getText() == null ? "" : txtnameup.getText().trim();
@@ -45,13 +45,13 @@ public class signupcontroller {
         }
 
         try {
-            if (userJsonStore.phoneNumberExists(phoneNumber)) {
+            if (userStore.phoneNumberExists(phoneNumber)) {
                 showAlert(Alert.AlertType.WARNING, "Trung du lieu", null, "So dien thoai da ton tai.");
                 return;
             }
 
-            userJsonStore.saveUser(new Account(name, email, phoneNumber, password));
-            showAlert(Alert.AlertType.INFORMATION, "OK", null, "Dang ky thanh cong. Du lieu da duoc luu vao file JSON.");
+            userStore.saveUser(new User(name, email, phoneNumber, password));
+            showAlert(Alert.AlertType.INFORMATION, "OK", null, "Dang ky thanh cong. Du lieu da duoc luu vao SQLite.");
 
             Parent signinRoot = FXMLLoader.load(getClass().getResource("/org/example/views/signin.fxml"));
             Scene sceneSignin = new Scene(signinRoot);
@@ -62,7 +62,7 @@ public class signupcontroller {
             window.centerOnScreen();
             window.show();
         } catch (IOException e) {
-            showAlert(Alert.AlertType.ERROR, "Loi luu file", "Khong the tao tai khoan", "Khong the ghi du lieu nguoi dung vao file JSON.");
+            showAlert(Alert.AlertType.ERROR, "Loi co so du lieu", "Khong the tao tai khoan", "Khong the ghi du lieu nguoi dung vao SQLite.");
         }
     }
 
