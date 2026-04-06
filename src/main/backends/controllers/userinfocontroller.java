@@ -27,13 +27,13 @@ public class userinfocontroller {
     private TextField infophonenumber;
 
     @FXML
-    private CheckBox passhide;
+    private CheckBox passshow;
 
     private User user;
 
     @FXML
     public void initialize() {
-        passhide.selectedProperty().addListener((observable, oldValue, newValue) -> refreshPasswordField());
+        passshow.selectedProperty().addListener((observable, oldValue, newValue) -> refreshPasswordField());
         if (UserSession.getCurrentUser() != null) {
             setUser(UserSession.getCurrentUser());
         }
@@ -68,7 +68,7 @@ public class userinfocontroller {
         if (user == null) {
             return;
         }
-        if (passhide.isSelected()) {
+        if (!passshow.isSelected()) {
             infopassword.setText("*".repeat(user.getPassword().length()));
         } else {
             infopassword.setText(user.getPassword());
