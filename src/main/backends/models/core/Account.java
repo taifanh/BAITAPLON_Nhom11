@@ -9,10 +9,13 @@ public abstract class Account extends Entity{
 
     public Account(){};// cần rỗng vì class con có constructor không có super
 
-    public Account(String phoneNumber){
-        super(phoneNumber);
+    public Account(String name, String phoneNumber, String email, String password){
+        this.id = generateEntity();
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+        this.password = password;
     }
-
     // hàm getter và setter
     public String getName() {return name;}
 

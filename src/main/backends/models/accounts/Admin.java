@@ -2,9 +2,10 @@ package models.accounts;
 
 import javafx.scene.control.Alert;
 import models.bidding.Auction;
+import models.core.Account;
 import models.core.Entity;
 
-public class Admin extends Entity {
+public class Admin extends Account {
     private String name;
     private String phoneNumber;
     private String email;
@@ -23,11 +24,7 @@ public class Admin extends Entity {
 
     // khởi tạo đối tượng khi đăng kí ( vì ID sẽ do hệ thống tự tạo)
     private Admin(String name, String phoneNumber, String email, String password){
-        super(phoneNumber);
-        this.name = name;
-        this.phoneNumber = phoneNumber;
-        this.email = email;
-        this.password = password;
+       super(name , phoneNumber , email , password);
     }
 
 

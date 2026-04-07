@@ -51,7 +51,7 @@ public class signupcontroller {
                 return;
             }
 
-            userJsonStore.saveUser(new User(name, email, phoneNumber, password));
+            userJsonStore.saveUser(new User(name, phoneNumber, email, password));
             showAlert(Alert.AlertType.INFORMATION, "OK", null, "Dang ky thanh cong. Du lieu da duoc luu vao file JSON.");
 
             Parent signinRoot = FXMLLoader.load(getClass().getResource("/org/example/views/signin.fxml"));

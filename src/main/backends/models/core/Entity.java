@@ -1,25 +1,36 @@
 package models.core;
 
+import controllers.UserJsonStore;
+
+import java.io.IOException;
+import java.util.Random;
+
 public abstract class Entity {
     protected String id;
+    private static final Random RANDOM = new Random();
 
+    public Entity() {}
 
-    public Entity(){};//-> cho constructor rỗng account
+    public String generateEntity() {
+        UserJsonStore userJsonStore = new UserJsonStore();
+        String generatedId;
 
-    public Entity(String phonenumber   ){
-        StringBuffer  sb = new StringBuffer("USER");// cần thêm nhận phân biệt admin***
+        do {
+            generatedId = "USER" + (100000 + RANDOM.nextInt(899999));
+        } while (isExistingId(userJsonStore, generatedId));
 
-        for ( int i =1 ; i< phonenumber.length() ; i++){
-
-            String tempt = String.valueOf(Integer.valueOf(phonenumber.charAt(i)-1));
-
-            sb.append( tempt );
-        }// mã hóa số điện thoại thành dãy ID
-
-        this.id = sb.toString();
+        return generatedId;
     }
 
-    public String getId(){
+    private boolean isExistingId(UserJsonStore userJsonStore, String id) {
+        try {
+            return userJsonStore.idExists(id);
+        } catch (IOException e) {
+            throw new RuntimeException("Khong the kiem tra ID da ton tai hay chua.", e);
+        }
+    }
+
+    public String getId() {
         return id;
     }
 

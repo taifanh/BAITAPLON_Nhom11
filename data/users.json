@@ -1,6 +1,13 @@
 [ {
+  "id" : null,
   "name" : "gianghtg",
-  "email" : "htg@gmail.com",
   "phoneNumber" : "0812282678",
+  "email" : "htg@gmail.com",
   "password" : "12345678"
+}, {
+  "id" : "USER135755",
+  "name" : "gds",
+  "phoneNumber" : "02132",
+  "email" : "dsfadkl",
+  "password" : "123"
 } ]
