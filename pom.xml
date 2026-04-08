@@ -47,6 +47,12 @@
     </dependencies>
 
     <build>
+        <sourceDirectory>src/main/backends</sourceDirectory>
+        <resources>
+            <resource>
+                <directory>src/main/frontends</directory>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -66,7 +72,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>org.example.baitaplon/controllers.MainApplication</mainClass>
+                            <mainClass>controllers.Launcher</mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
                             <jlinkImageName>app</jlinkImageName>
