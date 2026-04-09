@@ -10,7 +10,7 @@ public abstract class Account extends Entity{
     public Account(){};// cần rỗng vì class con có constructor không có super
 
     public Account(String name, String phoneNumber, String email, String password){
-        this.id = generateEntity();
+         // id được khởi tạo từ hàm trong entity một cách ngẫu nhiên đã có đảm bảo không trùng
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.email = email;

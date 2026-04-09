@@ -74,4 +74,14 @@ public class signupcontroller {
         alert.setContentText(content);
         alert.showAndWait();
     }
+    public void handle_sign_in(ActionEvent event) throws IOException {
+        Parent signupRoot = FXMLLoader.load(getClass().getResource("/org/example/views/signin.fxml"));
+        Scene sceneSignup = new Scene(signupRoot);
+
+        Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        window.setScene(sceneSignup);
+        window.setTitle("sign in!");
+        window.centerOnScreen();
+        window.show();
+    }
 }

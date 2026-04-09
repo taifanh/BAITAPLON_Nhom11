@@ -58,7 +58,7 @@ public class signincontroller {
             Scene sceneMain = new Scene(root);
             Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
             window.setScene(sceneMain);
-            window.setTitle("Thong tin nguoi dung");
+            window.setTitle("Main menu");
             window.centerOnScreen();
             window.show();
         } catch (IOException e) {

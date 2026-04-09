@@ -43,5 +43,7 @@ public class Admin extends Account {
 
     public void manageAuction(Auction auction){}
 
+    public void createsession(String s){
 
+    }
 }

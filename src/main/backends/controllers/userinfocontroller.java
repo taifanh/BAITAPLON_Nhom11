@@ -7,24 +7,26 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import models.core.Account;
 
 import java.io.IOException;
+import java.util.Random;
 
 public class userinfocontroller {
     @FXML
     private TextField infoname;
 
     @FXML
-    private TextField infoemail;
+    private Label infoemail;
 
     @FXML
-    private TextField infopassword;
+    private Label infopassword;
 
     @FXML
-    private TextField infophonenumber;
+    private Label infophonenumber;
 
     @FXML
     private CheckBox passhide;
@@ -74,4 +76,5 @@ public class userinfocontroller {
             infopassword.setText(user.getPassword());
         }
     }
+
 }
