@@ -1,6 +1,7 @@
 package network.server;
 
 public class Message {
-    double amount;
+    Double amount;
     String userID;
+    String itemID;
 }
