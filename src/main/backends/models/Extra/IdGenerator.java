@@ -19,7 +19,7 @@ public class IdGenerator {
             case Vehicle:
                 return vehicleCounter.incrementAndGet();
             default:
-                throw new IllegalArgumentException("Invalid type");
+                throw new IllegalArgumentException("Invalid type in IdGenerator");
         }
     }
 }

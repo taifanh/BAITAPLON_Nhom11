@@ -8,7 +8,4 @@ public class Art extends Item {
     public Art(String id,String name,double prices,String info){
         super(id, name, prices, info);
     }
-    public static String addId(){
-        return "A"+makeItemId(IdGenerator.nextId(ItemType.Art));
-    }
 }

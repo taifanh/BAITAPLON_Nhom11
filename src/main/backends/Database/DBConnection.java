@@ -8,7 +8,7 @@ public class DBConnection {
         try{
             String url="jdbc:sqlite:users.db";
             return DriverManager.getConnection(url);
-        }catch (Exception e){
+        } catch (Exception e){
             e.printStackTrace();
             return null;
         }
