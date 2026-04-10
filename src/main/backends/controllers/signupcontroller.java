@@ -49,7 +49,7 @@ public class signupcontroller {
                 return;
             }
 
-            userStore.saveUser(new User(name, email, phoneNumber, password));
+            userStore.saveUser(new User(name, phoneNumber, email, password));
             showAlert(Alert.AlertType.INFORMATION, "OK", null, "Dang ky thanh cong. Du lieu da duoc luu vao SQLite.");
 
             Parent signinRoot = ViewLoader.load("signin.fxml");
