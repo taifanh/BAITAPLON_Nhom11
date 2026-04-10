@@ -7,9 +7,17 @@ import models.items.ItemType;
 import models.items.itemFactory;
 import models.selling.CanSelling;
 
+import java.util.HashSet;
 import java.util.Scanner;
 
 public class User extends Account implements CanBidding, CanSelling {
+    HashSet<Item> items = new HashSet<>();
+    private double balance;
+
+    public double getBalance() {
+        return balance;
+    }
+
     public User(String id, String name, String phoneNumber, String email, String password) {
         super(id, name, phoneNumber, email, password);
     }
@@ -26,15 +34,26 @@ public class User extends Account implements CanBidding, CanSelling {
         return builder.toString();
     }
 
+    public void deposit(double amount) {
+        this.balance += amount;
+    }
+
+    public void withdraw(double amount) {
+        this.balance -= amount;
+    }
+
+    public void addItem(ItemType itemType, String itemName, double itemPrice, String itemDescription) {
+        items.add(itemFactory.createItem(itemType, itemName, itemPrice, itemDescription));
+    }
+
     @Override
-    public void sellItem() {
-        Scanner sc=new Scanner(System.in);
-        String type=sc.nextLine();
-        ItemType t=ItemType.valueOf(type);
-        String name=sc.nextLine();
-        double prices=sc.nextDouble();
-        String info=sc.nextLine();
-        Item item= itemFactory.createItem(t,name,prices,info);
-        System.out.println(item.getId());
+    public void sellItem(Item item) {
+
+        if (items.contains(item)) {
+            items.remove(item);
+        }
+        else  {
+            throw new IllegalArgumentException("Not exist item in this user");
+        }
     }
 }
