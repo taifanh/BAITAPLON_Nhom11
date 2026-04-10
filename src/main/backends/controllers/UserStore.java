@@ -110,17 +110,35 @@ public class UserStore {
             throw new IOException("Khong the kiem tra so dien thoai trong SQLite.", e);
         }
     }
+    public boolean IDexist(String ID) throws Exception{
+        try(Connection connection = openConnection();
+            PreparedStatement statement = connection.prepareStatement(
+                    """
+                     SELECT 1
+                     FROM users
+                     WHERE id = ?
+                     LIMIT 1
+                     """)) {
+            statement.setString(1, ID);
+            try(ResultSet resultSet = statement.executeQuery()){
+                return resultSet.next();
+            }
+        } catch  (SQLException e){
+            throw new IOException("khong the kiem tra ID trong sql lite");
+        }
+
+    }
 
     public void saveUser(User user) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     INSERT INTO users (id, name, phone_number, email, password)
+                     INSERT INTO users (id, name, email , phone_number, password)
                      VALUES (?, ?, ?, ?, ?)
                      """)) {
             statement.setString(1, user.getId());
             statement.setString(2, user.getName());
-            statement.setString(3, user.getPhoneNumber());
-            statement.setString(4, user.getEmail());
+            statement.setString(3, user.getEmail());
+            statement.setString(4, user.getPhoneNumber());
             statement.setString(5, user.getPassword());
             statement.executeUpdate();
         } catch (SQLException e) {

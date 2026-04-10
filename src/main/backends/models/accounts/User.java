@@ -1,11 +1,13 @@
 package models.accounts;
 
-import controllers.UserJsonStore;
+
+import controllers.UserStore;
 import models.core.Account;
 
 import java.io.IOException;
 import java.util.Random;
-import models.core.Account;
+
+
 public class User extends Account {
     public User() {}
 
@@ -25,21 +27,23 @@ public class User extends Account {
     }
     public String generateEntity() {
         Random RANDOM = new Random();
-        UserJsonStore userJsonStore = new UserJsonStore();
+        UserStore userStore = new UserStore();
         String generatedId;
 
         do {
             generatedId = "USER" + (100000 + RANDOM.nextInt(899999));
-        } while (isExistingId(userJsonStore, generatedId));
+        } while (isExistingId(userStore, generatedId));
 
         return generatedId;
     }
 
-    private boolean isExistingId(UserJsonStore userJsonStore, String id) {
+    private boolean isExistingId(UserStore userStore, String id) {
         try {
-            return userJsonStore.idExists(id);
+            return userStore.IDexist(id);
         } catch (IOException e) {
             throw new RuntimeException("Khong the kiem tra ID da ton tai hay chua.", e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

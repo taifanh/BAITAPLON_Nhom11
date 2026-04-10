@@ -2,10 +2,8 @@ package models.core;
 
 public abstract class Entity {
     protected String id;
+    public Entity(){}
 
-    public Entity(String id) {
-        this.id = id;
-    }
 
     public String getId() {
         return id;
@@ -19,7 +17,7 @@ public abstract class Entity {
         int len=8;
         String ID=String.valueOf(x);
         len-=ID.length();
-        for(int i=0;i<len;i++) ID="0"+ID;
+        for(int i=0;i<len;i++) ID="0" + ID;
         return ID;
     } 
 }
