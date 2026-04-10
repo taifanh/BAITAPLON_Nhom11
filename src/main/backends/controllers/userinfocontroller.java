@@ -2,43 +2,46 @@ package controllers;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import models.accounts.User;
+import models.core.Account;
 
 import java.io.IOException;
+import java.util.Random;
 
 public class userinfocontroller {
     @FXML
     private TextField infoname;
 
     @FXML
-    private TextField infoemail;
+    private Label infoemail;
 
     @FXML
-    private TextField infopassword;
+    private Label infopassword;
 
     @FXML
-    private TextField infophonenumber;
+    private Label infophonenumber;
 
     @FXML
-    private CheckBox passshow;
+    private CheckBox passShow;
 
-    private User user;
+    private Account user;
 
     @FXML
     public void initialize() {
-        passshow.selectedProperty().addListener((observable, oldValue, newValue) -> refreshPasswordField());
+        passShow.selectedProperty().addListener((observable, oldValue, newValue) -> refreshPasswordField());
         if (UserSession.getCurrentUser() != null) {
             setUser(UserSession.getCurrentUser());
         }
     }
 
-    public void setUser(User user) {
+    public void setUser(Account user) {
         this.user = user;
         if (user == null) {
             return;
@@ -53,7 +56,7 @@ public class userinfocontroller {
     @FXML
     public void handle_sign_out(ActionEvent event) throws IOException {
         UserSession.clear();
-        Parent root = ViewLoader.load("signin.fxml");
+        Parent root = FXMLLoader.load(getClass().getResource("/org/example/views/signin.fxml"));
         Scene scene = new Scene(root);
 
         Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -67,10 +70,11 @@ public class userinfocontroller {
         if (user == null) {
             return;
         }
-        if (!passshow.isSelected()) {
-            infopassword.setText("*".repeat(user.getPassword().length()));
-        } else {
+        if (passShow.isSelected()) {
             infopassword.setText(user.getPassword());
+        } else {
+            infopassword.setText("*".repeat(user.getPassword().length()));
         }
     }
+
 }

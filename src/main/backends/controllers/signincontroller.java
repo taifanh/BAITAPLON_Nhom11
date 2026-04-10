@@ -12,6 +12,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import models.accounts.User;
+import models.core.Account;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -47,27 +48,26 @@ public class signincontroller {
                 return;
             }
 
-            User user = userOptional.get();
-            UserSession.setCurrentUser(user);
+            UserSession.setCurrentUser(userOptional.get());
 
-            FXMLLoader loader = ViewLoader.loader("userinfo.fxml");
-            Parent root = loader.load();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/views/userinfo.fxml"));
+            Parent root = loader.load(); // phần giao diện người dùng
             userinfocontroller controller = loader.getController();
-            controller.setUser(user);
+            controller.setUser(userOptional.get());
 
             Scene sceneMain = new Scene(root);
             Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
             window.setScene(sceneMain);
-            window.setTitle("Thong tin nguoi dung");
+            window.setTitle("Main menu");
             window.centerOnScreen();
             window.show();
         } catch (IOException e) {
-            showAlert(Alert.AlertType.ERROR, "Loi co so du lieu", "Khong the dang nhap", "Khong the doc du lieu nguoi dung tu SQLite.");
+            showAlert(Alert.AlertType.ERROR, "Loi doc file", "Khong the dang nhap", "Khong the doc du lieu nguoi dung tu file JSON.");
         }
     }
 
     public void handle_signup(ActionEvent event) throws IOException {
-        Parent signupRoot = ViewLoader.load("signup.fxml");
+        Parent signupRoot = FXMLLoader.load(getClass().getResource("/org/example/views/signup.fxml"));
         Scene sceneSignup = new Scene(signupRoot);
 
         Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();

@@ -1,50 +1,221 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #3498db;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.userinfocontroller">
-   <children>
-      <TabPane prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE">
-        <tabs>
-          <Tab fx:id="userinfotab" text="user information">
-               <content>
-                  <ScrollPane prefHeight="200.0" prefWidth="200.0">
+<AnchorPane prefHeight="720.0" prefWidth="1080.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.userinfocontroller">
+    <children>
+        <TabPane prefHeight="720.0" prefWidth="1080.0" side="TOP" style="-fx-background-color: transparent; -fx-tab-min-width: 180; -fx-tab-max-width: 180;">
+            <tabs>
+                <Tab fx:id="userinfotab" closable="false" text="User Profile">
                     <content>
-                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="508.0" prefWidth="498.0">
-                           <children>
-                              <Button layoutX="402.0" layoutY="452.0" mnemonicParsing="false" onAction="#handle_sign_out" style="-fx-background-color: red;" text="sign out" />
-                              <Label layoutX="14.0" layoutY="77.0" prefHeight="18.0" prefWidth="73.0" text="     Name" />
-                              <Label layoutX="27.0" layoutY="125.0" prefHeight="18.0" prefWidth="55.0" text=" Email" />
-                              <Label layoutX="25.0" layoutY="178.0" prefHeight="18.0" prefWidth="94.0" text=" Password" />
-                              <TextField fx:id="infoname" layoutX="120.0" layoutY="64.0" prefHeight="26.0" prefWidth="230.0" />
-                              <TextField fx:id="infoemail" layoutX="120.0" layoutY="112.0" prefHeight="26.0" prefWidth="230.0" />
-                              <TextField fx:id="infopassword" layoutX="120.0" layoutY="166.0" prefHeight="26.0" prefWidth="234.0" />
-                              <CheckBox fx:id="passshow" layoutX="377.0" layoutY="166.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="62.0" text="show" />
-                              <Label layoutX="27.0" layoutY="220.0" prefHeight="26.0" prefWidth="87.0" text="Phone number" />
-                              <TextField fx:id="infophonenumber" layoutX="120.0" layoutY="221.0" prefHeight="26.0" prefWidth="233.0" />
-                           </children>
-                        </AnchorPane>
+                        <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" pannable="true" prefHeight="730.0" prefWidth="1080.0" style="-fx-background: transparent; -fx-background-color: transparent;">
+                            <content>
+                                <AnchorPane minHeight="700.0" prefHeight="730.0" prefWidth="1066.0" style="-fx-background-color: transparent;">
+                                    <children>
+                                        <Label layoutX="48.0" layoutY="74.0" text="Your profile details are shown here as read-only information." textFill="#64748b">
+                                            <font>
+                                                <Font size="14.0" />
+                                            </font>
+                                        </Label>
+
+                                        <Pane layoutX="48.0" layoutY="120.0" prefHeight="539.0" prefWidth="280.0" style="-fx-background-color: linear-gradient(to bottom, #0f172a, #1e293b); -fx-background-radius: 24; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.18), 28, 0.15, 0, 10);">
+                                            <children>
+                                                <Label layoutX="28.0" layoutY="28.0" text="Profile Card" textFill="#cbd5e1">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                                </Label>
+                                                <Pane layoutX="40.0" layoutY="70.0" prefHeight="158.0" prefWidth="200.0" style="-fx-background-color: rgba(255,255,255,0.08); -fx-background-radius: 24;">
+                                                    <children>
+                                                        <ImageView fx:id="UserImange" fitHeight="120.0" fitWidth="120.0" layoutX="40.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" />
+                                                    </children>
+                                                </Pane>
+                                                <Label alignment="CENTER" layoutX="26.0" layoutY="290.0" prefHeight="34.0" prefWidth="228.0" text="Full Name" textAlignment="CENTER" textFill="WHITE">
+                                                    <font>
+                                                        <Font size="22.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label alignment="CENTER" layoutX="26.0" layoutY="324.0" prefHeight="40.0" prefWidth="228.0" text="email@example.com" textAlignment="CENTER" textFill="#cbd5e1" wrapText="true">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                                </Label>
+                                                <Separator layoutX="28.0" layoutY="364.0" prefWidth="224.0" style="-fx-opacity: 0.22;" />
+                                                <Label layoutX="28.0" layoutY="388.0" text="Account status" textFill="#94a3b8">
+                                                    <font>
+                                                        <Font size="13.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label layoutX="28.0" layoutY="414.0" text="Verified user" textFill="#86efac">
+                                                    <font>
+                                                        <Font size="16.0" />
+                                                    </font>
+                                                </Label>
+                                                <Button alignment="CENTER" layoutX="76.0" layoutY="475.0" mnemonicParsing="false" onAction="#handle_sign_out" prefHeight="37.0" prefWidth="119.0" style="-fx-background-color: #f72b2b; -fx-background-radius: 20; -fx-border-radius: 20;" text="SIGN OUT" textFill="WHITE">
+                                                    <font>
+                                                        <Font name="System Bold" size="15.0" />
+                                                    </font>
+                                                </Button>
+                                                <Button alignment="CENTER" layoutX="85.0" layoutY="245.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="110.0" style="-fx-background-color: #20cc6b; -fx-background-radius: 20; -fx-border-radius: 20;" text="UPLOAD IMAGE" textFill="WHITE" />
+                                            </children>
+                                        </Pane>
+
+                                        <Pane layoutX="356.0" layoutY="120.0" prefHeight="156.0" prefWidth="704.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5); -fx-background-radius: 24; -fx-effect: dropshadow(gaussian, rgba(234,88,12,0.12), 22, 0.14, 0, 8);">
+                                            <children>
+                                                <Label layoutX="34.0" layoutY="30.0" text="Available Balance" textFill="#9a3412">
+                                                    <font>
+                                                        <Font size="15.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label fx:id="balance" layoutX="34.0" layoutY="58.0" prefHeight="48.0" prefWidth="388.0" text="100000000" textFill="#9a3412">
+                                                    <font>
+                                                        <Font size="38.0" />
+                                                    </font>
+                                                </Label>
+                                                <Button fx:id="btndeposit" alignment="CENTER" layoutX="518.0" layoutY="55.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="108.0" style="-fx-background-color: #ea580c; -fx-background-radius: 16; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Deposit" textOverrun="CLIP" />
+                                            </children>
+                                        </Pane>
+
+                                        <Pane layoutX="356.0" layoutY="300.0" prefHeight="382.0" prefWidth="656.0" style="-fx-background-color: white; -fx-background-radius: 24; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 22, 0.12, 0, 8);">
+                                            <children>
+                                                <Label fx:id="infopassword" alignment="CENTER" layoutX="139.0" layoutY="230.0" prefHeight="50.0" prefWidth="440.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: blue; -fx-border-radius: 14; -fx-text-fill: #0f172a;" textFill="#0f172a" />
+                                                <CheckBox fx:id="passShow" layoutX="590.0" layoutY="231.0" mnemonicParsing="false" prefHeight="54.0" prefWidth="75.0" text="Show" textFill="#0f172a">
+                                                    <font>
+                                                        <Font size="15.0" />
+                                                    </font>
+                                                </CheckBox>
+                                                <Label layoutX="16.0" layoutY="230.0" prefHeight="55.0" prefWidth="119.0" text="Password" textFill="BLACK">
+                                                    <font>
+                                                        <Font size="15.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label layoutX="14.0" layoutY="109.0" prefHeight="55.0" prefWidth="126.0" text="Phone number" textFill="BLACK">
+                                                    <font>
+                                                        <Font size="15.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label layoutX="14.0" layoutY="1.0" text="Personal Information" textFill="#0f172a">
+                                                    <font>
+                                                        <Font size="22.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label layoutX="16.0" layoutY="164.0" prefHeight="55.0" prefWidth="123.0" text="Email" textFill="#0f172a">
+                                                    <font>
+                                                        <Font size="15.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label layoutX="14.0" layoutY="45.0" prefHeight="56.0" prefWidth="91.0" text="Name" textFill="#0f172a">
+                                                    <font>
+                                                        <Font size="15.0" />
+                                                    </font>
+                                                </Label>
+                                                <TextField fx:id="infoname" accessibleRole="TEXT" alignment="CENTER" editable="false" layoutX="142.0" layoutY="46.0" prefHeight="55.0" prefWidth="435.0" style="-fx-background-color: white; -fx-text-fill: #0f172a; -fx-prompt-text-fill: #64748b; -fx-border-color: blue; -fx-background-radius: 10; -fx-border-radius: 14;" />
+                                                <Pane layoutX="141.0" layoutY="105.0" prefHeight="55.0" prefWidth="436.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: blue; -fx-border-radius: 14;">
+                                                    <children>
+                                                        <Label fx:id="infophonenumber" alignment="CENTER" layoutX="-1.0" layoutY="4.0" prefHeight="48.0" prefWidth="438.0" textAlignment="JUSTIFY" textFill="#0f172a" />
+                                                    </children>
+                                                </Pane>
+                                                <Pane layoutX="141.0" layoutY="163.0" prefHeight="55.0" prefWidth="436.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: blue; -fx-border-radius: 14;">
+                                                    <children>
+                                                        <Label fx:id="infoemail" alignment="CENTER" layoutX="1.0" layoutY="3.0" prefHeight="50.0" prefWidth="433.0" textAlignment="JUSTIFY" textFill="#0f172a" />
+                                                    </children>
+                                                </Pane>
+                                            </children>
+                                        </Pane>
+                                        <Label layoutX="48.0" layoutY="34.0" text="Account Overview" textFill="#1e293b">
+                                            <font>
+                                                <Font size="28.0" />
+                                            </font>
+                                        </Label>
+                                    </children>
+                                </AnchorPane>
+                            </content>
+                        </ScrollPane>
                     </content>
-                  </ScrollPane>
-               </content>
-            </Tab>
-            <Tab text="Tab Bidding">
-               <content>
-                  <ScrollPane prefHeight="200.0" prefWidth="200.0">
+                </Tab>
+                <Tab fx:id="productinfotab" closable="false" text="Bidding Space">
                     <content>
-                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="530.0" prefWidth="536.0" />
+                        <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" pannable="true" prefHeight="680.0" prefWidth="1080.0" style="-fx-background: transparent; -fx-background-color: transparent;">
+                            <content>
+                                <AnchorPane minHeight="700.0" prefHeight="700.0" prefWidth="1060.0" style="-fx-background-color: transparent;">
+                                    <children>
+                                        <Label layoutX="393.0" layoutY="14.0" text="Bidding Dashboard" textFill="#1e293b">
+                                            <font>
+                                                <Font size="28.0" />
+                                            </font>
+                                        </Label>
+
+                                        <Pane layoutX="14.0" layoutY="75.0" prefHeight="500.0" prefWidth="300.0" style="-fx-background-color: white; -fx-background-radius: 24; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 22, 0.12, 0, 8);">
+                                            <children>
+                                                <Label layoutX="28.0" layoutY="28.0" text="Upcoming Items" textFill="#0f172a">
+                                                    <font>
+                                                        <Font size="20.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label layoutX="28.0" layoutY="58.0" text="Items ready for bidding will appear here." textFill="#64748b">
+                                                    <font>
+                                                        <Font size="13.0" />
+                                                    </font>
+                                                </Label>
+                                                <ListView fx:id="ITEMLIST" layoutX="24.0" layoutY="98.0" prefHeight="372.0" prefWidth="252.0" style="-fx-background-radius: 18; -fx-border-radius: 18; -fx-border-color: #dbe4f0;" />
+                                            </children>
+                                        </Pane>
+
+                                        <Pane layoutX="739.0" layoutY="44.0" prefHeight="184.0" prefWidth="305.0" style="-fx-background-color: white; -fx-background-radius: 24; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 22, 0.12, 0, 8);">
+                                            <children>
+                                                <Label fx:id="itemname" layoutX="28.0" layoutY="28.0" text="Item name" textFill="#0f172a">
+                                                    <font>
+                                                        <Font size="20.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label layoutX="28.0" layoutY="58.0" text="Base Price" textFill="#64748b">
+                                                    <font>
+                                                        <Font size="13.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label layoutX="28.0" layoutY="121.0" text="Increment" textFill="#64748b">
+                                                    <font>
+                                                        <Font size="13.0" />
+                                                    </font>
+                                                </Label>
+                                                <TextField fx:id="baseprice" layoutX="28.0" layoutY="78.0" prefHeight="36.0" prefWidth="221.0" style="-fx-background-radius: 10; -fx-border-radius: 14; -fx-border-color: #000000; -fx-background-color: white;" />
+                                                <TextField fx:id="increment" layoutX="28.0" layoutY="141.0" prefHeight="37.0" prefWidth="222.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-radius: 14; -fx-border-color: #000000;" />
+                                            </children>
+                                        </Pane>
+
+                                        <Pane layoutX="739.0" layoutY="244.0" prefHeight="354.0" prefWidth="306.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5); -fx-background-radius: 24; -fx-effect: dropshadow(gaussian, rgba(234,88,12,0.12), 22, 0.14, 0, 8);">
+                                            <children>
+                                                <Label layoutX="28.0" layoutY="28.0" text="BID" textFill="#9a3412">
+                                                    <font>
+                                                        <Font size="20.0" />
+                                                    </font>
+                                                </Label>
+                                                <TextField fx:id="autoincrement" layoutX="28.0" layoutY="68.0" prefHeight="46.0" prefWidth="244.0" promptText="Auto increment" style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #fdba74;">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                                </TextField>
+                                                <TextField fx:id="maxlimit" layoutX="28.0" layoutY="121.0" prefHeight="46.0" prefWidth="244.0" promptText="Max limit" style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #fdba74;" />
+                                                <Button fx:id="autobid" alignment="CENTER" layoutX="28.0" layoutY="177.0" mnemonicParsing="false" prefHeight="38.0" prefWidth="108.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="AUTO" />
+                                                <TextField fx:id="bidprice" layoutX="28.0" layoutY="242.0" prefHeight="46.0" prefWidth="244.0" promptText="your bid" style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #fdba74;">
+                                                    <font>
+                                                        <Font size="15.0" />
+                                                    </font>
+                                                </TextField>
+                                                <Button fx:id="placebid" alignment="CENTER" layoutX="29.0" layoutY="297.0" mnemonicParsing="false" prefHeight="34.0" prefWidth="107.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="place" />
+                                            </children>
+                                        </Pane>
+                                        <Pane layoutX="329.0" layoutY="77.0" prefHeight="547.0" prefWidth="395.0" style="-fx-background-color: #D3D3D3; -fx-background-radius: 18; -fx-border-radius: 18;" />
+                                    </children>
+                                </AnchorPane>
+                            </content>
+                        </ScrollPane>
                     </content>
-                  </ScrollPane>
-               </content>
-            </Tab>
-        </tabs>
-      </TabPane>
-   </children>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </children>
 </AnchorPane>

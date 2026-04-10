@@ -19,4 +19,11 @@ public abstract class Item extends Entity {
     public String getInfo(){
         return info;
     }
+    public static String makeItemId(Long x){
+        int len=8;
+        String ID=String.valueOf(x);
+        len-=ID.length();
+        for(int i=0;i<len;i++) ID="0"+ID;
+        return ID;
+    }
 }

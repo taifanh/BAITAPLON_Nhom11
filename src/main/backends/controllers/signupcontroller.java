@@ -2,6 +2,7 @@ package controllers;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -11,6 +12,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import models.accounts.User;
+import models.core.Account;
 
 import java.io.IOException;
 
@@ -49,10 +51,10 @@ public class signupcontroller {
                 return;
             }
 
-            userStore.saveUser(new User(name, email, phoneNumber, password));
-            showAlert(Alert.AlertType.INFORMATION, "OK", null, "Dang ky thanh cong. Du lieu da duoc luu vao SQLite.");
+            userStore.saveUser(new User(name, phoneNumber, email, password));
+            showAlert(Alert.AlertType.INFORMATION, "OK", null, "Dang ky thanh cong. Du lieu da duoc luu vao file JSON.");
 
-            Parent signinRoot = ViewLoader.load("signin.fxml");
+            Parent signinRoot = FXMLLoader.load(getClass().getResource("/org/example/views/signin.fxml"));
             Scene sceneSignin = new Scene(signinRoot);
 
             Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -61,7 +63,7 @@ public class signupcontroller {
             window.centerOnScreen();
             window.show();
         } catch (IOException e) {
-            showAlert(Alert.AlertType.ERROR, "Loi co so du lieu", "Khong the tao tai khoan", "Khong the ghi du lieu nguoi dung vao SQLite.");
+            showAlert(Alert.AlertType.ERROR, "Loi luu file", "Khong the tao tai khoan", "Khong the ghi du lieu nguoi dung vao file JSON.");
         }
     }
 
@@ -71,5 +73,15 @@ public class signupcontroller {
         alert.setHeaderText(header);
         alert.setContentText(content);
         alert.showAndWait();
+    }
+    public void handle_sign_in(ActionEvent event) throws IOException {
+        Parent signupRoot = FXMLLoader.load(getClass().getResource("/org/example/views/signin.fxml"));
+        Scene sceneSignup = new Scene(signupRoot);
+
+        Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        window.setScene(sceneSignup);
+        window.setTitle("sign in!");
+        window.centerOnScreen();
+        window.show();
     }
 }
