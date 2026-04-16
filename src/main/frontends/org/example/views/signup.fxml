@@ -61,7 +61,7 @@
                   <HBox alignment="CENTER" spacing="5.0">
                      <children>
                         <Label text="Bạn đã có tài khoản?" textFill="#7F8C8D" />
-                        <Button mnemonicParsing="false" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;" text="Đăng nhập" textFill="#E67E22">
+                        <Button mnemonicParsing="false" onAction="#handle_signin" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;" text="Đăng nhập" textFill="#E67E22">
                            <font>
                               <Font name="System Bold" size="13.0" />
                            </font>

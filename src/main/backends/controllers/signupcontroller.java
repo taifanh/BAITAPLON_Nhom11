@@ -32,6 +32,17 @@ public class signupcontroller {
 
     private final UserStore userStore = new UserStore();
 
+    public void handle_signin(ActionEvent event) throws IOException {
+        Parent signinRoot = ViewLoader.load("signin.fxml");
+        Scene sceneSignin = new Scene(signinRoot);
+
+        Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        window.setScene(sceneSignin);
+        window.setTitle("Sign in");
+        window.centerOnScreen();
+        window.show();
+    }
+
     public void handle_signup_ok(ActionEvent event) {
         String name = txtnameup.getText() == null ? "" : txtnameup.getText().trim();
         String email = txtemailup.getText() == null ? "" : txtemailup.getText().trim();
