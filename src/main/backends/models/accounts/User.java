@@ -1,5 +1,6 @@
 package models.accounts;
 
+import Database.Inventory;
 import models.bidding.CanBidding;
 import models.core.Account;
 import models.core.Item;
@@ -7,8 +8,8 @@ import models.items.ItemType;
 import models.items.itemFactory;
 import models.selling.CanSelling;
 
+import java.io.IOException;
 import java.util.HashSet;
-import java.util.Scanner;
 
 public class User extends Account implements CanBidding, CanSelling {
     HashSet<Item> items = new HashSet<>();
@@ -43,7 +44,14 @@ public class User extends Account implements CanBidding, CanSelling {
     }
 
     public void addItem(ItemType itemType, String itemName, double itemPrice, String itemDescription) {
-        items.add(itemFactory.createItem(itemType, itemName, itemPrice, itemDescription));
+        Item item = itemFactory.createItem(itemType, itemName, itemPrice, itemDescription);
+        try {
+            Inventory inventory = new Inventory();
+            inventory.saveItem(item, id);
+            items.add(item);
+        } catch (IOException e) {
+            System.out.println("Khong the tao san pham");
+        }
     }
 
     @Override
