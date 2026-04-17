@@ -18,7 +18,7 @@ public class User extends Account implements CanBidding, CanSelling {
         return balance;
     }
 
-    public User(String id, String name, String phoneNumber, String email, String password) {
+    public User(String id, String name, String email, String phoneNumber, String password) {
         super(id, name, phoneNumber, email, password);
     }
 
@@ -36,6 +36,7 @@ public class User extends Account implements CanBidding, CanSelling {
 
     public void deposit(double amount) {
         this.balance += amount;
+
     }
 
     public void withdraw(double amount) {
@@ -44,10 +45,10 @@ public class User extends Account implements CanBidding, CanSelling {
 
     public void addItem(ItemType itemType, String itemName, double itemPrice, String itemDescription) {
         items.add(itemFactory.createItem(itemType, itemName, itemPrice, itemDescription));
-    }
+    }// tạo sản phẩm
 
     @Override
-    public void sellItem(Item item) {
+    public void sellItem(Item item) {// lúc đã giao dịch xong
 
         if (items.contains(item)) {
             items.remove(item);

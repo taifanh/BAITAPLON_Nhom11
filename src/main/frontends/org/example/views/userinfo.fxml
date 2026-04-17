@@ -1,20 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="720.0" prefWidth="1080.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.userinfocontroller">
+<AnchorPane prefHeight="720.0" prefWidth="1080.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.userinfocontroller">
     <children>
         <TabPane prefHeight="720.0" prefWidth="1080.0" side="TOP" style="-fx-background-color: transparent; -fx-tab-min-width: 180; -fx-tab-max-width: 180;">
             <tabs>
@@ -84,7 +75,7 @@
                                                         <Font size="38.0" />
                                                     </font>
                                                 </Label>
-                                                <Button fx:id="btndeposit" alignment="CENTER" layoutX="518.0" layoutY="55.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="108.0" style="-fx-background-color: #ea580c; -fx-background-radius: 16; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Deposit" textOverrun="CLIP" />
+                                                <Button fx:id="btndeposit" alignment="CENTER" layoutX="518.0" layoutY="55.0" mnemonicParsing="false" onAction="#handle_deposit" prefHeight="42.0" prefWidth="108.0" style="-fx-background-color: #ea580c; -fx-background-radius: 16; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Deposit" textOverrun="CLIP" />
                                             </children>
                                         </Pane>
 
@@ -208,13 +199,13 @@
                                                     </font>
                                                 </TextField>
                                                 <TextField fx:id="maxlimit" layoutX="28.0" layoutY="121.0" prefHeight="46.0" prefWidth="244.0" promptText="Max limit" style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #fdba74;" />
-                                                <Button fx:id="autobid" alignment="CENTER" layoutX="28.0" layoutY="177.0" mnemonicParsing="false" prefHeight="38.0" prefWidth="108.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="AUTO" />
+                                                <Button alignment="CENTER" layoutX="28.0" layoutY="177.0" mnemonicParsing="false" onAction="#autobid" prefHeight="38.0" prefWidth="108.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="AUTO" />
                                                 <TextField fx:id="bidprice" layoutX="28.0" layoutY="242.0" prefHeight="46.0" prefWidth="244.0" promptText="your bid" style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #fdba74;">
                                                     <font>
                                                         <Font size="15.0" />
                                                     </font>
                                                 </TextField>
-                                                <Button fx:id="placebid" alignment="CENTER" layoutX="29.0" layoutY="297.0" mnemonicParsing="false" prefHeight="34.0" prefWidth="107.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="place" />
+                                                <Button alignment="CENTER" layoutX="29.0" layoutY="297.0" mnemonicParsing="false" onAction="#placebid" prefHeight="34.0" prefWidth="107.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="place" />
                                             </children>
                                         </Pane>
                                         <Pane layoutX="329.0" layoutY="77.0" prefHeight="547.0" prefWidth="395.0" style="-fx-background-color: #D3D3D3; -fx-background-radius: 18; -fx-border-radius: 18;" />

@@ -40,7 +40,7 @@ public class UserStore {
     public List<User> getAllUsers() throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     SELECT id, name, phone_number, email, password
+                     SELECT id, name, email, phone_number, password
                      FROM users
                      ORDER BY rowid
                      """);
@@ -50,8 +50,8 @@ public class UserStore {
                 User user = new User(
                         resultSet.getString("id"),
                         resultSet.getString("name"),
-                        resultSet.getString("phone_number"),
                         resultSet.getString("email"),
+                        resultSet.getString("phone_number"),
                         resultSet.getString("password")
                 );
                 user.setId(resultSet.getString("id"));
@@ -66,7 +66,7 @@ public class UserStore {
     public Optional<User> authenticate(String phoneNumber, String password) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     SELECT id, name, phone_number, email, password
+                     SELECT id, name,email, phone_number, password
                      FROM users
                      WHERE phone_number = ? AND password = ?
                      LIMIT 1
@@ -82,8 +82,8 @@ public class UserStore {
                 User user = new User(
                         resultSet.getString("id"),
                         resultSet.getString("name"),
-                        resultSet.getString("phone_number"),
                         resultSet.getString("email"),
+                        resultSet.getString("phone_number"),
                         resultSet.getString("password")
                 );
                 user.setId(resultSet.getString("id"));
@@ -114,13 +114,13 @@ public class UserStore {
     public void saveUser(User user) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     INSERT INTO users (id, name, phone_number, email, password)
+                     INSERT INTO users (id, name, email ,phone_number, password)
                      VALUES (?, ?, ?, ?, ?)
                      """)) {
             statement.setString(1, user.getId());
             statement.setString(2, user.getName());
-            statement.setString(3, user.getPhoneNumber());
-            statement.setString(4, user.getEmail());
+            statement.setString(3, user.getEmail());
+            statement.setString(4, user.getPhoneNumber());
             statement.setString(5, user.getPassword());
             statement.executeUpdate();
         } catch (SQLException e) {
