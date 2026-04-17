@@ -1,9 +1,11 @@
 package models.accounts;
 
+import controllers.AdminService;
 import javafx.scene.control.Alert;
 import models.bidding.Auction;
 import models.core.Account;
-import models.core.Entity;
+
+import java.io.IOException;
 
 public class Admin extends Account {
     private String name;
@@ -39,6 +41,19 @@ public class Admin extends Account {
             alert.setHeaderText("admin register error");
             alert.setContentText("one admin existed");
             alert.showAndWait();}
+    }
+
+    public Auction startAuction(int hours, int minutes, int seconds) {
+        try {
+            // Service nhan vao doi tuong admin de goi StartAuction
+            return AdminService.startAuction(this, hours, minutes, seconds);
+        } catch (IOException e) {
+            throw new RuntimeException("Khong the bat dau phien dau gia", e);
+        }
+    }
+
+    public Auction StartAuction(int hours, int minutes, int seconds) {
+        return startAuction(hours, minutes, seconds);
     }
 
     public void manageAuction(Auction auction){}

@@ -1,7 +1,7 @@
 package models.accounts;
 
 import Database.Inventory;
-import controllers.UserStore;
+import Database.UserStore;
 import models.bidding.CanBidding;
 import models.core.Account;
 import models.core.Item;

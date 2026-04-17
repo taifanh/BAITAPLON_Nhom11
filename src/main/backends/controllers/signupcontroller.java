@@ -1,5 +1,6 @@
 package controllers;
 
+import Database.UserStore;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;

@@ -9,6 +9,11 @@ public class IdGenerator {
     private static final AtomicLong electronicsCounter = new AtomicLong(0);
     private static final AtomicLong artCounter = new AtomicLong(0);
     private static final AtomicLong vehicleCounter = new AtomicLong(0);
+    private  static final AtomicLong AuctionCounter = new AtomicLong(0);
+
+    public static long nextId(){
+        return AuctionCounter.incrementAndGet();
+    }
 
     public static long nextId(ItemType type) {
         switch (type) {
