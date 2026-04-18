@@ -2,31 +2,40 @@ package controllers;
 
 import javafx.application.Application;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicReference;
+import java.net.ServerSocket;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Launcher {
     public static void main(String[] args) {
-        CountDownLatch serverReady = new CountDownLatch(1);
-        AtomicReference<Throwable> startupError = new AtomicReference<>();
-        ServerLauncher serverLauncher = new ServerLauncher();
+        // 1. Tạo luồng cho Server
+        Thread serverThread = new Thread(() -> {
+            System.out.println("[Launcher] Đang khởi động Server...");
+            // Gọi phương thức main của ServerLauncher
+            ServerLauncher.start();
+        });
 
-        Thread serverThread = new Thread(() -> serverLauncher.start(serverReady, startupError), "bid-server");
-        serverThread.setDaemon(true);
+        // 2. Tạo luồng cho Client
+        Thread clientThread = new Thread(() -> {
+            System.out.println("[Launcher] Đang khởi động Client...");
+            // Gọi phương thức main của ClientLauncher
+            Application.launch(ClientLauncher.class, args);
+        });
+
+        // 3. Kích hoạt Server chạy trước
         serverThread.start();
 
+        // 4. Tạm dừng luồng chính một chút (Delay)
+        // để chắc chắn Server đã mở cổng 8080 thành công
         try {
-            serverReady.await();
+            System.out.println("[Launcher] Đợi Server sẵn sàng...");
+            Thread.sleep(2000); // Đợi 2 giây
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Bi gian doan khi cho server khoi dong", e);
+            e.printStackTrace();
         }
 
-        Throwable serverError = startupError.get();
-        if (serverError != null) {
-            throw new IllegalStateException("Khong the khoi dong server", serverError);
-        }
-
-        Application.launch(ClientLauncher.class, args);
+        // 5. Sau khi đợi, mới kích hoạt Client
+        clientThread.start();
     }
 }
