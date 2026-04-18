@@ -6,7 +6,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-public class MainApplication extends Application {
+public class ClientLauncher extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         Scene scene = new Scene(ViewLoader.load("signin.fxml"), 500, 500);

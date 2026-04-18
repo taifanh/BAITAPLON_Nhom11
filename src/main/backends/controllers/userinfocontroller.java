@@ -1,18 +1,20 @@
 package controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
+import models.JSON_request.PlaceBid;
 import models.accounts.User;
 
 import java.io.IOException;
-import java.util.Random;
+import java.io.*;
+import java.net.Socket;
 
 public class userinfocontroller {
     @FXML
@@ -29,6 +31,15 @@ public class userinfocontroller {
 
     @FXML
     private CheckBox passshow;
+
+    @FXML
+    private TextField bidprice;
+
+    @FXML
+    private Button placebid;
+
+    @FXML
+    private TextField result_bid;
 
     private User user;
 
@@ -65,6 +76,37 @@ public class userinfocontroller {
         window.show();
     }
 
+    @FXML
+    public void handle_bidding(ActionEvent event) {
+        String amount = bidprice.getText();
+        if (user == null) {
+            showAlert(Alert.AlertType.ERROR, "Loi", "Chua co thong tin nguoi dung", "");
+            return;
+        }
+        if (amount == null || amount.isBlank()) {
+            showAlert(Alert.AlertType.WARNING, "Thieu du lieu", "Ban chua nhap gia bid", "");
+            return;
+        }
+
+        new Thread(() -> {
+            try(Socket socket = new Socket("localhost",9999);
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));) {
+
+                ObjectMapper mapper = new ObjectMapper();
+                String json = mapper.writeValueAsString(new PlaceBid(user.getId(), user.getName(), amount));
+                out.println(json);
+                String result = in.readLine();
+                Platform.runLater(() -> result_bid.setText(result == null ? "Server khong tra ve du lieu" : result));
+            } catch (Exception e) {
+                e.printStackTrace();
+                Platform.runLater(() ->
+                    showAlert(Alert.AlertType.ERROR, "Loi ke noi", "Khong the ket noi toi Server", e.getMessage())
+                );
+            }
+        }).start();
+    }
+
     private void refreshPasswordField() {
         if (user == null) {
             return;
@@ -76,4 +118,11 @@ public class userinfocontroller {
         }
     }
 
+    private void showAlert(Alert.AlertType type, String title, String header, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
 }

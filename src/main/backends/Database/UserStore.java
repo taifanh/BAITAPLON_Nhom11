@@ -29,6 +29,24 @@ public class UserStore {
             )
             """;
 
+    private void initializeStorage() throws IOException, SQLException {
+        ensureDataDirectoryExists();
+        try (Connection connection = openConnection();
+             Statement statement = connection.createStatement()) {
+            statement.executeUpdate(CREATE_USERS_TABLE_SQL);
+        }
+    }
+
+    private void ensureDataDirectoryExists() throws IOException {
+        if (Files.notExists(DATA_DIRECTORY)) {
+            Files.createDirectories(DATA_DIRECTORY);
+        }
+    }
+
+    private Connection openConnection() throws SQLException {
+        return DriverManager.getConnection(DATABASE_URL);
+    }
+
     public UserStore() {
         try {
             initializeStorage();
@@ -144,23 +162,5 @@ public class UserStore {
         } catch (SQLException e) {
             throw new IOException("Khong the luu nguoi dung vao SQLite.", e);
         }
-    }
-
-    private void initializeStorage() throws IOException, SQLException {
-        ensureDataDirectoryExists();
-        try (Connection connection = openConnection();
-             Statement statement = connection.createStatement()) {
-            statement.executeUpdate(CREATE_USERS_TABLE_SQL);
-        }
-    }
-
-    private void ensureDataDirectoryExists() throws IOException {
-        if (Files.notExists(DATA_DIRECTORY)) {
-            Files.createDirectories(DATA_DIRECTORY);
-        }
-    }
-
-    private Connection openConnection() throws SQLException {
-        return DriverManager.getConnection(DATABASE_URL);
     }
 }

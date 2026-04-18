@@ -214,10 +214,13 @@
                                                         <Font size="15.0" />
                                                     </font>
                                                 </TextField>
-                                                <Button fx:id="placebid" alignment="CENTER" layoutX="29.0" layoutY="297.0" mnemonicParsing="false" prefHeight="34.0" prefWidth="107.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="place" />
+                                                <Button fx:id="placebid" alignment="CENTER" layoutX="29.0" layoutY="297.0" mnemonicParsing="false" onAction="#handle_bidding" prefHeight="34.0" prefWidth="107.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="place" />
                                             </children>
                                         </Pane>
-                                        <Pane layoutX="329.0" layoutY="77.0" prefHeight="547.0" prefWidth="395.0" style="-fx-background-color: #D3D3D3; -fx-background-radius: 18; -fx-border-radius: 18;" />
+                                        <Pane layoutX="321.0" layoutY="87.0" prefHeight="547.0" prefWidth="395.0" style="-fx-background-color: #D3D3D3; -fx-background-radius: 18; -fx-border-radius: 18;">
+                                 <children>
+                                    <TextField fx:id="result_bid" layoutX="65.0" layoutY="200.0" prefHeight="74.0" prefWidth="276.0" />
+                                 </children></Pane>
                                     </children>
                                 </AnchorPane>
                             </content>
