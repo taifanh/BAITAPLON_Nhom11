@@ -79,32 +79,19 @@ public class userinfocontroller {
     @FXML
     public void handle_bidding(ActionEvent event) {
         String amount = bidprice.getText();
-        if (user == null) {
-            showAlert(Alert.AlertType.ERROR, "Loi", "Chua co thong tin nguoi dung", "");
-            return;
-        }
         if (amount == null || amount.isBlank()) {
-            showAlert(Alert.AlertType.WARNING, "Thieu du lieu", "Ban chua nhap gia bid", "");
+            showAlert(Alert.AlertType.WARNING, "Thiếu dữ liệu", "Chưa nhập giá bid", "");
             return;
         }
-
-        new Thread(() -> {
-            try(Socket socket = new Socket("localhost",9999);
-                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));) {
-
-                ObjectMapper mapper = new ObjectMapper();
-                String json = mapper.writeValueAsString(new PlaceBid(user.getId(), user.getName(), amount));
-                out.println(json);
-                String result = in.readLine();
-                Platform.runLater(() -> result_bid.setText(result == null ? "Server khong tra ve du lieu" : result));
-            } catch (Exception e) {
-                e.printStackTrace();
-                Platform.runLater(() ->
-                    showAlert(Alert.AlertType.ERROR, "Loi ke noi", "Khong the ket noi toi Server", e.getMessage())
-                );
-            }
-        }).start();
+        try {
+            double value = Double.parseDouble(amount);
+            if (value <= 0) throw new NumberFormatException();
+        } catch (NumberFormatException e) {
+            showAlert(Alert.AlertType.WARNING, "Sai định dạng", "Giá bid phải là số dương", "");
+            return;
+        }
+        UserSession.getConnection().send(new PlaceBid(user.getId(), user.getName(), amount));
+        bidprice.clear();
     }
 
     private void refreshPasswordField() {
