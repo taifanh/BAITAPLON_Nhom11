@@ -103,6 +103,22 @@ public class Inventory {
         }
     }
 
+    public Item getItemByStatus(String status) throws IOException {
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement("""
+                     SELECT ItemId, type, name, price, itemDescription
+                     FROM inventory
+                     WHERE status = ?
+                     """)) {
+            statement.setString(1, status);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return getItem(resultSet);
+            }
+        } catch (SQLException e) {
+            throw new IOException("Khong the lay san pham theo trang thai", e);
+        }
+    }
+
     //Lấy sản phẩm theo Id user ( dùng để làm bảng riêng cho mỗi user )
     public List<Item> getItemsByUserId(String userId) throws IOException {
         try (Connection connection = openConnection();
@@ -137,6 +153,26 @@ public class Inventory {
                 statement.setString(2, itemId);
                 statement.addBatch();
             }
+            statement.executeBatch();
+        } catch (SQLException e) {
+            throw new IOException("Khong the cap nhat trang thai danh sach san pham", e);
+        }
+    }
+
+    public void updateItemStatus(String itemId, String status) throws IOException {
+        if (itemId == null) {
+            return;
+        }
+
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement("""
+                     UPDATE inventory
+                     SET status = ?
+                     WHERE ItemId = ?
+                     """)) {
+            statement.setString(1, status);
+            statement.setString(2, itemId);
+            statement.addBatch();
             statement.executeBatch();
         } catch (SQLException e) {
             throw new IOException("Khong the cap nhat trang thai danh sach san pham", e);

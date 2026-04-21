@@ -22,13 +22,6 @@
       <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/data/inventory.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="auctions_item" uuid="c8bd3cdc-a6c7-4c14-88f8-d8a6b2d076dc">
-      <driver-ref>sqlite.xerial</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/data/auctions_item.db</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
     <data-source source="LOCAL" name="auctions" uuid="2259c8ad-759b-4a1d-ab0f-182dc8582b5f">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>

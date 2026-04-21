@@ -7,10 +7,11 @@ import static models.items.ItemType.*;
 
 public class AdminServiceTestController {
     public static void main(String[] args) {
-        User user = new User("1","1","1","1");
-        user.addItem(Electronics,"Laptop",5000,"new laptop");
-        user.addItem(Art,"Mona Lisa",900000,"new art");
-        user.addItem(Electronics,"Phone",3000,"new phone");
+        User user1 = new User("User1","12345","1","1");
+        User user2 = new User("User2","34567","2","2");
+        user1.addItem(Electronics,"Laptop",5000,"new laptop");
+        user1.addItem(Art,"Mona Lisa",900000,"new art");
+        user2.addItem(Electronics,"Phone",3000,"new phone");
 
         // Tao 1 admin tam thoi de test, chua can qua DB.
         Admin admin = new Admin("ADMIN001", "Admin", "0123456789", "admin@gmail.com", "123456");
@@ -20,5 +21,7 @@ public class AdminServiceTestController {
         } catch (RuntimeException e) {
             e.printStackTrace();
         }
+
+
     }
 }

@@ -1,6 +1,5 @@
 package controllers;
 
-import Database.Auction_Item;
 import Database.Auctions;
 import Database.Inventory;
 import models.accounts.Admin;
@@ -29,16 +28,13 @@ public final class AdminService {
         }
 
         Inventory inventory = new Inventory();
-        List<Item> waitingItems = inventory.getItemsByStatus(Inventory.STATUS_WAITING);
-        if (waitingItems.isEmpty()) {
+        Item waitingItem = inventory.getItemByStatus(Inventory.STATUS_WAITING);
+        if (waitingItem==null) {
             throw new IllegalStateException("Khong co san pham nao o trang thai WAITING");
         }
 
         // Tao auction va dua toan bo item WAITING vao phien dau gia.
-        Auction auction = new Auction();
-        for (Item item : waitingItems) {
-            auction.addItem(item);
-        }
+        Auction auction = new Auction(waitingItem);
 
         // Set thoi gian bat dau va thoi gian ket thuc cho auction.
         LocalDateTime now = LocalDateTime.now();
@@ -49,15 +45,9 @@ public final class AdminService {
         Auctions auctionsRepository = new Auctions();
         auctionsRepository.saveAuction(auction);
 
-        // Luu quan he auction - item va doi trang thai item sang IN_AUCTION.
-        Auction_Item auctionItemRepository = new Auction_Item();
-        List<String> itemIds = new ArrayList<>();
-        for (Item item : waitingItems) {
-            auctionItemRepository.saveAuctionItem(auction.getAuctionId(), item.getId());
-            itemIds.add(item.getId());
-        }
+        String ItemId=waitingItem.getId();
 
-        inventory.updateItemStatus(itemIds, Inventory.STATUS_IN_AUCTION);
+        inventory.updateItemStatus(ItemId, Inventory.STATUS_IN_AUCTION);
         return auction;
     }
 }

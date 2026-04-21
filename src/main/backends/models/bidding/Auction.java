@@ -18,7 +18,7 @@ public class Auction {
     }
 
     private final String auctionId;
-    private final List<Item> items;
+    private final Item item;
     private final List<BidTransaction> bids;
     private Status status;
     private LocalDateTime startAt;
@@ -26,9 +26,9 @@ public class Auction {
     private double currentHighestBid;
     private BidTransaction highestBid;
 
-    public Auction() {
+    public Auction(Item item) {
         this.auctionId = generateAuctionId();
-        this.items = new ArrayList<>();
+        this.item = item;
         this.bids = new ArrayList<>();
         this.status = Status.SCHEDULED;
         this.currentHighestBid = 0;
@@ -36,13 +36,6 @@ public class Auction {
 
     private String generateAuctionId() {
         return "AUC" + models.core.Entity.makeItemId(IdGenerator.nextId());
-    }
-
-    public void addItem(Item item) {
-        if (item == null) {
-            throw new IllegalArgumentException("Item cannot be null");
-        }
-        items.add(item);
     }
 
     public void addBid(BidTransaction bid) {
@@ -128,8 +121,8 @@ public class Auction {
         return highestBid;
     }
 
-    public List<Item> getItemsList() {
-        return Collections.unmodifiableList(items);
+    public Item getItem() {
+        return item;
     }
 
     public List<BidTransaction> getBidList() {

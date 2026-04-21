@@ -21,6 +21,7 @@ public class Auctions {
                 startAt TEXT NOT NULL,
                 endAt TEXT NOT NULL,
                 status TEXT NOT NULL,
+                ItemId TEXT NOT NULL,
                 highestBid DOUBLE DEFAULT 0
             )
             """;
@@ -36,8 +37,8 @@ public class Auctions {
     public void saveAuction(Auction auction) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     INSERT INTO auctions(auctionId,startAt,endAt,status,highestBid)
-                     VALUES(?,?,?,?,?)
+                     INSERT INTO auctions(auctionId,startAt,endAt,status,ItemId,highestBid)
+                     VALUES(?,?,?,?,?,?)
                      """)) {
             statement.setString(1, auction.getAuctionId());
             statement.setString(2, auction.getStartAt().toString());
@@ -45,7 +46,8 @@ public class Auctions {
             //Date đọc bằng toString() lấy bằng parse()
             statement.setString(4, auction.getStatus().name());
             //Status đọc bằng name() lấy bằng valuesOf()
-            statement.setDouble(5, auction.getCurrentHighestBid());
+            statement.setString(5,auction.getItem().getId());
+            statement.setDouble(6, auction.getCurrentHighestBid());
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new IOException("Khong the luu auction", e);
