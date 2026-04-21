@@ -136,6 +136,26 @@ public class Inventory {
         }
     }
 
+    public String getUserIdByItemId(String itemId) {
+        String sql = "SELECT userId FROM inventory WHERE ItemId = ?";
+
+        try (Connection conn = openConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, itemId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getString("userId");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     // Cập nhât status cho Item (Waiting -> InAuction -> Sold)
     public void updateItemStatus(List<String> itemIds, String status) throws IOException {
         if (itemIds == null || itemIds.isEmpty()) {

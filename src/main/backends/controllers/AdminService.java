@@ -50,4 +50,5 @@ public final class AdminService {
         inventory.updateItemStatus(ItemId, Inventory.STATUS_IN_AUCTION);
         return auction;
     }
+
 }
