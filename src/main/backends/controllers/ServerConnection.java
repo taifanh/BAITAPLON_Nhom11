@@ -1,5 +1,7 @@
 package controllers;
 
+import models.Extra.NetworkUtils;
+
 import java.io.*;
 import java.net.Socket;
 
@@ -18,7 +20,6 @@ public class ServerConnection {
         startListenerThread();
     }
 
-    // 🔥 gửi raw text (KHÔNG JSON hóa nữa)
     public void sendRaw(String text) {
         out.println(text);
     }
@@ -39,7 +40,7 @@ public class ServerConnection {
             try {
                 String line;
                 while (running && (line = in.readLine()) != null) {
-                    System.out.println("Received: " + line); // 🔥 QUAN TRỌNG
+                    System.out.println(line);
                 }
             } catch (IOException e) {
                 System.out.println("Connection lost");
@@ -53,7 +54,7 @@ public class ServerConnection {
         ServerConnection client = new ServerConnection();
 
         try {
-            client.connect("10.11.71.187", 9999);
+            client.connect(NetworkUtils.getPrivateIP(), 9999);
 
             BufferedReader console = new BufferedReader(
                     new InputStreamReader(System.in));
@@ -62,7 +63,7 @@ public class ServerConnection {
 
             String line;
             while ((line = console.readLine()) != null) {
-                client.sendRaw(line); // 🔥 gửi trực tiếp
+                client.sendRaw(line);
             }
 
         } catch (IOException e) {

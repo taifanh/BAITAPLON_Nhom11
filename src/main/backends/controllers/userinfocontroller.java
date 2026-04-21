@@ -90,7 +90,7 @@ public class userinfocontroller {
             showAlert(Alert.AlertType.WARNING, "Sai định dạng", "Giá bid phải là số dương", "");
             return;
         }
-        UserSession.getConnection().send(new PlaceBid(user.getId(), user.getName(), amount));
+
         bidprice.clear();
     }
 
