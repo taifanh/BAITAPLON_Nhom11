@@ -31,7 +31,7 @@ public final class UserSession {
     public static void clear() {
         currentUser = null;
         if (connection != null) {
-            connection.disconnect();
+            connection. disconnect();
             connection = null;
         }
     }
