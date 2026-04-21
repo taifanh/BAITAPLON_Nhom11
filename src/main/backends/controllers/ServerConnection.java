@@ -36,6 +36,8 @@ public class ServerConnection {
     public void disconnect() {
         running = false;
         try {
+            if (in != null) in.close();
+            if (out != null) out.close();
             if (socket != null) socket.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -60,8 +62,23 @@ public class ServerConnection {
                 }
             }
         });
-        listener.setDaemon(true); // tắt cùng với app, không giữ JVM sống
+        listener.setDaemon(true);
         listener.setName("ServerListener");
         listener.start();
+    }
+    public static void main(String[] args) {
+        ServerConnection client = new ServerConnection();
+
+        try {
+            client.connect("10.11.71.187", 9999);
+            BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
+            System.out.println("Connected");
+            String line;
+            while ((line = console.readLine()) != null) {
+                client.send(line); // gửi thẳng string
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

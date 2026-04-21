@@ -32,17 +32,17 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         // Đăng ký vào AuctionRoom ngay khi connect
-        AuctionRoom.getInstance().register(this);
+        //AuctionRoom.getInstance().register(this);
 
         // Khởi tạo in/out NGOÀI try-with-resources
         // để out tồn tại suốt vòng đời ClientHandler
+
         try {
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(socket.getOutputStream(), true);
 
             String line;
-            // Vòng lặp liên tục — tương tự while trong ServerConnection
             while ((line = in.readLine()) != null) {
                 handleMessage(line);
             }
@@ -50,15 +50,11 @@ public class ClientHandler implements Runnable {
         } catch (IOException e) {
             System.out.println("[ClientHandler] Mất kết nối: " + e.getMessage());
         } finally {
-            // Dù lỗi hay client tự ngắt đều unregister
-            AuctionRoom.getInstance().unregister(this);
+            ServerLauncher.remove(this); // 🔥 thêm dòng này
             try { socket.close(); } catch (IOException ignored) {}
         }
     }
 
-    // =========================================================
-    // XỬ LÝ TIN NHẮN TỪ CLIENT
-    // =========================================================
     private void handleMessage(String json) {
         try {
             JsonNode node = mapper.readTree(json);
@@ -77,25 +73,10 @@ public class ClientHandler implements Runnable {
                     AuctionRoom.getInstance().unwatch(this);
                     watchingAuctionId = null;
                 }
-
-                case "PLACE_BID" -> {
-                    String auctionId = node.get("auctionId").asText();
-                    /*Bid bid = mapper.treeToValue(node, Bid.class);
-
-                    try {
-                        // Manager xử lý nghiệp vụ, trả về JSON kết quả
-                        String resultJson = AuctionManager.getInstance().placeBid(auctionId, bid);
-                        // Room broadcast đến tất cả client đang xem phiên này
-                        AuctionRoom.getInstance().broadcastToSession(auctionId, resultJson);
-
-                    } catch (InvalidBidException | AuctionClosedException e) {
-                        // Chỉ trả lỗi về client này, không broadcast
-                        send(errorJson(e.getMessage()));
-                    } */
+                case "BID" -> {
+                    ServerLauncher.broadcast(json);
                 }
-
                 case "GET_AUCTIONS" -> {
-                    // TODO: lấy danh sách phiên từ AuctionManager, gửi riêng cho client này
                     send("{\"type\":\"AUCTION_LIST\",\"data\":[]}");
                 }
 
@@ -108,9 +89,6 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    // =========================================================
-    // HELPER
-    // =========================================================
     private String errorJson(String message) {
         ObjectNode node = mapper.createObjectNode();
         node.put("type", "ERROR");

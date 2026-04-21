@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class AuctionRoom {
 
-    // --- Singleton, cùng kiểu eager như AuctionManager ---
     private static final AuctionRoom INSTANCE = new AuctionRoom();
 
     public static AuctionRoom getInstance() { return INSTANCE; }
