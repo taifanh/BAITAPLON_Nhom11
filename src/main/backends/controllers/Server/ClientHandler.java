@@ -2,41 +2,29 @@ package controllers.Server;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import controllers.Server.AuctionRoom;
 
 import java.io.*;
 import java.net.Socket;
 
-
 public class ClientHandler implements Runnable {
 
     private final Socket socket;
-    private PrintWriter out;                        // field — dùng lâu dài
+    private PrintWriter out;
     private final ObjectMapper mapper = new ObjectMapper();
-    private String watchingAuctionId = null;        // client đang xem phiên nào
 
     public ClientHandler(Socket socket) {
         this.socket = socket;
     }
 
-    // AuctionRoom gọi hàm này để push tin xuống client
     public void send(String json) {
         if (out != null && !socket.isClosed()) {
+            System.out.println("[Send -> " + socket.getInetAddress() + "] " + json);
             out.println(json);
         }
     }
 
-    public String getWatchingAuctionId() { return watchingAuctionId; }
-
     @Override
     public void run() {
-        // Đăng ký vào AuctionRoom ngay khi connect
-        //AuctionRoom.getInstance().register(this);
-
-        // Khởi tạo in/out NGOÀI try-with-resources
-        // để out tồn tại suốt vòng đời ClientHandler
-
         try {
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(socket.getInputStream()));
@@ -44,13 +32,14 @@ public class ClientHandler implements Runnable {
 
             String line;
             while ((line = in.readLine()) != null) {
+                System.out.println("[Received] " + line);
                 handleMessage(line);
             }
 
         } catch (IOException e) {
-            System.out.println("[ClientHandler] Mất kết nối: " + e.getMessage());
+            System.out.println("[ClientHandler] Disconnected: " + e.getMessage());
         } finally {
-            ServerLauncher.remove(this); // 🔥 thêm dòng này
+            ServerLauncher.remove(this);
             try { socket.close(); } catch (IOException ignored) {}
         }
     }
@@ -62,44 +51,23 @@ public class ClientHandler implements Runnable {
 
             switch (type) {
 
-                case "WATCH_AUCTION" -> {
-                    // Client mở màn hình chi tiết phiên
-                    watchingAuctionId = node.get("auctionId").asText();
-                    AuctionRoom.getInstance().watch(this, watchingAuctionId);
-                    send(okJson("Đang theo dõi phiên: " + watchingAuctionId));
+                case "CHAT" -> {
+                    ServerLauncher.broadcast(json);
                 }
 
-                case "UNWATCH_AUCTION" -> {
-                    AuctionRoom.getInstance().unwatch(this);
-                    watchingAuctionId = null;
-                }
                 case "BID" -> {
                     ServerLauncher.broadcast(json);
                 }
-                case "GET_AUCTIONS" -> {
-                    send("{\"type\":\"AUCTION_LIST\",\"data\":[]}");
-                }
 
-                default -> System.out.println("[ClientHandler] Unknown type: " + type);
+                default -> {
+                    System.out.println("[Unknown type] " + type);
+                    // vẫn broadcast để test
+                    ServerLauncher.broadcast(json);
+                }
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
-            send(errorJson("Lỗi xử lý yêu cầu"));
+            System.out.println("[Parse error] " + json);
         }
-    }
-
-    private String errorJson(String message) {
-        ObjectNode node = mapper.createObjectNode();
-        node.put("type", "ERROR");
-        node.put("message", message);
-        return node.toString();
-    }
-
-    private String okJson(String message) {
-        ObjectNode node = mapper.createObjectNode();
-        node.put("type", "OK");
-        node.put("message", message);
-        return node.toString();
     }
 }

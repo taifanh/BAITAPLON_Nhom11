@@ -1,8 +1,5 @@
 package controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import javafx.application.Platform;
-
 import java.io.*;
 import java.net.Socket;
 
@@ -11,7 +8,6 @@ public class ServerConnection {
     private Socket socket;
     private PrintWriter out;
     private BufferedReader in;
-    private final ObjectMapper mapper = new ObjectMapper();
     private volatile boolean running = false;
 
     public void connect(String host, int port) throws IOException {
@@ -22,17 +18,11 @@ public class ServerConnection {
         startListenerThread();
     }
 
-    // Gửi bất kỳ object nào lên server (tự serialize thành JSON)
-    public void send(Object payload) {
-        try {
-            String json = mapper.writeValueAsString(payload);
-            out.println(json);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    // 🔥 gửi raw text (KHÔNG JSON hóa nữa)
+    public void sendRaw(String text) {
+        out.println(text);
     }
 
-    // Đóng kết nối (gọi khi logout / tắt app)
     public void disconnect() {
         running = false;
         try {
@@ -44,39 +34,37 @@ public class ServerConnection {
         }
     }
 
-    // Vòng lặp nghe liên tục — chạy trên daemon thread
     private void startListenerThread() {
         Thread listener = new Thread(() -> {
             try {
                 String line;
                 while (running && (line = in.readLine()) != null) {
-                    final String message = line;
-                    // Đẩy về JavaFX thread để update UI an toàn
-                    Platform.runLater(() -> MessageBus.getInstance().dispatch(message));
+                    System.out.println("Received: " + line); // 🔥 QUAN TRỌNG
                 }
             } catch (IOException e) {
-                if (running) {
-                    // Mất kết nối ngoài ý muốn
-                    Platform.runLater(() ->MessageBus.getInstance().dispatch("{\"type\":\"CONNECTION_LOST\"}")
-                    );
-                }
+                System.out.println("Connection lost");
             }
         });
         listener.setDaemon(true);
-        listener.setName("ServerListener");
         listener.start();
     }
+
     public static void main(String[] args) {
         ServerConnection client = new ServerConnection();
 
         try {
             client.connect("10.11.71.187", 9999);
-            BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
-            System.out.println("Connected");
+
+            BufferedReader console = new BufferedReader(
+                    new InputStreamReader(System.in));
+
+            System.out.println("Connected. Type JSON:");
+
             String line;
             while ((line = console.readLine()) != null) {
-                client.send(line); // gửi thẳng string
+                client.sendRaw(line); // 🔥 gửi trực tiếp
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
