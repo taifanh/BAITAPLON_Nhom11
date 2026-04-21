@@ -106,13 +106,20 @@ public class Inventory {
     public Item getItemByStatus(String status) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     SELECT ItemId, type, name, price, itemDescription
-                     FROM inventory
-                     WHERE status = ?
-                     """)) {
+                 SELECT ItemId, type, name, price, itemDescription
+                 FROM inventory
+                 WHERE status = ?
+                 ORDER BY rowid ASC
+                 LIMIT 1
+                 """)) {
+
             statement.setString(1, status);
+
             try (ResultSet resultSet = statement.executeQuery()) {
-                return getItem(resultSet);
+                if (resultSet.next()) {
+                    return getItem(resultSet);
+                }
+                return null;
             }
         } catch (SQLException e) {
             throw new IOException("Khong the lay san pham theo trang thai", e);
