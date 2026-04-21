@@ -80,18 +80,7 @@ public class ClientHandler implements Runnable {
 
                 case "PLACE_BID" -> {
                     String auctionId = node.get("auctionId").asText();
-                    /*Bid bid = mapper.treeToValue(node, Bid.class);
 
-                    try {
-                        // Manager xử lý nghiệp vụ, trả về JSON kết quả
-                        String resultJson = AuctionManager.getInstance().placeBid(auctionId, bid);
-                        // Room broadcast đến tất cả client đang xem phiên này
-                        AuctionRoom.getInstance().broadcastToSession(auctionId, resultJson);
-
-                    } catch (InvalidBidException | AuctionClosedException e) {
-                        // Chỉ trả lỗi về client này, không broadcast
-                        send(errorJson(e.getMessage()));
-                    } */
                 }
 
                 case "GET_AUCTIONS" -> {

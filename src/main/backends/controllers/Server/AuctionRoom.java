@@ -66,14 +66,15 @@ public class AuctionRoom {
 
     // Gửi đến những client đang xem 1 phiên cụ thể
     // Dùng cho: bid mới, cập nhật giá, đóng phiên
-    public void broadcastToSession(String auctionId, String json) {
-        for (ClientHandler handler : observers) {
-            String watching = watchingMap.get(handler);
-            if (auctionId.equals(watching)) {
-                handler.send(json);
-            }
-        }
-    }
+    // tạm thời chưa dùng (chỉ dùng broadcast thương)
+//    public void broadcastToSession(String auctionId, String json) {
+//        for (ClientHandler handler : observers) {
+//            String watching = watchingMap.get(handler);
+//            if (auctionId.equals(watching)) {
+//                handler.send(json);
+//            }
+//        }
+//    }
 
     // Gửi đến tất cả TRỪ người gửi
     // Dùng khi muốn tránh echo lại cho chính client đặt bid
