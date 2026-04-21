@@ -3,11 +3,12 @@ package controllers;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import Launcher.Launcher;
 
 public class ClientApplication extends Application {
     @Override
     public void start(Stage stage) throws Exception {
-        UserSession.initConnection("10.11.71.187", 9999);
+        UserSession.initConnection(Launcher.serverIp, 9999);
         Scene scene = new Scene(ViewLoader.load("signin.fxml"), 500, 500);
         stage.setTitle("sign in!");
         stage.setScene(scene);
