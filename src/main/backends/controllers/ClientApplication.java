@@ -4,9 +4,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-
-public class ClientLauncher extends Application {
+public class ClientApplication extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         UserSession.initConnection("10.11.71.187", 9999);

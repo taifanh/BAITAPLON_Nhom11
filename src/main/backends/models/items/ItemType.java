@@ -4,9 +4,9 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public enum ItemType {
     // Chỉ cần khai báo thêm ở đây là xong, không cần sửa Factory hay IdGenerator nữa
-    ELECTRONICS("ELE", Electronics::new),
-    ART("ART", Art::new),
-    VEHICLE("VEH", Vehicle::new);
+    Electronics("ELE", Electronics::new),
+    Art("ART", Art::new),
+    Vehicle("VEH", Vehicle::new);
 
     private final String prefix;
     private final AtomicLong counter;
