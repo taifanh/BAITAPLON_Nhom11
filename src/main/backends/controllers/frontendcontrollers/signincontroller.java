@@ -1,5 +1,8 @@
-package controllers;
+package controllers.frontendcontrollers;
 
+import Database.UserStore;
+import controllers.UserSession;
+import controllers.ViewLoader;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;

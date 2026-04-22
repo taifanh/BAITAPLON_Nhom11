@@ -1,5 +1,7 @@
-package controllers;
+package controllers.frontendcontrollers;
 
+import Database.UserStore;
+import controllers.ViewLoader;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -32,6 +34,17 @@ public class signupcontroller {
 
     private final UserStore userStore = new UserStore();
 
+    public void handle_signin(ActionEvent event) throws IOException {
+        Parent signinRoot = ViewLoader.load("signin.fxml");
+        Scene sceneSignin = new Scene(signinRoot);
+
+        Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        window.setScene(sceneSignin);
+        window.setTitle("Sign in");
+        window.centerOnScreen();
+        window.show();
+    }
+
     public void handle_signup_ok(ActionEvent event) {
         String name = txtnameup.getText() == null ? "" : txtnameup.getText().trim();
         String email = txtemailup.getText() == null ? "" : txtemailup.getText().trim();
@@ -49,7 +62,7 @@ public class signupcontroller {
                 return;
             }
 
-            userStore.saveUser(new User(name, email, phoneNumber, password));
+            userStore.saveUser(new User(name, phoneNumber, email, password));
             showAlert(Alert.AlertType.INFORMATION, "OK", null, "Dang ky thanh cong. Du lieu da duoc luu vao SQLite.");
 
             Parent signinRoot = ViewLoader.load("signin.fxml");

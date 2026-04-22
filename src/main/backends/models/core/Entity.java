@@ -3,20 +3,9 @@ package models.core;
 public abstract class Entity {
     protected String id;
 
-    public Entity(String phonenumber   ){
-        StringBuffer  sb = new StringBuffer("USER");// cần thêm nhận phân biệt admin***
+    public Entity() {}
 
-        for ( int i =1 ; i< phonenumber.length() ; i++){
-
-            String tempt = String.valueOf(Integer.valueOf(phonenumber.charAt(i)-1));
-
-            sb.append( tempt );
-        }// mã hóa số điện thoại thành dãy ID
-
-        this.id = sb.toString();
-    }
-
-    public String getId(){
+    public String getId() {
         return id;
     }
 
@@ -24,5 +13,13 @@ public abstract class Entity {
         this.id = id;
     }
 
-
+    public static String makeItemId(Long x) {
+        int len = 8;
+        String id = String.valueOf(x);
+        len -= id.length();
+        for (int i = 0; i < len; i++) {
+            id = "0" + id;
+        }
+        return id;
+    }
 }

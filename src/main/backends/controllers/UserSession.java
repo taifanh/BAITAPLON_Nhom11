@@ -5,7 +5,7 @@ import models.accounts.User;
 public final class UserSession {
     private static User currentUser;
 
-    private UserSession() {
+    public UserSession() {
     }
 
     public static User getCurrentUser() {

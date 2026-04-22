@@ -1,12 +1,11 @@
-package controllers;
+package controllers.frontendcontrollers;
 
+import Database.request_log;
 import com.google.gson.Gson;
+import controllers.UserSession;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import models.Extra.messages.Depositpayload;
@@ -17,8 +16,7 @@ import java.io.IOException;
 public class depositcontroller {
     @FXML
     public TextField deposit_amount;
-    @FXML
-    public Button verifybtn;
+
     @FXML
     public TextField name_deposit_input;
     @FXML
@@ -26,7 +24,10 @@ public class depositcontroller {
     @FXML
     public Label money_display;
 
-    public void ok_deposit(ActionEvent event){
+
+    private final request_log request_log = new request_log() ;
+
+    public void ok_deposit(ActionEvent event) throws IOException {
         double money_in = Double.parseDouble(money_display.getText());
 
         Gson gson = new Gson();
@@ -34,15 +35,25 @@ public class depositcontroller {
         String payloadJson = gson.toJson( payload); // convert the content into like   "{"amount" : 100.0}"
 
         Message msg = new Message();// create message of deposit
-//        msg.id_user = "12345";
+        msg.Id_user = UserSession.getCurrentUser().getId();
         msg.messageType = "deposit";
         msg.payloadJson = payloadJson;
         // this part for send request for server
 
+        request_log.save_request(msg);
+
         // the next part is for show screen
+        Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        window.close();
 
 
     }
+
+    public void handle_verify_money(ActionEvent event){
+        money_display.setText(deposit_amount.getText());
+
+    }
+
 
 
 }

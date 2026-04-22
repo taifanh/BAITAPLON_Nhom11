@@ -1,6 +1,8 @@
-package controllers;
+package controllers.frontendcontrollers;
 
 import com.google.gson.Gson;
+import controllers.UserSession;
+import controllers.ViewLoader;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -88,21 +90,21 @@ public class userinfocontroller {
             infopassword.setText(user.getPassword());
         }
     }
-
+    // chua dung
     public void placebid(ActionEvent event ) throws IOException{
-        double money_bid = Double.parseDouble(money_display.getText());
-
-        Gson gson = new Gson();
-        placeBidpayload payload = new placeBidpayload(money_bid);
-        String payloadJson = gson.toJson( payload); // convert the content into like   "{"amount" : 100.0}"
-
-        Message msg = new Message();// create message of deposit
-//        msg.id_user = "12345";
-        msg.messageType = "bid";
-        msg.payloadJson = payloadJson;
-        // this part still need checking for possible bid(compare max and increase)
-
-        // code here //
+//        double money_bid = Double.parseDouble(money_display.getText());
+//
+//        Gson gson = new Gson();
+//        placeBidpayload payload = new placeBidpayload(money_bid);
+//        String payloadJson = gson.toJson( payload); // convert the content into like   "{"amount" : 100.0}"
+//
+//        Message msg = new Message();// create message of deposit
+////        msg.id_user = "12345";
+//        msg.messageType = "bid";
+//        msg.payloadJson = payloadJson;
+//        // this part still need checking for possible bid(compare max and increase)
+//
+//        // code here //
     }
 
     public void autobid(ActionEvent event ) throws IOException{}

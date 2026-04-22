@@ -1,4 +1,4 @@
-package controllers;
+package Database;
 
 import models.accounts.User;
 
