@@ -9,8 +9,19 @@ import models.core.Item;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public final class AdminService {
+
+    private static final ScheduledExecutorService AUCTION_SCHEDULER =
+            Executors.newSingleThreadScheduledExecutor(runnable -> {
+                Thread thread = new Thread(runnable, "auction-auto-close");
+                thread.setDaemon(true);
+                return thread;
+            });
+
     private AdminService() {
     }
 
@@ -26,7 +37,7 @@ public final class AdminService {
         }
 
         Inventory inventory = new Inventory();
-        Item waitingItem = inventory.getItemByStatus(Inventory.STATUS_WAITING);
+        Item waitingItem = inventory.getItemtoAuction(Inventory.STATUS_WAITING);
         if (waitingItem==null) {
             throw new IllegalStateException("Khong co san pham nao o trang thai WAITING");
         }
@@ -46,7 +57,18 @@ public final class AdminService {
         String ItemId=waitingItem.getId();
 
         inventory.updateItemStatus(ItemId, Inventory.STATUS_IN_AUCTION);
+        scheduleAutoClose(auction, duration);
+
         return auction;
     }
 
+    private static void scheduleAutoClose(Auction auction, Duration duration) {
+        AUCTION_SCHEDULER.schedule(() -> {
+            try {
+                auction.end(LocalDateTime.now());
+            } catch (Exception e) {
+                System.err.println("Khong the tu dong dong phien dau gia " + auction.getAuctionId() + ": " + e.getMessage());
+            }
+        }, duration.toMillis(), TimeUnit.MILLISECONDS);
+    }
 }

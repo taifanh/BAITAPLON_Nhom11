@@ -2,29 +2,30 @@ package models.Extra;
 
 import models.items.ItemType;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 public class IdGenerator {
+    private static long lastGeneratedId = System.currentTimeMillis();
 
-    private static final AtomicLong electronicsCounter = new AtomicLong(0);
-    private static final AtomicLong artCounter = new AtomicLong(0);
-    private static final AtomicLong vehicleCounter = new AtomicLong(0);
-    private  static final AtomicLong AuctionCounter = new AtomicLong(0);
-
-    public static long nextId(){
-        return AuctionCounter.incrementAndGet();
+    private IdGenerator() {
     }
 
-    public static long nextId(ItemType type) {
-        switch (type) {
-            case Electronics:
-                return electronicsCounter.incrementAndGet();
-            case Art:
-                return artCounter.incrementAndGet();
-            case Vehicle:
-                return vehicleCounter.incrementAndGet();
-            default:
-                throw new IllegalArgumentException("Invalid type in IdGenerator");
+    public static synchronized long nextId() {
+        return nextUniqueId();
+    }
+
+    public static synchronized long nextId(ItemType type) {
+        if (type == null) {
+            throw new IllegalArgumentException("Item type is required");
         }
+        return nextUniqueId();
+    }
+
+    private static long nextUniqueId() {
+        long now = System.currentTimeMillis();
+        if (now <= lastGeneratedId) {
+            lastGeneratedId++;
+        } else {
+            lastGeneratedId = now;
+        }
+        return lastGeneratedId;
     }
 }

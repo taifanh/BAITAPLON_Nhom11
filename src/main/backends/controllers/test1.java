@@ -4,9 +4,10 @@ import models.accounts.Admin;
 import models.accounts.User;
 import models.bidding.Auction;
 
+
 import static models.items.ItemType.*;
 
-public class AdminServiceTestController {
+public class test1 {
     public static void main(String[] args) {
         //Khởi tạo 2 user
         User user1 = new User("User1","12345","1","1");
@@ -20,11 +21,11 @@ public class AdminServiceTestController {
         Admin admin = new Admin("ADMIN001", "Admin", "0123456789", "admin@gmail.com", "123456");
 
         try {
-            //Mở phiên đấu giá với sanr phẩm đầu tiên người bán là user 1
-            Auction auction=admin.startAuction(0, 2, 0);
-            user1.bids(auction,1500);//user 1 đấu giá sẽ báo lỗi không được đấu giá sản phẩm mình bán
+            //Mở phiên đấu giá với sản phẩm đầu tiên người bán là user 1
+            Auction auction=admin.startAuction(0, 0, 5);
+            //user1.bids(auction,1500);//user 1 đấu giá sẽ báo lỗi không được đấu giá sản phẩm mình bán
             user2.bids(auction,2000);//user 2 đấu giá sẽ cập nhập giá
-            System.out.println(auction.getCurrentHighestBid());
+            Thread.sleep(6000);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -22,6 +22,7 @@ public class Inventory {
     public static final String STATUS_WAITING = "WAITING";
     public static final String STATUS_IN_AUCTION = "IN_AUCTION";
     public static final String STATUS_SOLD = "SOLD";
+    public static final String STATUS_UNSOLD = "UNSOLD";
 
     private static final Path DATA_DIRECTORY = Path.of("data");
     private static final Path DATABASE_FILE = DATA_DIRECTORY.resolve("inventory.db");
@@ -34,7 +35,8 @@ public class Inventory {
                 price DOUBLE,
                 itemDescription TEXT,
                 userId TEXT,
-                status VARCHAR(20)
+                status VARCHAR(20),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
             """;
 
@@ -103,13 +105,14 @@ public class Inventory {
         }
     }
 
-    public Item getItemByStatus(String status) throws IOException {
+    //thêm item vào phiên đấu giá theo TIMESTAMP và STATUS
+    public Item getItemtoAuction(String status) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
                  SELECT ItemId, type, name, price, itemDescription
                  FROM inventory
                  WHERE status = ?
-                 ORDER BY rowid ASC
+                 ORDER BY created_at ASC
                  LIMIT 1
                  """)) {
 

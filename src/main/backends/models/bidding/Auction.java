@@ -1,8 +1,11 @@
 package models.bidding;
 
+import Database.Auctions;
+import Database.Inventory;
 import models.Extra.IdGenerator;
 import models.core.Item;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -38,7 +41,8 @@ public class Auction {
         return "AUC" + models.core.Entity.makeItemId(IdGenerator.nextId());
     }
 
-    public void addBid(BidTransaction bid) {
+    public synchronized void addBid(BidTransaction bid) {
+        closeIfExpired();
         if (status != Status.ACTIVE) {
             throw new IllegalStateException("Auction is not active");
         }
@@ -52,6 +56,7 @@ public class Auction {
         bids.add(bid);
         currentHighestBid = bid.getAmount();
         highestBid = bid;
+        persistHighestBid();
     }
 
     public void schedule(LocalDateTime startAt, Duration duration) {
@@ -78,7 +83,13 @@ public class Auction {
         this.status = Status.ACTIVE;
     }
 
-    public void end(LocalDateTime time) {
+    public synchronized void end(LocalDateTime time) {
+        if (status == Status.ENDED) {
+            return;
+        }
+        if (status == Status.CANCELLED) {
+            throw new IllegalStateException("Auction has been cancelled");
+        }
         if (time == null) {
             throw new IllegalArgumentException("End time is required");
         }
@@ -87,10 +98,12 @@ public class Auction {
         }
         this.endAt = time;
         this.status = Status.ENDED;
+        syncClosedAuction();
     }
 
-    public void cancel() {
+    public synchronized void cancel() {
         this.status = Status.CANCELLED;
+        syncCancelledAuction();
     }
 
     public boolean isActive() {
@@ -127,5 +140,51 @@ public class Auction {
 
     public List<BidTransaction> getBidList() {
         return Collections.unmodifiableList(bids);
+    }
+
+    //đóng phiên khi hết thời gian
+    public synchronized boolean closeIfExpired() {
+        if (status != Status.ACTIVE || endAt == null) {
+            return false;
+        }
+        if (LocalDateTime.now().isBefore(endAt)) {
+            return false;
+        }
+        end(LocalDateTime.now());
+        return true;
+    }
+
+    private void persistHighestBid() {
+        try {
+            Auctions auctions = new Auctions();
+            auctions.updateHighestBid(auctionId, currentHighestBid);
+        } catch (IOException e) {
+            throw new RuntimeException("Khong the cap nhat highest bid", e);
+        }
+    }
+
+    private void syncClosedAuction() {
+        try {
+            Auctions auctions = new Auctions();
+            Inventory inventory = new Inventory();
+            auctions.updateAuctionState(auctionId, status, endAt, currentHighestBid);
+            String itemStatus = highestBid == null ? Inventory.STATUS_UNSOLD : Inventory.STATUS_SOLD;
+            inventory.updateItemStatus(item.getId(), itemStatus);
+        } catch (IOException e) {
+            throw new RuntimeException("Khong the dong phien dau gia", e);
+        }
+    }
+    //hủy phiên đấu giá
+    private void syncCancelledAuction() {
+        try {
+            Auctions auctions = new Auctions();
+            Inventory inventory = new Inventory();
+            LocalDateTime closedAt = endAt != null ? endAt : LocalDateTime.now();
+            this.endAt = closedAt;
+            auctions.updateAuctionState(auctionId, status, closedAt, currentHighestBid);
+            inventory.updateItemStatus(item.getId(), Inventory.STATUS_WAITING);
+        } catch (IOException e) {
+            throw new RuntimeException("Khong the huy phien dau gia", e);
+        }
     }
 }
