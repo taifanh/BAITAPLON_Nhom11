@@ -15,14 +15,14 @@
       <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/data/users.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="inventory" uuid="5b5625c7-237f-4f36-8b25-00a9406117fd">
+    <data-source source="LOCAL" name="inventory" uuid="bab94495-9e7b-4d39-9767-a03fcb97a398">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/data/inventory.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="auctions" uuid="a6076883-9133-4b67-a109-229956d0b6e6">
+    <data-source source="LOCAL" name="auctions" uuid="49622e23-3f7c-45ed-9acd-28cbe62f45a0">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>

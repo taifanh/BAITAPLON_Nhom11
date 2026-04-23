@@ -2,8 +2,8 @@ package models.accounts;
 
 import Database.Inventory;
 import Database.UserStore;
+import controllers.AuctionService;
 import models.bidding.Auction;
-import models.bidding.BidTransaction;
 import models.bidding.CanBidding;
 import models.core.Account;
 import models.core.Item;
@@ -86,13 +86,8 @@ public class User extends Account implements CanBidding, CanSelling {
             throw new IllegalArgumentException("Not exist item in this user");
         }
     }
-    public void bids(Auction auction, double amount) throws Exception{
-        Inventory inventory=new Inventory();
-        Item item=auction.getItem();
-        if(this.id.equals(inventory.getUserIdByItemId(item.getId())))
-            throw new IllegalArgumentException("Nguoi ban khong duoc dau gia san pham minh ban");
-        BidTransaction bid = new BidTransaction(this,item,amount);
-        auction.addBid(bid);
-    }
 
+    public void bids(Auction auction, double amount) throws Exception {
+        AuctionService.placeBid(this, auction, amount);
+    }
 }
