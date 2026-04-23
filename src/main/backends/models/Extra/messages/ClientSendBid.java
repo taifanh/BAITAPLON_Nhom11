@@ -1,10 +1,13 @@
 package models.Extra.messages;
 
-public class placeBidpayload {
-
+public class ClientSendBid {
+    String id;
     double amount;
 
-    public placeBidpayload(double amount) {
+    public ClientSendBid() {}
+
+    public ClientSendBid(String id, double amount) {
+        this.id = id;
         this.amount = amount;
     }
     public double getAmount() {
