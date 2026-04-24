@@ -1,0 +1,50 @@
+package Launcher;
+
+import controllers.ClientApplication;
+import controllers.Server.ServerApplication;
+import javafx.application.Application;
+
+import java.util.Scanner;
+
+public class Launcher {
+    public static String serverIp = "localhost";
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("👉 Nhập địa chỉ IP Server (Nhấn Enter để dùng localhost): ");
+        String input = sc.nextLine();
+
+        if (!input.trim().isEmpty()) {
+            serverIp = input;
+        }
+        if (serverIp.equals("localhost")) {
+            ServerStart();
+            ClientStart(args);
+        }
+        else {
+            ClientStart(args);
+        }
+    }
+
+    public static void ServerStart() {
+        Thread serverThread = new Thread(() -> {
+            System.out.println("[Launcher] Đang khởi động Server...");
+            ServerApplication.start();
+        });
+        serverThread.start();
+
+        try {
+            System.out.println("[Launcher] Đợi Server sẵn sàng...");
+            Thread.sleep(2000); // Đợi 2 giây
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+    public static void ClientStart(String[] args) {
+        Thread clientThread = new Thread(() -> {
+            System.out.println("[Launcher] Đang khởi động Client...");
+            // Gọi phương thức main của ClientLauncher
+            Application.launch(ClientApplication.class, args);
+        });
+        clientThread.start();
+    }
+}

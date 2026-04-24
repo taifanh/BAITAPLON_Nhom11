@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="514.0" prefWidth="372.0" style="-fx-background-radius: 15;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.frontendcontrollers.depositcontroller">
+   <children>
+      <Separator layoutX="-4.0" layoutY="302.0" prefHeight="18.0" prefWidth="378.0" />
+      <Button alignment="CENTER" layoutX="75.0" layoutY="436.0" mnemonicParsing="false" onAction="#ok_deposit" prefHeight="38.0" prefWidth="221.0" style="-fx-background-color: #20a8e7; -fx-background-radius: 13;" text="Thanh Toán" textAlignment="JUSTIFY" textFill="WHITE">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Button>
+      <Label layoutX="64.0" layoutY="481.0" prefHeight="18.0" prefWidth="250.0" text="Tôi đã đọc &amp; đồng ý với Chính sách về Quyền Riêng Tư" textFill="#717171">
+         <font>
+            <Font size="10.0" />
+         </font>
+      </Label>
+      <TextField fx:id="deposit_amount" layoutX="23.0" layoutY="73.0" prefHeight="46.0" prefWidth="327.0" promptText="Tổng tiền nạp*" style="-fx-background-radius: 12; -fx-background-color: #e7e7e7; -fx-border-radius: 12; -fx-border-color: #c9c9c9;">
+         <font>
+            <Font size="17.0" />
+         </font>
+      </TextField>
+      <Label layoutX="23.0" prefHeight="46.0" prefWidth="124.0" text="Nạp Tiền">
+         <font>
+            <Font name="System Bold" size="25.0" />
+         </font>
+      </Label>
+      <Label layoutX="23.0" layoutY="55.0" prefHeight="18.0" prefWidth="161.0" text="Vui lòng nhập số tiền " textFill="#949494" />
+      <TextField fx:id="name_deposit_input" layoutX="23.0" layoutY="139.0" prefHeight="46.0" prefWidth="327.0" promptText="Họ và Tên*" style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-background-color: #e7e7e7; -fx-border-color: #c9c9c9;">
+         <font>
+            <Font size="17.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="phonenumber_deposit_input" layoutX="23.0" layoutY="202.0" prefHeight="46.0" prefWidth="327.0" promptText="Số điện thoại*" style="-fx-border-color: #c9c9c9; -fx-background-radius: 12; -fx-border-radius: 12; -fx-background-color: #e7e7e7;">
+         <font>
+            <Font size="17.0" />
+         </font>
+      </TextField>
+      <Label alignment="CENTER" layoutX="22.0" layoutY="344.0" prefHeight="46.0" prefWidth="85.0" style="-fx-background-color: #e7e7e7;" text="Tổng">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <Label fx:id="money_display" alignment="CENTER_RIGHT" layoutX="104.0" layoutY="344.0" prefHeight="46.0" prefWidth="240.0" style="-fx-background-color: #e7e7e7;">
+         <font>
+            <Font size="17.0" />
+         </font>
+      </Label>
+      <Button fx:id="verifybtn" alignment="CENTER" layoutX="266.0" layoutY="263.0" mnemonicParsing="false" onAction="#handle_verify_money" prefHeight="38.0" prefWidth="77.0" style="-fx-background-color: #20a8e7; -fx-background-radius: 13;" text="Xác nhận" textFill="WHITE">
+         <font>
+            <Font name="System Bold" size="13.0" />
+         </font>
+      </Button>
+   </children>
+</AnchorPane>

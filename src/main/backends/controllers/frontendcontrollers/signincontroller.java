@@ -1,5 +1,8 @@
-package controllers;
+package controllers.frontendcontrollers;
 
+import Database.UserStore;
+import controllers.UserSession;
+import controllers.ViewLoader;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -11,7 +14,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import models.core.Account;
+import models.accounts.User;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -29,7 +32,7 @@ public class signincontroller {
     @FXML
     public Button signupbtn;
 
-    private final UserJsonStore userJsonStore = new UserJsonStore();
+    private final UserStore userStore = new UserStore();
 
     public void handle_signin(ActionEvent event) {
         String phoneNumber = txtphonenumberfield.getText() == null ? "" : txtphonenumberfield.getText().trim();
@@ -41,18 +44,19 @@ public class signincontroller {
         }
 
         try {
-            Optional<Account> userOptional = userJsonStore.authenticate(phoneNumber, password);
+            Optional<User> userOptional = userStore.authenticate(phoneNumber, password);
             if (userOptional.isEmpty()) {
                 showAlert(Alert.AlertType.ERROR, "Loi", "Dang nhap that bai", "Sai tai khoan hoac mat khau. Vui long thu lai.");
                 return;
             }
 
-            UserSession.setCurrentUser(userOptional.get());
+            User user = userOptional.get();
+            UserSession.setCurrentUser(user);
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/views/userinfo.fxml"));
+            FXMLLoader loader = ViewLoader.loader("userinfo.fxml");
             Parent root = loader.load();
             userinfocontroller controller = loader.getController();
-            controller.setUser(userOptional.get());
+            controller.setUser(user);
 
             Scene sceneMain = new Scene(root);
             Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -61,12 +65,13 @@ public class signincontroller {
             window.centerOnScreen();
             window.show();
         } catch (IOException e) {
-            showAlert(Alert.AlertType.ERROR, "Loi doc file", "Khong the dang nhap", "Khong the doc du lieu nguoi dung tu file JSON.");
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Loi co so du lieu", "Khong the dang nhap", "Khong the doc du lieu nguoi dung tu SQLite.");
         }
     }
 
     public void handle_signup(ActionEvent event) throws IOException {
-        Parent signupRoot = FXMLLoader.load(getClass().getResource("/org/example/views/signup.fxml"));
+        Parent signupRoot = ViewLoader.load("signup.fxml");
         Scene sceneSignup = new Scene(signupRoot);
 
         Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();

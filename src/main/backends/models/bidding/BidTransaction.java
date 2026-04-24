@@ -5,11 +5,11 @@ import models.core.Item;
 import java.util.Date;
 
 public class BidTransaction{
-    private CanBidding bidder;
+    private Bidder bidder;
     private Item item;
     private double amount;
     private Date time;
-    public BidTransaction(CanBidding bidder, Item item, double amount){
+    public BidTransaction(Bidder bidder,Item item,double amount){
         this.bidder=bidder;
         this.item=item;
         this.amount=amount;
@@ -18,7 +18,7 @@ public class BidTransaction{
     public double getAmount(){
         return  amount;
     }
-    public CanBidding getBidder(){
+    public Bidder getBidder(){
         return  bidder;
     }
     public Item item(){
