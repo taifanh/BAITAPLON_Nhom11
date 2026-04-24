@@ -1,8 +1,10 @@
 package controllers.frontendcontrollers;
 
 import com.google.gson.Gson;
+import controllers.MessageBus;
 import controllers.ServerConnection;
 import controllers.UserSession;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -11,6 +13,7 @@ import javafx.stage.Stage;
 import models.Extra.messages.Depositpayload;
 import models.Extra.messages.Message;
 import java.io.IOException;
+import java.util.function.Consumer;
 
 public class depositcontroller {
     @FXML
@@ -22,6 +25,48 @@ public class depositcontroller {
     public TextField phonenumber_deposit_input;
     @FXML
     public Label money_display;
+
+    private Consumer<String> depositHandler;
+    @FXML
+    public void initialize() {
+        subscribeDepositResult();
+        Platform.runLater(() -> {
+            Stage stage = (Stage) deposit_amount.getScene().getWindow();
+            stage.setOnHidden(e -> cleanup());
+        });
+    }
+
+    private void subscribeDepositResult() {
+//        depositHandler = rawJson -> {
+//            Message msg = gson.fromJson(rawJson, Message.class);
+//
+//            if (!"deposit_result".equals(msg.messageType)) return;
+//
+//            // parse payload
+//            DepositResult result = gson.fromJson(msg.payloadJson, DepositResult.class);
+//
+//            Platform.runLater(() -> {
+//                if (result.isSuccess()) {
+//                    money_display.setText(String.format("%,.0f", result.getNewBalance()));
+//                    showAlert("Thành công", "Nạp tiền thành công!");
+//
+//                    // đóng cửa sổ nếu muốn
+//                    // closeWindow();
+//
+//                } else {
+//                    showAlert("Thất bại", "Nạp tiền thất bại!");
+//                }
+//            });
+//        };
+
+        MessageBus.getInstance().subscribe(depositHandler);
+    }
+
+    public void cleanup() {
+        if (depositHandler != null) {
+            MessageBus.getInstance().unsubscribe(depositHandler);
+        }
+    }
 
 
     public void ok_deposit(ActionEvent event) throws IOException {
@@ -57,17 +102,12 @@ public class depositcontroller {
         msg.messageType = "deposit";
         msg.payloadJson = payloadJson;
 
-        ServerConnection.send(msg);
-        money_display.setText(amountText);
+        UserSession.getConnection().send(msg);
 
         Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
         window.close();
     }
 
-    public void handle_verify_money(ActionEvent event){
-        String amountText = deposit_amount.getText() == null ? "" : deposit_amount.getText().trim();
-        money_display.setText(amountText);
-    }
 
     private void showAlert(Alert.AlertType type, String title, String content) {
         Alert alert = new Alert(type);

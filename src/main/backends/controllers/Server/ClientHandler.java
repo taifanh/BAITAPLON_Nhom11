@@ -102,7 +102,7 @@ public class ClientHandler implements Runnable {
                     // TODO: lấy danh sách phiên từ AuctionManager, gửi riêng cho client này
                     send("{\"type\":\"AUCTION_LIST\",\"data\":[]}");
                 }
-                case "deposit" -> {
+                case "DEPOSIT" -> {
                     String userId = node.get("Id_user").asText();
                     String payloadJson = node.get("payloadJson").asText();
 
