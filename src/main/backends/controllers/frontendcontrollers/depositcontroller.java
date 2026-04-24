@@ -1,6 +1,5 @@
 package controllers.frontendcontrollers;
 
-import Database.request_log;
 import com.google.gson.Gson;
 import controllers.ServerConnection;
 import controllers.UserSession;
@@ -11,10 +10,7 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import models.Extra.messages.Depositpayload;
 import models.Extra.messages.Message;
-
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 
 public class depositcontroller {
     @FXML
@@ -29,31 +25,56 @@ public class depositcontroller {
 
 
     public void ok_deposit(ActionEvent event) throws IOException {
-        double money_in =  Double.parseDouble(money_display.getText());
+        if (UserSession.getCurrentUser() == null) {
+            showAlert(Alert.AlertType.ERROR, "Loi", "Khong tim thay nguoi dung dang dang nhap.");
+            return;
+        }
+
+        String amountText = deposit_amount.getText() == null ? "" : deposit_amount.getText().trim();
+        if (amountText.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Loi", "Vui long nhap so tien nap.");
+            return;
+        }
+
+        double moneyIn;
+        try {
+            moneyIn = Double.parseDouble(amountText);
+        } catch (NumberFormatException e) {
+            showAlert(Alert.AlertType.WARNING, "Loi", "So tien khong hop le.");
+            return;
+        }
+        if (moneyIn <= 0) {
+            showAlert(Alert.AlertType.WARNING, "Loi", "So tien nap phai lon hon 0.");
+            return;
+        }
 
         Gson gson = new Gson();
-        Depositpayload payload = new Depositpayload(money_in);
-        String payloadJson = gson.toJson( payload); // convert the content into like   "{"amount" : 100.0}"
+        Depositpayload payload = new Depositpayload(moneyIn);
+        String payloadJson = gson.toJson(payload);
 
-        Message msg = new Message();// create message of deposit
+        Message msg = new Message();
         msg.Id_user = UserSession.getCurrentUser().getId();
         msg.messageType = "deposit";
         msg.payloadJson = payloadJson;
-        // this part for send request for server
-        // client send request then  server  receive and save into database
 
         ServerConnection.send(msg);
+        money_display.setText(amountText);
 
-        // the next part is for show screen
         Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
         window.close();
     }
 
     public void handle_verify_money(ActionEvent event){
-        money_display.setText(deposit_amount.getText());
-
+        String amountText = deposit_amount.getText() == null ? "" : deposit_amount.getText().trim();
+        money_display.setText(amountText);
     }
 
-
+    private void showAlert(Alert.AlertType type, String title, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
 
 }

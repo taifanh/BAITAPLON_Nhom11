@@ -1,13 +1,10 @@
 package controllers.Server;
 
 import Database.UserStore;
-import Database.request_log;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import models.Extra.messages.Createitempayload;
 import models.Extra.messages.Depositpayload;
-import models.Extra.messages.Message;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -69,7 +66,7 @@ public class ClientHandler implements Runnable {
     private void handleMessage(String json) {
         try {
             JsonNode node = mapper.readTree(json);
-            String type = node.path("messageType").asText();
+            String type = resolveMessageType(node);
 
             switch (type) {
 
@@ -113,16 +110,9 @@ public class ClientHandler implements Runnable {
 
                     UserStore userStore = new UserStore();
                     userStore.update_balance(payload.getAmount(), userId);
+                    send(okJson("Deposit success"));
 
                 }
-//                case "additem" ->{
-//                    String userId = node.get("Id_user").asText();
-//                    String payloadJson = node.get("payloadJson").asText();
-//
-//                    Createitempayload payload = mapper.readValue(payloadJson, Createitempayload.class);
-//
-//
-//                }
 
                 default -> System.out.println("[ClientHandler] Unknown type: " + type);
             }
@@ -148,5 +138,13 @@ public class ClientHandler implements Runnable {
         node.put("type", "OK");
         node.put("message", message);
         return node.toString();
+    }
+
+    private String resolveMessageType(JsonNode node) {
+        String messageType = node.path("messageType").asText("");
+        if (!messageType.isBlank()) {
+            return messageType;
+        }
+        return node.path("type").asText("");
     }
 }
