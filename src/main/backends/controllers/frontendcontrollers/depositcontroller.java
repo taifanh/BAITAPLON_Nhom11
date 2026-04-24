@@ -27,9 +27,12 @@ public class depositcontroller {
     public Label money_display;
 
     private Consumer<String> depositHandler;
+    private final Gson gson = new Gson();
+
     @FXML
     public void initialize() {
         subscribeDepositResult();
+
         Platform.runLater(() -> {
             Stage stage = (Stage) deposit_amount.getScene().getWindow();
             stage.setOnHidden(e -> cleanup());
@@ -37,84 +40,58 @@ public class depositcontroller {
     }
 
     private void subscribeDepositResult() {
-//        depositHandler = rawJson -> {
+        depositHandler = rawJson -> {
 //            Message msg = gson.fromJson(rawJson, Message.class);
 //
 //            if (!"deposit_result".equals(msg.messageType)) return;
 //
-//            // parse payload
+//            if (msg.Id_user != UserSession.getCurrentUser().getId()) return;
+//
 //            DepositResult result = gson.fromJson(msg.payloadJson, DepositResult.class);
 //
 //            Platform.runLater(() -> {
 //                if (result.isSuccess()) {
 //                    money_display.setText(String.format("%,.0f", result.getNewBalance()));
-//                    showAlert("Thành công", "Nạp tiền thành công!");
-//
-//                    // đóng cửa sổ nếu muốn
-//                    // closeWindow();
-//
+//                    showAlert(Alert.AlertType.INFORMATION, "Thành công", "Nạp tiền thành công!");
+//                    closeWindow();
 //                } else {
-//                    showAlert("Thất bại", "Nạp tiền thất bại!");
+//                    showAlert(Alert.AlertType.ERROR, "Thất bại", "Nạp tiền thất bại!");
 //                }
 //            });
-//        };
+        };
 
         MessageBus.getInstance().subscribe(depositHandler);
     }
 
     public void cleanup() {
         if (depositHandler != null) {
-            MessageBus.getInstance().unsubscribe(depositHandler);
+          MessageBus.getInstance().unsubscribe(depositHandler);
         }
     }
 
-
-    public void ok_deposit(ActionEvent event) throws IOException {
-        if (UserSession.getCurrentUser() == null) {
-            showAlert(Alert.AlertType.ERROR, "Loi", "Khong tim thay nguoi dung dang dang nhap.");
-            return;
-        }
-
-        String amountText = deposit_amount.getText() == null ? "" : deposit_amount.getText().trim();
-        if (amountText.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Loi", "Vui long nhap so tien nap.");
-            return;
-        }
-
-        double moneyIn;
+    public void ok_deposit(ActionEvent event) {
         try {
-            moneyIn = Double.parseDouble(amountText);
-        } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.WARNING, "Loi", "So tien khong hop le.");
-            return;
+            double moneyIn = Double.parseDouble(deposit_amount.getText());
+
+            Message msg = new Message();
+            msg.Id_user = UserSession.getCurrentUser().getId();
+            msg.messageType = "deposit";
+            msg.payloadJson = gson.toJson(new Depositpayload(moneyIn));
+
+            UserSession.getConnection().send(msg);
+
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Số tiền không hợp lệ");
         }
-        if (moneyIn <= 0) {
-            showAlert(Alert.AlertType.WARNING, "Loi", "So tien nap phai lon hon 0.");
-            return;
-        }
-
-        Gson gson = new Gson();
-        Depositpayload payload = new Depositpayload(moneyIn);
-        String payloadJson = gson.toJson(payload);
-
-        Message msg = new Message();
-        msg.Id_user = UserSession.getCurrentUser().getId();
-        msg.messageType = "deposit";
-        msg.payloadJson = payloadJson;
-
-        UserSession.getConnection().send(msg);
-
-        Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        window.close();
     }
 
-
+    private void closeWindow() {
+        Stage stage = (Stage) deposit_amount.getScene().getWindow();
+        stage.close();
+    }
     private void showAlert(Alert.AlertType type, String title, String content) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
+        Alert alert = new Alert(type); alert.setTitle(title);
+        alert.setHeaderText(null); alert.setContentText(content);
         alert.showAndWait();
     }
-
 }

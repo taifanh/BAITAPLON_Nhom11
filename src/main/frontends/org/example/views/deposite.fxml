@@ -48,7 +48,7 @@
             <Font size="17.0" />
          </font>
       </Label>
-      <Button fx:id="verifybtn" alignment="CENTER" layoutX="266.0" layoutY="263.0" mnemonicParsing="false" onAction="#handle_verify_money" prefHeight="38.0" prefWidth="77.0" style="-fx-background-color: #20a8e7; -fx-background-radius: 13;" text="Xác nhận" textFill="WHITE">
+      <Button fx:id="verifybtn" alignment="CENTER" layoutX="266.0" layoutY="263.0" mnemonicParsing="false"  prefHeight="38.0" prefWidth="77.0" style="-fx-background-color: #20a8e7; -fx-background-radius: 13;" text="Xác nhận" textFill="WHITE">
          <font>
             <Font name="System Bold" size="13.0" />
          </font>
