@@ -1,6 +1,8 @@
-package controllers;
+package controllers.frontendcontrollers;
 
 import Database.UserStore;
+import controllers.UserSession;
+import controllers.ViewLoader;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -63,6 +65,7 @@ public class signincontroller {
             window.centerOnScreen();
             window.show();
         } catch (IOException e) {
+            e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Loi co so du lieu", "Khong the dang nhap", "Khong the doc du lieu nguoi dung tu SQLite.");
         }
     }

@@ -1,5 +1,6 @@
 package controllers;
 
+import Database.Auction_Item;
 import Database.Auctions;
 import Database.Inventory;
 import models.accounts.Admin;
@@ -9,19 +10,10 @@ import models.core.Item;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class AdminService {
-
-    private static final ScheduledExecutorService AUCTION_SCHEDULER =
-            Executors.newSingleThreadScheduledExecutor(runnable -> {
-                Thread thread = new Thread(runnable, "auction-auto-close");
-                thread.setDaemon(true);
-                return thread;
-            });
-
     private AdminService() {
     }
 
@@ -37,13 +29,16 @@ public final class AdminService {
         }
 
         Inventory inventory = new Inventory();
-        Item waitingItem = inventory.getItemtoAuction(Inventory.STATUS_WAITING);
-        if (waitingItem==null) {
+        List<Item> waitingItems = inventory.getItemsByStatus(Inventory.STATUS_WAITING);
+        if (waitingItems.isEmpty()) {
             throw new IllegalStateException("Khong co san pham nao o trang thai WAITING");
         }
 
         // Tao auction va dua toan bo item WAITING vao phien dau gia.
-        Auction auction = new Auction(waitingItem);
+        Auction auction = new Auction();
+        for (Item item : waitingItems) {
+            auction.addItem(item);
+        }
 
         // Set thoi gian bat dau va thoi gian ket thuc cho auction.
         LocalDateTime now = LocalDateTime.now();
@@ -54,21 +49,15 @@ public final class AdminService {
         Auctions auctionsRepository = new Auctions();
         auctionsRepository.saveAuction(auction);
 
-        String ItemId=waitingItem.getId();
+        // Luu quan he auction - item va doi trang thai item sang IN_AUCTION.
+        Auction_Item auctionItemRepository = new Auction_Item();
+        List<String> itemIds = new ArrayList<>();
+        for (Item item : waitingItems) {
+            auctionItemRepository.saveAuctionItem(auction.getAuctionId(), item.getId());
+            itemIds.add(item.getId());
+        }
 
-        inventory.updateItemStatus(ItemId, Inventory.STATUS_IN_AUCTION);
-        scheduleAutoClose(auction, duration);
-
+        inventory.updateItemStatus(itemIds, Inventory.STATUS_IN_AUCTION);
         return auction;
-    }
-
-    private static void scheduleAutoClose(Auction auction, Duration duration) {
-        AUCTION_SCHEDULER.schedule(() -> {
-            try {
-                auction.end(LocalDateTime.now());
-            } catch (Exception e) {
-                System.err.println("Khong the tu dong dong phien dau gia " + auction.getAuctionId() + ": " + e.getMessage());
-            }
-        }, duration.toMillis(), TimeUnit.MILLISECONDS);
     }
 }

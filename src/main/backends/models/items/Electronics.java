@@ -1,9 +1,10 @@
 package models.items;
 
+import models.Extra.IdGenerator;
 import models.core.Item;
 
 public class Electronics extends Item {
-    public Electronics(String id, String name, double prices, String info) {
+    public  Electronics(String id,String name,double prices,String info){
         super(id, name, prices, info);
     }
 }

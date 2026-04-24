@@ -5,8 +5,9 @@ public class Depositpayload {
     public double getAmount() {
         return amount;
     }
-    public void setAmount(double amount) {}
+    public void setAmount(double amount) {this.amount = amount;}
 
+    public Depositpayload(){}
     public Depositpayload(double amount) {
         this.amount = amount;
     }

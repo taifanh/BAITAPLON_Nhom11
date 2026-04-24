@@ -1,7 +1,6 @@
 package models.core;
 
 import models.Extra.IdGenerator;
-import models.accounts.User;
 import models.items.ItemType;
 
 public abstract class Item extends Entity {

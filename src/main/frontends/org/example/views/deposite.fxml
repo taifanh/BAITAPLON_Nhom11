@@ -4,10 +4,10 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="514.0" prefWidth="372.0" style="-fx-background-radius: 15;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.depositcontroller">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="514.0" prefWidth="372.0" style="-fx-background-radius: 15;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.frontendcontrollers.depositcontroller">
    <children>
       <Separator layoutX="-4.0" layoutY="302.0" prefHeight="18.0" prefWidth="378.0" />
-      <Button fx:id="ok_deposit" alignment="CENTER" layoutX="75.0" layoutY="436.0" mnemonicParsing="false" prefHeight="38.0" prefWidth="221.0" style="-fx-background-color: #20a8e7; -fx-background-radius: 13;" text="Thanh Toán" textAlignment="JUSTIFY" textFill="WHITE">
+      <Button alignment="CENTER" layoutX="75.0" layoutY="436.0" mnemonicParsing="false" onAction="#ok_deposit" prefHeight="38.0" prefWidth="221.0" style="-fx-background-color: #20a8e7; -fx-background-radius: 13;" text="Thanh Toán" textAlignment="JUSTIFY" textFill="WHITE">
          <font>
             <Font name="System Bold" size="14.0" />
          </font>
@@ -48,7 +48,7 @@
             <Font size="17.0" />
          </font>
       </Label>
-      <Button fx:id="verifybtn" alignment="CENTER" layoutX="266.0" layoutY="263.0" mnemonicParsing="false" prefHeight="38.0" prefWidth="77.0" style="-fx-background-color: #20a8e7; -fx-background-radius: 13;" text="Xác nhận" textFill="WHITE">
+      <Button fx:id="verifybtn" alignment="CENTER" layoutX="266.0" layoutY="263.0" mnemonicParsing="false" onAction="#handle_verify_money" prefHeight="38.0" prefWidth="77.0" style="-fx-background-color: #20a8e7; -fx-background-radius: 13;" text="Xác nhận" textFill="WHITE">
          <font>
             <Font name="System Bold" size="13.0" />
          </font>

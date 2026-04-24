@@ -1,20 +1,24 @@
-package controllers;
+package controllers.frontendcontrollers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import javafx.application.Platform;
+import com.google.gson.Gson;
+import controllers.UserSession;
+import controllers.ViewLoader;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import models.JSON_request.PlaceBid;
+import models.Extra.messages.Message;
+import models.Extra.messages.placeBidpayload;
 import models.accounts.User;
 
 import java.io.IOException;
-import java.io.*;
-import java.net.Socket;
 
 public class userinfocontroller {
     @FXML
@@ -33,13 +37,13 @@ public class userinfocontroller {
     private CheckBox passshow;
 
     @FXML
-    private TextField bidprice;
-
-    @FXML
     private Button placebid;
 
     @FXML
-    private TextField result_bid;
+    private Label balance;
+
+    @FXML
+    private Button autobid;
 
     private User user;
 
@@ -60,6 +64,7 @@ public class userinfocontroller {
         infoname.setText(user.getName());
         infoemail.setText(user.getEmail());
         infophonenumber.setText(user.getPhoneNumber());
+        balance.setText(String.valueOf(user.getBalance()));
         refreshPasswordField();
     }
 
@@ -76,24 +81,6 @@ public class userinfocontroller {
         window.show();
     }
 
-    @FXML
-    public void handle_bidding(ActionEvent event) {
-        String amount = bidprice.getText();
-        if (amount == null || amount.isBlank()) {
-            showAlert(Alert.AlertType.WARNING, "Thiếu dữ liệu", "Chưa nhập giá bid", "");
-            return;
-        }
-        try {
-            double value = Double.parseDouble(amount);
-            if (value <= 0) throw new NumberFormatException();
-        } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.WARNING, "Sai định dạng", "Giá bid phải là số dương", "");
-            return;
-        }
-        UserSession.getConnection().send(new PlaceBid(user.getId(), user.getName(), amount));
-        bidprice.clear();
-    }
-
     private void refreshPasswordField() {
         if (user == null) {
             return;
@@ -104,12 +91,35 @@ public class userinfocontroller {
             infopassword.setText(user.getPassword());
         }
     }
-
-    private void showAlert(Alert.AlertType type, String title, String header, String content) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(header);
-        alert.setContentText(content);
-        alert.showAndWait();
+    // chua dung
+    public void placebid(ActionEvent event ) throws IOException{
+//        double money_bid = Double.parseDouble(money_display.getText());
+//
+//        Gson gson = new Gson();
+//        placeBidpayload payload = new placeBidpayload(money_bid);
+//        String payloadJson = gson.toJson( payload); // convert the content into like   "{"amount" : 100.0}"
+//
+//        Message msg = new Message();// create message of deposit
+////        msg.id_user = "12345";
+//        msg.messageType = "bid";
+//        msg.payloadJson = payloadJson;
+//        // this part still need checking for possible bid(compare max and increase)
+//
+//        // code here //
     }
+
+    public void autobid(ActionEvent event ) throws IOException{}
+
+    public void handle_deposit(ActionEvent event) throws IOException {
+        FXMLLoader loader = ViewLoader.loader("deposite.fxml");
+        Parent root = loader.load();
+
+        Scene sceneMain = new Scene(root);
+        Stage window = new  Stage();
+        window.setScene(sceneMain);
+        window.setTitle("DEPOSIT");
+        window.centerOnScreen();
+        window.show();
+    }
+    public void handle_create(ActionEvent event) throws IOException {}
 }

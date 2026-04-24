@@ -8,12 +8,7 @@ import models.items.Vehicle;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +17,6 @@ public class Inventory {
     public static final String STATUS_WAITING = "WAITING";
     public static final String STATUS_IN_AUCTION = "IN_AUCTION";
     public static final String STATUS_SOLD = "SOLD";
-    public static final String STATUS_UNSOLD = "UNSOLD";
 
     private static final Path DATA_DIRECTORY = Path.of("data");
     private static final Path DATABASE_FILE = DATA_DIRECTORY.resolve("inventory.db");
@@ -35,8 +29,7 @@ public class Inventory {
                 price DOUBLE,
                 itemDescription TEXT,
                 userId TEXT,
-                status VARCHAR(20),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                status VARCHAR(20)
             )
             """;
 
@@ -105,30 +98,6 @@ public class Inventory {
         }
     }
 
-    //thêm item vào phiên đấu giá theo TIMESTAMP và STATUS
-    public Item getItemtoAuction(String status) throws IOException {
-        try (Connection connection = openConnection();
-             PreparedStatement statement = connection.prepareStatement("""
-                 SELECT ItemId, type, name, price, itemDescription
-                 FROM inventory
-                 WHERE status = ?
-                 ORDER BY created_at ASC
-                 LIMIT 1
-                 """)) {
-
-            statement.setString(1, status);
-
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return getItem(resultSet);
-                }
-                return null;
-            }
-        } catch (SQLException e) {
-            throw new IOException("Khong the lay san pham theo trang thai", e);
-        }
-    }
-
     //Lấy sản phẩm theo Id user ( dùng để làm bảng riêng cho mỗi user )
     public List<Item> getItemsByUserId(String userId) throws IOException {
         try (Connection connection = openConnection();
@@ -144,26 +113,6 @@ public class Inventory {
         } catch (SQLException e) {
             throw new IOException("Khong the lay san pham theo user", e);
         }
-    }
-
-    public String getUserIdByItemId(String itemId) {
-        String sql = "SELECT userId FROM inventory WHERE ItemId = ?";
-
-        try (Connection conn = openConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, itemId);
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                return rs.getString("userId");
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
     }
 
     // Cập nhât status cho Item (Waiting -> InAuction -> Sold)
@@ -183,26 +132,6 @@ public class Inventory {
                 statement.setString(2, itemId);
                 statement.addBatch();
             }
-            statement.executeBatch();
-        } catch (SQLException e) {
-            throw new IOException("Khong the cap nhat trang thai danh sach san pham", e);
-        }
-    }
-
-    public void updateItemStatus(String itemId, String status) throws IOException {
-        if (itemId == null) {
-            return;
-        }
-
-        try (Connection connection = openConnection();
-             PreparedStatement statement = connection.prepareStatement("""
-                     UPDATE inventory
-                     SET status = ?
-                     WHERE ItemId = ?
-                     """)) {
-            statement.setString(1, status);
-            statement.setString(2, itemId);
-            statement.addBatch();
             statement.executeBatch();
         } catch (SQLException e) {
             throw new IOException("Khong the cap nhat trang thai danh sach san pham", e);

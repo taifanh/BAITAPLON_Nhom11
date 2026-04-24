@@ -1,9 +1,5 @@
 package models.accounts;
 
-import Database.Inventory;
-import Database.UserStore;
-import models.bidding.Auction;
-import models.bidding.BidTransaction;
 import models.bidding.CanBidding;
 import models.core.Account;
 import models.core.Item;
@@ -11,88 +7,65 @@ import models.items.ItemType;
 import models.items.itemFactory;
 import models.selling.CanSelling;
 
-import java.io.IOException;
 import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.Scanner;
 
 public class User extends Account implements CanBidding, CanSelling {
-    private final Set<Item> items = new HashSet<>();
+    HashSet<Item> items = new HashSet<>();
     private double balance;
-
-    public User() {}
-
-    public User(String id, String name, String phoneNumber, String email, String password) {
-        this.id = id;
-        this.name = name;
-        this.phoneNumber = phoneNumber;
-        this.email = email;
-        this.password = password;
-    }
-
-    public User(String name, String phoneNumber, String email, String password) {
-        super(name, phoneNumber, email, password);
-        this.id = generateEntity();
-    }
 
     public double getBalance() {
         return balance;
     }
-
-    public String generateEntity() {
-        Random random = new Random();
-        UserStore userStore = new UserStore();
-        String generatedId;
-
-        do {
-            generatedId = "USER" + (100000 + random.nextInt(899999));
-        } while (isExistingId(userStore, generatedId));
-
-        return generatedId;
+    public void setBalance(double balance){
+        this.balance = balance;
     }
 
-    private boolean isExistingId(UserStore userStore, String id) {
-        try {
-            return userStore.IDexist(id);
-        } catch (IOException e) {
-            throw new RuntimeException("Khong the kiem tra ID da ton tai hay chua.", e);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    public User(String id, String name, String email, String phoneNumber, String password , double balance) {
+        super(id, name, email,phoneNumber, password);
+        this.balance = balance;
+
+    }
+    public User(String id, String name, String email, String phoneNumber, String password) {
+        super(id, name, email,phoneNumber,  password);
+
+    }
+
+    public User(String name, String email, String phoneNumber, String password) {
+        this(buildGeneratedId(phoneNumber), name, email,phoneNumber,  password);
+        this.balance = 0.0;
+
+    }
+
+    private static String buildGeneratedId(String phoneNumber) {
+        String normalizedPhoneNumber = phoneNumber == null ? "" : phoneNumber.replaceAll("\\D", "");
+        if (normalizedPhoneNumber.isBlank()) {
+            return "USER";
         }
+        return "USER" + normalizedPhoneNumber;
     }
 
     public void deposit(double amount) {
-        balance += amount;
+        this.balance += amount;
+
     }
 
     public void withdraw(double amount) {
-        balance -= amount;
+        this.balance -= amount;
     }
 
     public void addItem(ItemType itemType, String itemName, double itemPrice, String itemDescription) {
-        Item item = itemFactory.createItem(itemType, itemName, itemPrice, itemDescription);
-        try {
-            Inventory inventory = new Inventory();
-            inventory.saveItem(item, getId());
-            items.add(item);
-        } catch (IOException e) {
-            throw new RuntimeException("Khong the tao san pham", e);
-        }
-    }
+        items.add(itemFactory.createItem(itemType, itemName, itemPrice, itemDescription));
+    }// tạo sản phẩm
 
     @Override
-    public void sellItem(Item item) {
-        if (!items.remove(item)) {
+    public void sellItem(Item item) {// lúc đã giao dịch xong
+
+        if (items.contains(item)) {
+            items.remove(item);
+        }
+        else  {
             throw new IllegalArgumentException("Not exist item in this user");
         }
     }
-    public void bids(Auction auction, double amount) throws Exception{
-        Inventory inventory=new Inventory();
-        Item item=auction.getItem();
-        if(this.id.equals(inventory.getUserIdByItemId(item.getId())))
-            throw new IllegalArgumentException("Nguoi ban khong duoc dau gia san pham minh ban");
-        BidTransaction bid = new BidTransaction(this,item,amount);
-        auction.addBid(bid);
-    }
-
 }

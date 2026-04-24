@@ -1,11 +1,18 @@
 package controllers.Server;
 
+import Database.UserStore;
+import Database.request_log;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import controllers.Server.AuctionRoom;
+import models.Extra.messages.Createitempayload;
+import models.Extra.messages.Depositpayload;
+import models.Extra.messages.Message;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
 
 
@@ -62,7 +69,7 @@ public class ClientHandler implements Runnable {
     private void handleMessage(String json) {
         try {
             JsonNode node = mapper.readTree(json);
-            String type = node.path("type").asText();
+            String type = node.path("messageType").asText();
 
             switch (type) {
 
@@ -80,13 +87,42 @@ public class ClientHandler implements Runnable {
 
                 case "PLACE_BID" -> {
                     String auctionId = node.get("auctionId").asText();
+                    /*Bid bid = mapper.treeToValue(node, Bid.class);
 
+                    try {
+                        // Manager xử lý nghiệp vụ, trả về JSON kết quả
+                        String resultJson = AuctionManager.getInstance().placeBid(auctionId, bid);
+                        // Room broadcast đến tất cả client đang xem phiên này
+                        AuctionRoom.getInstance().broadcastToSession(auctionId, resultJson);
+
+                    } catch (InvalidBidException | AuctionClosedException e) {
+                        // Chỉ trả lỗi về client này, không broadcast
+                        send(errorJson(e.getMessage()));
+                    } */
                 }
 
                 case "GET_AUCTIONS" -> {
                     // TODO: lấy danh sách phiên từ AuctionManager, gửi riêng cho client này
                     send("{\"type\":\"AUCTION_LIST\",\"data\":[]}");
                 }
+                case "deposit" -> {
+                    String userId = node.get("Id_user").asText();
+                    String payloadJson = node.get("payloadJson").asText();
+
+                    Depositpayload payload = mapper.readValue(payloadJson, Depositpayload.class);
+
+                    UserStore userStore = new UserStore();
+                    userStore.update_balance(payload.getAmount(), userId);
+
+                }
+//                case "additem" ->{
+//                    String userId = node.get("Id_user").asText();
+//                    String payloadJson = node.get("payloadJson").asText();
+//
+//                    Createitempayload payload = mapper.readValue(payloadJson, Createitempayload.class);
+//
+//
+//                }
 
                 default -> System.out.println("[ClientHandler] Unknown type: " + type);
             }

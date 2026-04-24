@@ -9,9 +9,9 @@ import java.net.Socket;
 public class ServerConnection {
 
     private Socket socket;
-    private PrintWriter out;
+    private static PrintWriter out;
     private BufferedReader in;
-    private final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper();
     private volatile boolean running = false;
 
     public void connect(String host, int port) throws IOException {
@@ -23,7 +23,7 @@ public class ServerConnection {
     }
 
     // Gửi bất kỳ object nào lên server (tự serialize thành JSON)
-    public void send(Object payload) {
+    public static void send(Object payload) {
         try {
             String json = mapper.writeValueAsString(payload);
             out.println(json);

@@ -1,7 +1,6 @@
 package models.Extra.messages;
 
 public class placeBidpayload {
-
     double amount;
 
     public placeBidpayload(double amount) {
