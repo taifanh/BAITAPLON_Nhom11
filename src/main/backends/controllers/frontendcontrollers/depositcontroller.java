@@ -2,6 +2,7 @@ package controllers.frontendcontrollers;
 
 import Database.request_log;
 import com.google.gson.Gson;
+import controllers.ServerConnection;
 import controllers.UserSession;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -11,7 +12,9 @@ import javafx.stage.Stage;
 import models.Extra.messages.Depositpayload;
 import models.Extra.messages.Message;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 
 public class depositcontroller {
     @FXML
@@ -25,10 +28,8 @@ public class depositcontroller {
     public Label money_display;
 
 
-    private final request_log request_log = new request_log() ;
-
     public void ok_deposit(ActionEvent event) throws IOException {
-        double money_in = Double.parseDouble(money_display.getText());
+        double money_in =  Double.parseDouble(money_display.getText());
 
         Gson gson = new Gson();
         Depositpayload payload = new Depositpayload(money_in);
@@ -39,14 +40,13 @@ public class depositcontroller {
         msg.messageType = "deposit";
         msg.payloadJson = payloadJson;
         // this part for send request for server
+        // client send request then  server  receive and save into database
 
-        request_log.save_request(msg);
+        ServerConnection.send(msg);
 
         // the next part is for show screen
         Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
         window.close();
-
-
     }
 
     public void handle_verify_money(ActionEvent event){

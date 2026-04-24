@@ -4,8 +4,9 @@ import models.accounts.User;
 
 public final class UserSession {
     private static User currentUser;
+    private static ServerConnection connection;
 
-    public UserSession() {
+    private UserSession() {
     }
 
     public static User getCurrentUser() {
@@ -16,7 +17,22 @@ public final class UserSession {
         currentUser = user;
     }
 
+    public static void initConnection(String host, int port) throws Exception {
+        if (connection == null) {
+            connection = new ServerConnection();
+            connection.connect(host, port);
+        }
+    }
+
+    public static ServerConnection getConnection() {
+        return connection;
+    }
+
     public static void clear() {
         currentUser = null;
+        if (connection != null) {
+            connection.disconnect();
+            connection = null;
+        }
     }
 }

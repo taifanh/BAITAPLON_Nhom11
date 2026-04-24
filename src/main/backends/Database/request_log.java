@@ -9,7 +9,7 @@ import java.sql.*;
 
 public class request_log {
     private static final Path DATA_DIRECTORY = Path.of("data");
-    private static final Path DATABASE_FILE = DATA_DIRECTORY.resolve("request_log.db");
+    static final Path DATABASE_FILE = DATA_DIRECTORY.resolve("request_log.db");
     private static final String DATABASE_URL = "jdbc:sqlite:" + DATABASE_FILE;
     private static final String CREATE_REQUEST_TABLE_SQL = """
             CREATE TABLE IF NOT EXISTS request_log (
@@ -28,7 +28,7 @@ public class request_log {
         }
     }
 
-    public void save_request(Message message) throws  IOException {
+    public static void save_request(Message message) throws  IOException {
         try(Connection connection = openConnection();
             PreparedStatement statement = connection.prepareStatement("""
             INSERT INTO request_log (id_user , request_type , request_info) VALUES (? , ? , ?)""")
@@ -55,7 +55,7 @@ public class request_log {
                 Files.createDirectories(DATA_DIRECTORY);
         }
     }
-    private Connection openConnection() throws SQLException{
+    private static Connection openConnection() throws SQLException{
         return DriverManager.getConnection(DATABASE_URL);
     }
 }

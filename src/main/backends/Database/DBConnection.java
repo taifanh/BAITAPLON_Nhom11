@@ -6,7 +6,7 @@ import java.sql.DriverManager;
 public class DBConnection {
     public static Connection getConnection(){
         try{
-            String url="jdbc:sqlite:users.db";
+            String url="jdbc:sqlite:data/users.db";
             return DriverManager.getConnection(url);
         } catch (Exception e){
             e.printStackTrace();

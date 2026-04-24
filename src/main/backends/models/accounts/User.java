@@ -17,21 +17,32 @@ public class User extends Account implements CanBidding, CanSelling {
     public double getBalance() {
         return balance;
     }
+    public void setBalance(double balance){
+        this.balance = balance;
+    }
 
+    public User(String id, String name, String email, String phoneNumber, String password , double balance) {
+        super(id, name, email,phoneNumber, password);
+        this.balance = balance;
+
+    }
     public User(String id, String name, String email, String phoneNumber, String password) {
-        super(id, name, phoneNumber, email, password);
+        super(id, name, email,phoneNumber,  password);
+
     }
 
     public User(String name, String email, String phoneNumber, String password) {
-        this(buildGeneratedId(phoneNumber), name, phoneNumber, email, password);
+        this(buildGeneratedId(phoneNumber), name, email,phoneNumber,  password);
+        this.balance = 0.0;
+
     }
 
     private static String buildGeneratedId(String phoneNumber) {
-        StringBuilder builder = new StringBuilder("USER");
-        for (int i = 1; i < phoneNumber.length(); i++) {
-            builder.append(phoneNumber.charAt(i) - 1);
+        String normalizedPhoneNumber = phoneNumber == null ? "" : phoneNumber.replaceAll("\\D", "");
+        if (normalizedPhoneNumber.isBlank()) {
+            return "USER";
         }
-        return builder.toString();
+        return "USER" + normalizedPhoneNumber;
     }
 
     public void deposit(double amount) {

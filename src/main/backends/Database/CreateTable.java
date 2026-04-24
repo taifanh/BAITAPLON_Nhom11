@@ -9,11 +9,12 @@ public class CreateTable {
             Connection conn=DBConnection.getConnection();
             Statement stm=conn.createStatement();
             String sql = "CREATE TABLE IF NOT EXISTS users (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "name TEXT, " +
-                    "phoneNumber TEXT, " +
-                    "Email TEXT, " +
-                    "password TEXT)";
+                    "id TEXT PRIMARY KEY, " +
+                    "name TEXT NOT NULL, " +
+                    "phone_number TEXT NOT NULL UNIQUE, " +
+                    "email TEXT NOT NULL, " +
+                    "password TEXT NOT NULL, " +
+                    "balance DOUBLE)";
             stm.execute(sql);
         }catch (Exception e){
             e.printStackTrace();

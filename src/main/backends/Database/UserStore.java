@@ -25,7 +25,8 @@ public class UserStore {
                 name TEXT NOT NULL,
                 phone_number TEXT NOT NULL UNIQUE,
                 email TEXT NOT NULL,
-                password TEXT NOT NULL
+                password TEXT NOT NULL,
+                balance DOUBLE
             )
             """;
 
@@ -40,7 +41,7 @@ public class UserStore {
     public List<User> getAllUsers() throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     SELECT id, name, email, phone_number, password
+                     SELECT id, name, email , phone_number, password
                      FROM users
                      ORDER BY rowid
                      """);
@@ -66,7 +67,7 @@ public class UserStore {
     public Optional<User> authenticate(String phoneNumber, String password) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     SELECT id, name,email, phone_number, password
+                     SELECT id, name, email , phone_number, password , balance
                      FROM users
                      WHERE phone_number = ? AND password = ?
                      LIMIT 1
@@ -84,7 +85,8 @@ public class UserStore {
                         resultSet.getString("name"),
                         resultSet.getString("email"),
                         resultSet.getString("phone_number"),
-                        resultSet.getString("password")
+                        resultSet.getString("password"),
+                        resultSet.getDouble("balance")
                 );
                 user.setId(resultSet.getString("id"));
                 return Optional.of(user);
@@ -99,7 +101,7 @@ public class UserStore {
              PreparedStatement statement = connection.prepareStatement("""
                      SELECT 1
                      FROM users
-                     WHERE phone_number = ?
+                     WHERE phone_number = ? 
                      LIMIT 1
                      """)) {
             statement.setString(1, phoneNumber);
@@ -114,17 +116,36 @@ public class UserStore {
     public void saveUser(User user) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     INSERT INTO users (id, name, email ,phone_number, password)
-                     VALUES (?, ?, ?, ?, ?)
+                     INSERT INTO users (id, name, email ,phone_number, password , balance)
+                     VALUES (?, ?, ?, ?, ? , ? )
                      """)) {
             statement.setString(1, user.getId());
             statement.setString(2, user.getName());
             statement.setString(3, user.getEmail());
             statement.setString(4, user.getPhoneNumber());
             statement.setString(5, user.getPassword());
+            statement.setDouble(6,0.0);
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new IOException("Khong the luu nguoi dung vao SQLite.", e);
+        }
+    }
+    public void update_balance(double new_balance, String userId) throws IOException {
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement("""
+                     UPDATE users
+                     SET balance = balance + ?
+                     WHERE id = ?
+                     """)) {
+            statement.setDouble(1, new_balance);
+            statement.setString(2,userId);
+            try {
+                statement.executeUpdate();
+            }catch (SQLException e) {
+                throw new IOException("Khong the cập nhật balance trong SQLite.", e);
+            }
+        } catch (SQLException e) {
+            throw new IOException("Khong the cập nhật balance trong SQLite.", e);
         }
     }
 
@@ -140,6 +161,9 @@ public class UserStore {
         if (Files.notExists(DATA_DIRECTORY)) {
             Files.createDirectories(DATA_DIRECTORY);
         }
+    }
+    private boolean looksLikeEmail(String value) {
+        return value != null && value.contains("@");
     }
 
     private Connection openConnection() throws SQLException {

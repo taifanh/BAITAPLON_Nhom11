@@ -12,12 +12,12 @@ public class Admin extends Account {
     private final Map<String, String> userItem = new HashMap<>();
 
     public Admin(String id, String name, String phoneNumber, String email, String password) {
-        super(id, name, phoneNumber, email, password);
+        super(id, name, email,phoneNumber,  password);
         instance = this;
     }
 
     private Admin(String name, String phoneNumber, String email, String password) {
-        this(buildGeneratedId(phoneNumber), name, phoneNumber, email, password);
+        this(buildGeneratedId(phoneNumber), name, email ,phoneNumber, password);
     }
 
     private static String buildGeneratedId(String phoneNumber) {

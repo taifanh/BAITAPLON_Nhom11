@@ -65,6 +65,7 @@ public class signincontroller {
             window.centerOnScreen();
             window.show();
         } catch (IOException e) {
+            e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Loi co so du lieu", "Khong the dang nhap", "Khong the doc du lieu nguoi dung tu SQLite.");
         }
     }

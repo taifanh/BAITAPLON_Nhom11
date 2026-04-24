@@ -2,6 +2,7 @@ package controllers.frontendcontrollers;
 
 import Database.request_log;
 import com.google.gson.Gson;
+import controllers.ServerConnection;
 import controllers.UserSession;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -50,7 +51,7 @@ public class createitemcontroller {
           msg.messageType = "additem";
           msg.Id_user = UserSession.getCurrentUser().getId();
 
-          request_log.save_request(msg);
+          ServerConnection.send(msg);// server gửi cho clienthandler
 
           // this part for handle showing window
         Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();

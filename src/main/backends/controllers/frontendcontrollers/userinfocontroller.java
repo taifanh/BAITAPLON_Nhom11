@@ -40,7 +40,7 @@ public class userinfocontroller {
     private Button placebid;
 
     @FXML
-    private TextField money_display;
+    private Label balance;
 
     @FXML
     private Button autobid;
@@ -64,6 +64,7 @@ public class userinfocontroller {
         infoname.setText(user.getName());
         infoemail.setText(user.getEmail());
         infophonenumber.setText(user.getPhoneNumber());
+        balance.setText(String.valueOf(user.getBalance()));
         refreshPasswordField();
     }
 
@@ -120,4 +121,5 @@ public class userinfocontroller {
         window.centerOnScreen();
         window.show();
     }
+    public void handle_create(ActionEvent event) throws IOException {}
 }

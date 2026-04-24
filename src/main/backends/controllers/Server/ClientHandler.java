@@ -1,8 +1,13 @@
 package controllers.Server;
 
+import Database.UserStore;
+import Database.request_log;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import models.Extra.messages.Createitempayload;
+import models.Extra.messages.Depositpayload;
+import models.Extra.messages.Message;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -64,7 +69,7 @@ public class ClientHandler implements Runnable {
     private void handleMessage(String json) {
         try {
             JsonNode node = mapper.readTree(json);
-            String type = node.path("type").asText();
+            String type = node.path("messageType").asText();
 
             switch (type) {
 
@@ -100,6 +105,24 @@ public class ClientHandler implements Runnable {
                     // TODO: lấy danh sách phiên từ AuctionManager, gửi riêng cho client này
                     send("{\"type\":\"AUCTION_LIST\",\"data\":[]}");
                 }
+                case "deposit" -> {
+                    String userId = node.get("Id_user").asText();
+                    String payloadJson = node.get("payloadJson").asText();
+
+                    Depositpayload payload = mapper.readValue(payloadJson, Depositpayload.class);
+
+                    UserStore userStore = new UserStore();
+                    userStore.update_balance(payload.getAmount(), userId);
+
+                }
+//                case "additem" ->{
+//                    String userId = node.get("Id_user").asText();
+//                    String payloadJson = node.get("payloadJson").asText();
+//
+//                    Createitempayload payload = mapper.readValue(payloadJson, Createitempayload.class);
+//
+//
+//                }
 
                 default -> System.out.println("[ClientHandler] Unknown type: " + type);
             }
