@@ -22,9 +22,9 @@ public class test1 {
 
         try {
             //Mở phiên đấu giá với sản phẩm đầu tiên người bán là user 1
-            Auction auction=admin.startAuction(0, 0, 5);
+            //Auction auction=admin.startAuction(0, 0, 5);
             //user1.bids(auction,1500);//user 1 đấu giá sẽ báo lỗi không được đấu giá sản phẩm mình bán
-            user2.bids(auction,2000);//user 2 đấu giá sẽ cập nhập giá
+            //user2.bids(auction,2000);//user 2 đấu giá sẽ cập nhập giá
             Thread.sleep(6000);
         } catch (Exception e) {
             e.printStackTrace();
