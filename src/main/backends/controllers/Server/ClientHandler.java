@@ -74,7 +74,6 @@ public class ClientHandler implements Runnable {
                     // Client mở màn hình chi tiết phiên
                     watchingAuctionId = node.get("auctionId").asText();
                     AuctionRoom.getInstance().watch(this, watchingAuctionId);
-                    send(okJson("Đang theo dõi phiên: " + watchingAuctionId));
                 }
 
                 case "UNWATCH_AUCTION" -> {
@@ -107,10 +106,11 @@ public class ClientHandler implements Runnable {
                     String payloadJson = node.get("payloadJson").asText();
 
                     Depositpayload payload = mapper.readValue(payloadJson, Depositpayload.class);
+                    System.out.println("[Server] DEPOSIT received | userId=" + userId + " | amount=" + payload.getAmount());
 
                     UserStore userStore = new UserStore();
                     userStore.update_balance(payload.getAmount(), userId);
-                    send(okJson("Deposit success"));
+                    send(okJson(payload.getAmount()));
 
                 }
 
@@ -133,10 +133,10 @@ public class ClientHandler implements Runnable {
         return node.toString();
     }
 
-    private String okJson(String message) {
+    private String okJson(Double amount) {
         ObjectNode node = mapper.createObjectNode();
         node.put("type", "OK");
-        node.put("message", message);
+        node.put("amount", amount);
         return node.toString();
     }
 

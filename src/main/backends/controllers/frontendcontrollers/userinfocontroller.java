@@ -1,8 +1,12 @@
 package controllers.frontendcontrollers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
+import controllers.MessageBus;
 import controllers.UserSession;
 import controllers.ViewLoader;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -19,6 +23,7 @@ import models.Extra.messages.placeBidpayload;
 import models.accounts.User;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 
 public class userinfocontroller {
     @FXML
@@ -47,12 +52,42 @@ public class userinfocontroller {
 
     private User user;
 
+    private Consumer<String> depositResultHandler;
+
     @FXML
     public void initialize() {
         passshow.selectedProperty().addListener((observable, oldValue, newValue) -> refreshPasswordField());
         if (UserSession.getCurrentUser() != null) {
             setUser(UserSession.getCurrentUser());
         }
+        subscribeDepositResult();
+    }
+
+    private void subscribeDepositResult() {
+        depositResultHandler = rawJson -> {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                ObjectNode node = (ObjectNode) mapper.readTree(rawJson);
+                String type = node.get("type").asText();
+
+                if (type.equals("OK") && node.has("amount")) {
+                    double depositedAmount = node.get("amount").asDouble();
+
+                    User currentUser = UserSession.getCurrentUser();
+                    if (currentUser == null) {
+                        return;
+                    }
+
+                    double updatedBalance = currentUser.getBalance() + depositedAmount;
+                    currentUser.setBalance(updatedBalance);
+                    Platform.runLater(() -> balance.setText(String.valueOf(updatedBalance)));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        };
+
+        MessageBus.getInstance().subscribe(depositResultHandler);
     }
 
     public void setUser(User user) {

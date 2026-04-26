@@ -51,7 +51,7 @@ public class createitemcontroller {
           msg.messageType = "additem";
           msg.Id_user = UserSession.getCurrentUser().getId();
 
-          ServerConnection.send(msg);// server gửi cho clienthandler
+          UserSession.getConnection().send(msg);// server gửi cho clienthandler
 
           // this part for handle showing window
         Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();

@@ -23,7 +23,7 @@ public class ServerConnection {
     }
 
     // Gửi bất kỳ object nào lên server (tự serialize thành JSON)
-    public static void send(Object payload) {
+    public void send(Object payload) {
         try {
             String json = mapper.writeValueAsString(payload);
             out.println(json);
