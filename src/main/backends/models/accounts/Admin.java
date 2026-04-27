@@ -5,47 +5,62 @@ import javafx.scene.control.Alert;
 import models.bidding.Auction;
 import models.core.Account;
 
+import javax.imageio.IIOException;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Admin extends Account {
     private static Admin instance;
+    private final Map<String, String> userItem = new HashMap<>();
 
     public Admin(String id, String name, String phoneNumber, String email, String password) {
-        super(name, phoneNumber, email, password);
-        this.id = id;
+        super(id, name, email,phoneNumber,  password);
+        instance = this;
     }
 
     private Admin(String name, String phoneNumber, String email, String password) {
-        super(name, phoneNumber, email, password);
+        this(buildGeneratedId(phoneNumber), name, email ,phoneNumber, password);
     }
 
-    public void creating_admin(String name, String phoneNumber, String email, String password) {
+    private static String buildGeneratedId(String phoneNumber) {
+        return "ADMIN" + phoneNumber;
+    }
+
+    public static Admin getInstance() {
+        return instance;
+    }
+
+    public static void setInstance(Admin admin) {
+        instance = admin;
+    }
+
+    public Admin creating_admin(String name, String phoneNumber, String email, String password) {
         if (instance == null) {
             instance = new Admin(name, phoneNumber, email, password);
-            return;
+            return instance;
         }
 
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("admin");
-        alert.setHeaderText("admin register error");
-        alert.setContentText("one admin existed");
+        alert.setTitle("Admin");
+        alert.setHeaderText("Admin register error");
+        alert.setContentText("One admin already exists.");
         alert.showAndWait();
+        return instance;
     }
 
-    public Auction startAuction(int hours, int minutes, int seconds) {
-        try {
-            return AdminService.startAuction(this, hours, minutes, seconds);
-        } catch (IOException e) {
-            throw new RuntimeException("Khong the bat dau phien dau gia", e);
-        }
+    public void manageAuction(Auction auction) {
+
     }
 
-    public Auction StartAuction(int hours, int minutes, int seconds) {
-        return startAuction(hours, minutes, seconds);
+    public void createsession(String sessionId) {
+
     }
 
-    public void manageAuction(Auction auction) {}
-
-    public void createsession(String s) {
+    public Map<String, String> getUserItem() {
+        return userItem;
+    }
+    public Auction startAuction(int hours,int minutes,int seconds) throws IOException {
+        return AdminService.startAuction(this,hours,minutes,seconds);
     }
 }

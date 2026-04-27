@@ -1,6 +1,7 @@
-package controllers;
+package controllers.frontendcontrollers;
 
 import Database.UserStore;
+import controllers.ViewLoader;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -61,7 +62,7 @@ public class signupcontroller {
                 return;
             }
 
-            userStore.saveUser(new User(name, phoneNumber, email, password));
+            userStore.saveUser(new User(name,  email, phoneNumber, password));
             showAlert(Alert.AlertType.INFORMATION, "OK", null, "Dang ky thanh cong. Du lieu da duoc luu vao SQLite.");
 
             Parent signinRoot = ViewLoader.load("signin.fxml");

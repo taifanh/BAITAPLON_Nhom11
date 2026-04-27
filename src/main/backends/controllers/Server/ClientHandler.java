@@ -1,11 +1,15 @@
 package controllers.Server;
 
+import Database.UserStore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import controllers.Server.AuctionRoom;
+import models.Extra.messages.Depositpayload;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
 
 
@@ -62,7 +66,7 @@ public class ClientHandler implements Runnable {
     private void handleMessage(String json) {
         try {
             JsonNode node = mapper.readTree(json);
-            String type = node.path("type").asText();
+            String type = resolveMessageType(node);
 
             switch (type) {
 
@@ -70,7 +74,6 @@ public class ClientHandler implements Runnable {
                     // Client mở màn hình chi tiết phiên
                     watchingAuctionId = node.get("auctionId").asText();
                     AuctionRoom.getInstance().watch(this, watchingAuctionId);
-                    send(okJson("Đang theo dõi phiên: " + watchingAuctionId));
                 }
 
                 case "UNWATCH_AUCTION" -> {
@@ -80,12 +83,35 @@ public class ClientHandler implements Runnable {
 
                 case "PLACE_BID" -> {
                     String auctionId = node.get("auctionId").asText();
+                    /*Bid bid = mapper.treeToValue(node, Bid.class);
 
+                    try {
+                        // Manager xử lý nghiệp vụ, trả về JSON kết quả
+                        String resultJson = AuctionManager.getInstance().placeBid(auctionId, bid);
+                        // Room broadcast đến tất cả client đang xem phiên này
+                        AuctionRoom.getInstance().broadcastToSession(auctionId, resultJson);
+
+                    } catch (InvalidBidException | AuctionClosedException e) {
+                        // Chỉ trả lỗi về client này, không broadcast
+                        send(errorJson(e.getMessage()));
+                    } */
                 }
 
                 case "GET_AUCTIONS" -> {
                     // TODO: lấy danh sách phiên từ AuctionManager, gửi riêng cho client này
                     send("{\"type\":\"AUCTION_LIST\",\"data\":[]}");
+                }
+                case "DEPOSIT" -> {
+                    String userId = node.get("Id_user").asText();
+                    String payloadJson = node.get("payloadJson").asText();
+
+                    Depositpayload payload = mapper.readValue(payloadJson, Depositpayload.class);
+                    System.out.println("[Server] DEPOSIT received | userId=" + userId + " | amount=" + payload.getAmount());
+
+                    UserStore userStore = new UserStore();
+                    userStore.update_balance(payload.getAmount(), userId);
+                    send(okJson(payload.getAmount()));
+
                 }
 
                 default -> System.out.println("[ClientHandler] Unknown type: " + type);
@@ -107,10 +133,18 @@ public class ClientHandler implements Runnable {
         return node.toString();
     }
 
-    private String okJson(String message) {
+    private String okJson(Double amount) {
         ObjectNode node = mapper.createObjectNode();
         node.put("type", "OK");
-        node.put("message", message);
+        node.put("amount", amount);
         return node.toString();
+    }
+
+    private String resolveMessageType(JsonNode node) {
+        String messageType = node.path("messageType").asText("");
+        if (!messageType.isBlank()) {
+            return messageType;
+        }
+        return node.path("type").asText("");
     }
 }

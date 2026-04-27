@@ -1,14 +1,12 @@
 package models.core;
 
 public class Account extends Entity {
-    protected String name,phoneNumber,email,password;
-
-    public Account(){}
-
-    public Account( String name, String phoneNumber, String Email, String password){
+    protected String name,phoneNumber,Email,password;
+    public Account(String id, String name, String Email, String phoneNumber, String password){
+        this.id = id;
         this.name=name;
         this.phoneNumber=phoneNumber;
-        this.email=Email;
+        this.Email=Email;
         this.password=password;
     }
     public String getName(){
@@ -18,7 +16,7 @@ public class Account extends Entity {
         return phoneNumber;
     }
     public String getEmail(){
-        return email;
+        return Email;
     }
     public String getPassword(){
         return password;

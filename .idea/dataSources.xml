@@ -1,18 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="users" uuid="a1af6e77-9628-4cb0-94b7-c4de9f116641">
+    <data-source source="LOCAL" name="users.db" uuid="1a3c385c-82b4-4157-8c88-51fcd5f89d77">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/users.db</jdbc-url>
+      <jdbc-url>jdbc:sqlite:C:\Users\DELL\IdeaProjects\BAITAPLON_Nhom11\data\users.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="users [2]" uuid="dcd86fe1-7186-432a-88a7-18dc4f07063f">
+    <data-source source="LOCAL" name="inventory.db" uuid="ab441226-3404-42f6-9059-585b9e55041b">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/data/users.db</jdbc-url>
+      <jdbc-url>jdbc:sqlite:C:\Users\DELL\IdeaProjects\BAITAPLON_Nhom11\data\inventory.db</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="auctions.db" uuid="08fc79c4-eb4e-41b6-a02e-a7a4ea10ea38">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:C:\Users\DELL\IdeaProjects\BAITAPLON_Nhom11\data\auctions.db</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="request_log.db" uuid="12f14b9f-dda9-4214-9e41-83fb8168e388">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:C:\Users\DELL\IdeaProjects\BAITAPLON_Nhom11\data\request_log.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>

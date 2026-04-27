@@ -1,20 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="720.0" prefWidth="1080.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.userinfocontroller">
+<AnchorPane prefHeight="720.0" prefWidth="1080.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.frontendcontrollers.userinfocontroller">
     <children>
         <TabPane prefHeight="720.0" prefWidth="1080.0" side="TOP" style="-fx-background-color: transparent; -fx-tab-min-width: 180; -fx-tab-max-width: 180;">
             <tabs>
@@ -84,7 +75,7 @@
                                                         <Font size="38.0" />
                                                     </font>
                                                 </Label>
-                                                <Button fx:id="btndeposit" alignment="CENTER" layoutX="518.0" layoutY="55.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="108.0" style="-fx-background-color: #ea580c; -fx-background-radius: 16; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Deposit" textOverrun="CLIP" />
+                                                <Button fx:id="btndeposit" alignment="CENTER" layoutX="518.0" layoutY="55.0" mnemonicParsing="false" onAction="#handle_deposit" prefHeight="42.0" prefWidth="108.0" style="-fx-background-color: #ea580c; -fx-background-radius: 16; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Deposit" textOverrun="CLIP" />
                                             </children>
                                         </Pane>
 
@@ -156,7 +147,7 @@
                                                 <Font size="28.0" />
                                             </font>
                                         </Label>
-
+                  
                                         <Pane layoutX="14.0" layoutY="75.0" prefHeight="500.0" prefWidth="300.0" style="-fx-background-color: white; -fx-background-radius: 24; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 22, 0.12, 0, 8);">
                                             <children>
                                                 <Label layoutX="28.0" layoutY="28.0" text="Upcoming Items" textFill="#0f172a">
@@ -172,7 +163,7 @@
                                                 <ListView fx:id="ITEMLIST" layoutX="24.0" layoutY="98.0" prefHeight="372.0" prefWidth="252.0" style="-fx-background-radius: 18; -fx-border-radius: 18; -fx-border-color: #dbe4f0;" />
                                             </children>
                                         </Pane>
-
+                  
                                         <Pane layoutX="739.0" layoutY="44.0" prefHeight="184.0" prefWidth="305.0" style="-fx-background-color: white; -fx-background-radius: 24; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 22, 0.12, 0, 8);">
                                             <children>
                                                 <Label fx:id="itemname" layoutX="28.0" layoutY="28.0" text="Item name" textFill="#0f172a">
@@ -180,12 +171,12 @@
                                                         <Font size="20.0" />
                                                     </font>
                                                 </Label>
-                                                <Label layoutX="28.0" layoutY="58.0" text="Base Price" textFill="#64748b">
+                                                <Label layoutX="28.0" layoutY="58.0" text="Opening Bid" textFill="#64748b">
                                                     <font>
                                                         <Font size="13.0" />
                                                     </font>
                                                 </Label>
-                                                <Label layoutX="28.0" layoutY="121.0" text="Increment" textFill="#64748b">
+                                                <Label layoutX="28.0" layoutY="121.0" text="Bid Increment" textFill="#64748b">
                                                     <font>
                                                         <Font size="13.0" />
                                                     </font>
@@ -194,7 +185,7 @@
                                                 <TextField fx:id="increment" layoutX="28.0" layoutY="141.0" prefHeight="37.0" prefWidth="222.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-radius: 14; -fx-border-color: #000000;" />
                                             </children>
                                         </Pane>
-
+                  
                                         <Pane layoutX="739.0" layoutY="244.0" prefHeight="354.0" prefWidth="306.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5); -fx-background-radius: 24; -fx-effect: dropshadow(gaussian, rgba(234,88,12,0.12), 22, 0.14, 0, 8);">
                                             <children>
                                                 <Label layoutX="28.0" layoutY="28.0" text="BID" textFill="#9a3412">
@@ -208,19 +199,36 @@
                                                     </font>
                                                 </TextField>
                                                 <TextField fx:id="maxlimit" layoutX="28.0" layoutY="121.0" prefHeight="46.0" prefWidth="244.0" promptText="Max limit" style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #fdba74;" />
-                                                <Button fx:id="autobid" alignment="CENTER" layoutX="28.0" layoutY="177.0" mnemonicParsing="false" prefHeight="38.0" prefWidth="108.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="AUTO" />
+                                                <Button alignment="CENTER" layoutX="28.0" layoutY="177.0" mnemonicParsing="false" onAction="#autobid" prefHeight="38.0" prefWidth="108.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="AUTO" />
                                                 <TextField fx:id="bidprice" layoutX="28.0" layoutY="242.0" prefHeight="46.0" prefWidth="244.0" promptText="your bid" style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #fdba74;">
                                                     <font>
                                                         <Font size="15.0" />
                                                     </font>
                                                 </TextField>
-                                                <Button fx:id="placebid" alignment="CENTER" layoutX="29.0" layoutY="297.0" mnemonicParsing="false" onAction="#handle_bidding" prefHeight="34.0" prefWidth="107.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="place" />
+                                                <Button alignment="CENTER" layoutX="29.0" layoutY="297.0" mnemonicParsing="false" onAction="#placebid" prefHeight="34.0" prefWidth="107.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="PLACE" />
                                             </children>
                                         </Pane>
-                                        <Pane layoutX="321.0" layoutY="87.0" prefHeight="547.0" prefWidth="395.0" style="-fx-background-color: #D3D3D3; -fx-background-radius: 18; -fx-border-radius: 18;">
+                                        <Pane layoutX="328.0" layoutY="67.0" prefHeight="547.0" prefWidth="395.0" style="-fx-background-color: #D3D3D3; -fx-background-radius: 18; -fx-border-radius: 18;">
                                  <children>
-                                    <TextField fx:id="result_bid" layoutX="65.0" layoutY="200.0" prefHeight="74.0" prefWidth="276.0" />
-                                 </children></Pane>
+                                    <Label alignment="CENTER" layoutX="41.0" layoutY="30.0" prefHeight="61.0" prefWidth="313.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5); -fx-background-radius: 12;" text="Current Auction Info" textFill="#9a3412">
+                                       <font>
+                                          <Font size="24.0" />
+                                       </font>
+                                    </Label>
+                                    <Label alignment="CENTER" layoutX="4.0" layoutY="201.0" prefHeight="35.0" prefWidth="137.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5); -fx-background-radius: 10;" text="The High Bidder" textFill="#9a3412">
+                                       <font>
+                                          <Font size="18.0" />
+                                       </font>
+                                    </Label>
+                                    <TextField layoutX="144.0" layoutY="200.0" prefHeight="37.0" prefWidth="237.0" style="-fx-background-radius: 12;" />
+                                    <TextField layoutX="144.0" layoutY="250.0" prefHeight="36.0" prefWidth="237.0" style="-fx-background-radius: 12;" />
+                                    <Label alignment="CENTER" layoutX="3.0" layoutY="251.0" prefHeight="34.0" prefWidth="138.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5); -fx-background-radius: 10;" text="Current  Bid" textFill="#9a3412">
+                                       <font>
+                                          <Font size="18.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </Pane>
                                     </children>
                                 </AnchorPane>
                             </content>
@@ -229,7 +237,24 @@
                 </Tab>
             <Tab text=" Sell Item">
               <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <Pane layoutX="20.0" layoutY="23.0" prefHeight="81.0" prefWidth="1038.0" style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 22, 0.12, 0, 8);">
+                           <children>
+                              <Button layoutX="30.0" layoutY="17.0" mnemonicParsing="false" onAction="#handle_create" prefHeight="47.0" prefWidth="92.0" style="-fx-background-color: #20cc6b; -fx-background-radius: 14;" text="Create" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="18.0" />
+                                 </font>
+                              </Button>
+                              <Label layoutX="661.0" layoutY="32.0" prefHeight="25.0" prefWidth="371.0" text="Create your own product for the highest price" textFill="#8e8e8e">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </Pane>
+                        <Pane layoutX="20.0" layoutY="118.0" prefHeight="561.0" prefWidth="1039.0" style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 22, 0.12, 0, 8);" />
+                     </children></AnchorPane>
               </content>
             </Tab>
             </tabs>
