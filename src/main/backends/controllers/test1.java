@@ -22,22 +22,22 @@ public class test1 {
         User user3 = new User("User3", "123", "3", "3");
         ;
 
-//        user1.addItem(Electronics, "Laptop", 5000, "new laptop");
-//        user1.addItem(Art, "Mona Lisa", 900000, "new art");
-//        user2.addItem(Electronics, "Phone", 3000, "new phone");
+        user1.addItem(Electronics, "Laptop", 5000, "new laptop");
+        user1.addItem(Art, "Mona Lisa", 900000, "new art");
+        user2.addItem(Electronics, "Phone", 3000, "new phone");
 
         Admin admin = new Admin("ADMIN001", "Admin", "0123456789", "admin@gmail.com", "123456");
 
-        try {
-            Auction auction = admin.startAuction(0, 0, 10);
-            user2.bids(auction, 2000);
-            Thread.sleep(1000);
-            user3.bids(auction, 3000);
-            Thread.sleep(1000);
-            user2.bids(auction, 4000);
-            Thread.sleep(10000);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            Auction auction = admin.startAuction(0, 0, 10);
+//            user2.bids(auction, 2000);
+//            Thread.sleep(1000);
+//            user3.bids(auction, 3000);
+//            Thread.sleep(1000);
+//            user2.bids(auction, 4000);
+//            Thread.sleep(10000);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 }

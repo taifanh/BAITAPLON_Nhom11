@@ -1,15 +1,31 @@
 package models.Extra.messages;
 
 public class Createitempayload {
+    private String item_type;
     private String item_info;
     private double base_price;
     private double bid_increment;
 
-    public Createitempayload(String item_info, double base_price, double bid_increment) {
+    public Createitempayload(String item_type, String item_info, double base_price, double bid_increment) {
+        this.item_type = item_type;
         this.item_info = item_info;
         this.base_price = base_price;
         this.bid_increment = bid_increment;
     }
 
+    public String getItemType() {
+        return item_type;
+    }
 
+    public String getItemInfo() {
+        return item_info;
+    }
+
+    public double getBasePrice() {
+        return base_price;
+    }
+
+    public double getBidIncrement() {
+        return bid_increment;
+    }
 }

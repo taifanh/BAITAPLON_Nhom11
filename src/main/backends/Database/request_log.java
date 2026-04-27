@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class request_log {
     private static final Path DATA_DIRECTORY = Path.of("data");
@@ -44,6 +46,52 @@ public class request_log {
         } ;
     }
 
+    public List<RequestRecord> getRequestsByType(String requestType) throws IOException {
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement("""
+                     SELECT STT, id_user, request_type, request_info
+                     FROM request_log
+                     WHERE request_type = ?
+                     ORDER BY STT ASC
+                     """)) {
+            statement.setString(1, requestType);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                List<RequestRecord> requests = new ArrayList<>();
+                while (resultSet.next()) {
+                    requests.add(new RequestRecord(
+                            resultSet.getInt("STT"),
+                            resultSet.getString("id_user"),
+                            resultSet.getString("request_type"),
+                            resultSet.getString("request_info")
+                    ));
+                }
+                return requests;
+            }
+        } catch (SQLException e) {
+            throw new IOException("Khong the lay danh sach request", e);
+        }
+    }
+
+    public void deleteRequests(List<Integer> requestIds) throws IOException {
+        if (requestIds == null || requestIds.isEmpty()) {
+            return;
+        }
+
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement("""
+                     DELETE FROM request_log
+                     WHERE STT = ?
+                     """)) {
+            for (Integer requestId : requestIds) {
+                statement.setInt(1, requestId);
+                statement.addBatch();
+            }
+            statement.executeBatch();
+        } catch (SQLException e) {
+            throw new IOException("Khong the xoa request", e);
+        }
+    }
+
     private void initializeRequest_Log() throws IOException, SQLException {
         ensureDataDirectoryExists();
         try(Connection conn = openConnection();
@@ -58,5 +106,8 @@ public class request_log {
     }
     private static Connection openConnection() throws SQLException{
         return DriverManager.getConnection(DATABASE_URL);
+    }
+
+    public record RequestRecord(int id, String userId, String requestType, String requestInfo) {
     }
 }

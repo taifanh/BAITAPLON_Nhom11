@@ -2,7 +2,6 @@ package controllers.frontendcontrollers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
 import controllers.MessageBus;
 import controllers.UserSession;
@@ -19,8 +18,6 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import models.Extra.messages.Message;
-import models.Extra.messages.placeBidpayload;
 import models.accounts.User;
 
 import java.io.IOException;
@@ -76,7 +73,7 @@ public class userinfocontroller {
                     Gson gson = new Gson();
                     JsonNode payloadJsonNode = mapper.readTree(payloadjson);
 
-                    double depositedAmount = payloadJsonNode.get("amount").asDouble();// lấy giá trị được gửi đến
+                    double depositedAmount = payloadJsonNode.get("amount").asDouble();
 
                     User currentUser = UserSession.getCurrentUser();
                     if (currentUser == null) {
@@ -131,38 +128,26 @@ public class userinfocontroller {
             infopassword.setText(user.getPassword());
         }
     }
-    // chua dung
-    public void placebid(ActionEvent event ) throws IOException{
-//        double money_bid = Double.parseDouble(money_display.getText());
-//
-//        Gson gson = new Gson();
-//        placeBidpayload payload = new placeBidpayload(money_bid);
-//        String payloadJson = gson.toJson( payload); // convert the content into like   "{"amount" : 100.0}"
-//
-//        Message msg = new Message();// create message of deposit
-////        msg.id_user = "12345";
-//        msg.messageType = "bid";
-//        msg.payloadJson = payloadJson;
-//        // this part still need checking for possible bid(compare max and increase)
-//
-//        // code here //
+
+    public void placebid(ActionEvent event) throws IOException {
     }
 
-    public void autobid(ActionEvent event ) throws IOException{}
+    public void autobid(ActionEvent event) throws IOException {
+    }
 
     public void handle_deposit(ActionEvent event) throws IOException {
         FXMLLoader loader = ViewLoader.loader("deposite.fxml");
         Parent root = loader.load();
 
         Scene sceneMain = new Scene(root);
-        Stage window = new  Stage();
+        Stage window = new Stage();
         window.setScene(sceneMain);
         window.setTitle("DEPOSIT");
         window.centerOnScreen();
         window.show();
     }
-    public void handle_create(ActionEvent event) throws IOException {
-        FXMLLoader  loader = ViewLoader.loader("create.fxml");
 
+    public void handle_create(ActionEvent event) throws IOException {
+        FXMLLoader loader = ViewLoader.loader("create.fxml");
     }
 }
