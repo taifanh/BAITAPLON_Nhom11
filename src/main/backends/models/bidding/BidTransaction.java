@@ -1,17 +1,18 @@
 package models.bidding;
 
+import models.accounts.User;
 import models.core.Account;
 import models.core.Item;
 
 import java.util.Date;
 
 public class BidTransaction {
-    private final CanBidding bidder;
+    private final User bidder;
     private final Item item;
     private final double amount;
     private final Date time;
 
-    public BidTransaction(CanBidding bidder, Item item, double amount) {
+    public BidTransaction(User bidder, Item item, double amount) {
         this.bidder = bidder;
         this.item = item;
         this.amount = amount;
@@ -22,7 +23,7 @@ public class BidTransaction {
         return amount;
     }
 
-    public CanBidding getBidder() {
+    public User getBidder() {
         return bidder;
     }
 

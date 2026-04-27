@@ -15,4 +15,10 @@ public class ClientApplication extends Application {
         stage.centerOnScreen();
         stage.show();
     }
+
+    @Override
+    public void stop() throws Exception {
+        System.out.println("Đang đóng chương trình...");
+        System.exit(0);
+    }
 }

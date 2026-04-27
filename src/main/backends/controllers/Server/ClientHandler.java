@@ -1,17 +1,27 @@
 package controllers.Server;
 
+import Database.BidTransactions;
 import Database.UserStore;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
+import models.Extra.messages.ClientSendBid;
 import models.Extra.messages.Depositpayload;
+import models.Extra.messages.ServerBidRespond;
+import models.accounts.User;
+import models.bidding.BidTransaction;
+import models.core.Item;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+
+import models.items.ItemType;
+import models.items.itemFactory;
 
 
 public class ClientHandler implements Runnable {
@@ -84,19 +94,15 @@ public class ClientHandler implements Runnable {
                 }
 
                 case "PLACE_BID" -> {
-                    String auctionId = node.get("auctionId").asText();
-                    /*Bid bid = mapper.treeToValue(node, Bid.class);
-
-                    try {
-                        // Manager xử lý nghiệp vụ, trả về JSON kết quả
-                        String resultJson = AuctionManager.getInstance().placeBid(auctionId, bid);
-                        // Room broadcast đến tất cả client đang xem phiên này
-                        AuctionRoom.getInstance().broadcastToSession(auctionId, resultJson);
-
-                    } catch (InvalidBidException | AuctionClosedException e) {
-                        // Chỉ trả lỗi về client này, không broadcast
-                        send(errorJson(e.getMessage()));
-                    } */
+                    ClientSendBid info = mapper.readValue(json, ClientSendBid.class);
+                    BidTransactions bidTransactions = new BidTransactions();
+                    User thisUser = (new UserStore()).getUser(info.id);
+                    String auctionId = "0";
+                    bidTransactions.saveBid(auctionId, new BidTransaction(thisUser,
+                            itemFactory.createItem(ItemType.Art, "bao ngu", 0, "oc cak"),
+                            info.amount));
+                    ServerBidRespond maxBidder = bidTransactions.getMaxBidder(auctionId);
+                    out.println(new Gson().toJson(maxBidder));
                 }
 
                 case "GET_AUCTIONS" -> {

@@ -1,5 +1,7 @@
 package Database;
 
+import models.Extra.messages.ServerBidRespond;
+import models.accounts.User;
 import models.bidding.BidTransaction;
 
 import java.io.IOException;
@@ -52,6 +54,26 @@ public class BidTransactions {
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new IOException("Khong the luu lich su bid", e);
+        }
+    }
+
+    public ServerBidRespond getMaxBidder(String auctionId) throws IOException, SQLException {
+        try(Connection connection = openConnection();
+            PreparedStatement statement = connection.prepareStatement("""
+                    SELECT bidderId, amount
+                    FROM bid_transactions
+                    WHERE auctionId = ?
+                    ORDER BY amount DESC 
+                    LIMIT 1
+                    """)) {
+            statement.setString(1, auctionId);
+            try(ResultSet resultSet = statement.executeQuery()) {
+                resultSet.next();
+                String username = (new UserStore()).getUser(resultSet.getString("bidderId")).getName();
+                return new ServerBidRespond(username, resultSet.getDouble("amount"));
+            } catch (SQLException e) {
+                throw new IOException("Chua co bidder", e);
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 package controllers.frontendcontrollers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -13,11 +14,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
+import models.Extra.messages.ClientSendBid;
+import models.Extra.messages.ServerBidRespond;
 import models.accounts.User;
 
 import java.io.IOException;
@@ -48,6 +48,9 @@ public class userinfocontroller {
     @FXML
     private Button autobid;
 
+    @FXML
+    private TextField bidprice;
+
     private User user;
 
     private Consumer<String> depositResultHandler;
@@ -59,6 +62,32 @@ public class userinfocontroller {
             setUser(UserSession.getCurrentUser());
         }
         subscribeDepositResult();
+        subcribePlaceBid();
+    }
+
+    private void subcribePlaceBid() {
+        MessageBus.getInstance().subscribe(json -> {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode node = null;
+            try {
+                node = mapper.readTree(json);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+            String type = resolveMessageType(node);
+
+            switch (type) {
+                case "PLACE_BID" -> {
+                    ServerBidRespond maxBidder;
+                    try {
+                        maxBidder = mapper.readValue(json, ServerBidRespond.class);
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                    System.out.println("nguoi cao nhat hien tai la " + maxBidder.name + " voi gia la " + maxBidder.amount);
+                }
+            }
+        });
     }
 
     private void subscribeDepositResult() {
@@ -128,8 +157,24 @@ public class userinfocontroller {
             infopassword.setText(user.getPassword());
         }
     }
-
     public void placebid(ActionEvent event) throws IOException {
+        String amountStr = bidprice.getText();
+        Double amount;
+        try {
+            amount = Double.parseDouble(amountStr);
+        } catch (NumberFormatException e) {
+            new Alert(Alert.AlertType.ERROR, "Invalid amount", ButtonType.OK).show();
+            return;
+        }
+        UserSession.getConnection().send(new ClientSendBid(UserSession.getCurrentUser().getId(), amount));
+    }
+
+    private String resolveMessageType(JsonNode node) {
+        String messageType = node.path("messageType").asText("");
+        if (!messageType.isBlank()) {
+            return messageType;
+        }
+        return node.path("type").asText("");
     }
 
     public void autobid(ActionEvent event) throws IOException {

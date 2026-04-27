@@ -38,6 +38,31 @@ public class UserStore {
         }
     }
 
+    public User getUser(String id) throws IOException {
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement("""
+                     SELECT id, name, email , phone_number, password
+                     FROM users
+                     where id = ?
+                     """)) {
+
+             statement.setString(1, id);
+             try(ResultSet resultSet = statement.executeQuery()) {
+                 resultSet.next();
+                 User user = new User(
+                         resultSet.getString("id"),
+                         resultSet.getString("name"),
+                         resultSet.getString("email"),
+                         resultSet.getString("phone_number"),
+                         resultSet.getString("password")
+                 );
+                 return user;
+             }
+        } catch (SQLException e) {
+            throw new IOException("Khong co user voi id = " + id, e);
+        }
+    }
+
     public List<User> getAllUsers() throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
