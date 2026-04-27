@@ -4,6 +4,7 @@ import Database.UserStore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.gson.Gson;
 import models.Extra.messages.Depositpayload;
 
 import java.io.BufferedReader;
@@ -20,6 +21,7 @@ public class ClientHandler implements Runnable {
     private final ObjectMapper mapper = new ObjectMapper();
     private String watchingAuctionId = null;        // client đang xem phiên nào
 
+    public Gson gson = new Gson();
     public ClientHandler(Socket socket) {
         this.socket = socket;
     }
@@ -110,8 +112,12 @@ public class ClientHandler implements Runnable {
 
                     UserStore userStore = new UserStore();
                     userStore.update_balance(payload.getAmount(), userId);
-                    send(okJson(payload.getAmount()));
 
+                    ObjectNode responseNode = mapper.createObjectNode();// tạo 1 kiểu payloadjson để có thể dùng chung cho các phương thức khác
+                    responseNode.put("type", "OK");
+                    responseNode.put("payloadJson", gson.toJson(payload));
+
+                    send(responseNode.toString());
                 }
 
                 default -> System.out.println("[ClientHandler] Unknown type: " + type);

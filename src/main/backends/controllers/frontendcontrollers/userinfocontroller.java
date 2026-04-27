@@ -1,5 +1,6 @@
 package controllers.frontendcontrollers;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
@@ -67,11 +68,15 @@ public class userinfocontroller {
         depositResultHandler = rawJson -> {
             try {
                 ObjectMapper mapper = new ObjectMapper();
-                ObjectNode node = (ObjectNode) mapper.readTree(rawJson);
+                JsonNode node = mapper.readTree(rawJson);
                 String type = node.get("type").asText();
 
-                if (type.equals("OK") && node.has("amount")) {
-                    double depositedAmount = node.get("amount").asDouble();
+                if (type.equals("OK") && node.has("payloadJson")) {
+                    String payloadjson = node.get("payloadJson").asText();
+                    Gson gson = new Gson();
+                    JsonNode payloadJsonNode = mapper.readTree(payloadjson);
+
+                    double depositedAmount = payloadJsonNode.get("amount").asDouble();// lấy giá trị được gửi đến
 
                     User currentUser = UserSession.getCurrentUser();
                     if (currentUser == null) {
@@ -156,5 +161,8 @@ public class userinfocontroller {
         window.centerOnScreen();
         window.show();
     }
-    public void handle_create(ActionEvent event) throws IOException {}
+    public void handle_create(ActionEvent event) throws IOException {
+        FXMLLoader  loader = ViewLoader.loader("create.fxml");
+
+    }
 }
