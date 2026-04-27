@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
 import models.Extra.messages.ClientSendBid;
 import models.Extra.messages.Depositpayload;
+import models.Extra.messages.ReceiveMaxBidder;
 import models.Extra.messages.ServerBidRespond;
 import models.accounts.User;
 import models.bidding.BidTransaction;
@@ -102,7 +103,8 @@ public class ClientHandler implements Runnable {
                             itemFactory.createItem(ItemType.Art, "bao ngu", 0, "oc cak"),
                             info.amount));
                     ServerBidRespond maxBidder = bidTransactions.getMaxBidder(auctionId);
-                    out.println(new Gson().toJson(maxBidder));
+                    ReceiveMaxBidder maxBidder_msg = new ReceiveMaxBidder(maxBidder);
+                    send(new Gson().toJson(maxBidder_msg));
                 }
 
                 case "GET_AUCTIONS" -> {

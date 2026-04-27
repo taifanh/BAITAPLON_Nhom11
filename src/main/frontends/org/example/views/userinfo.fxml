@@ -220,8 +220,8 @@
                                           <Font size="18.0" />
                                        </font>
                                     </Label>
-                                    <TextField layoutX="144.0" layoutY="200.0" prefHeight="37.0" prefWidth="237.0" style="-fx-background-radius: 12;" />
-                                    <TextField layoutX="144.0" layoutY="250.0" prefHeight="36.0" prefWidth="237.0" style="-fx-background-radius: 12;" />
+                                    <TextField fx:id="high_bidder" layoutX="144.0" layoutY="200.0" prefHeight="37.0" prefWidth="237.0" style="-fx-background-radius: 12;" />
+                                    <TextField fx:id="current_amount" layoutX="144.0" layoutY="250.0" prefHeight="36.0" prefWidth="237.0" style="-fx-background-radius: 12;" />
                                     <Label alignment="CENTER" layoutX="3.0" layoutY="251.0" prefHeight="34.0" prefWidth="138.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5); -fx-background-radius: 10;" text="Current  Bid" textFill="#9a3412">
                                        <font>
                                           <Font size="18.0" />

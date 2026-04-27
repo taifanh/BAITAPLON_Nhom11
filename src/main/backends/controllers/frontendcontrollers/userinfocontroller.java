@@ -17,6 +17,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import models.Extra.messages.ClientSendBid;
+import models.Extra.messages.ReceiveMaxBidder;
 import models.Extra.messages.ServerBidRespond;
 import models.accounts.User;
 
@@ -44,6 +45,12 @@ public class userinfocontroller {
 
     @FXML
     private Label balance;
+
+    @FXML
+    private TextField high_bidder;
+
+    @FXML
+    private TextField current_amount;
 
     @FXML
     private Button autobid;
@@ -75,16 +82,19 @@ public class userinfocontroller {
                 throw new RuntimeException(e);
             }
             String type = resolveMessageType(node);
-
             switch (type) {
-                case "PLACE_BID" -> {
-                    ServerBidRespond maxBidder;
+                case "RECEIVE_BID" -> {
+                    ReceiveMaxBidder maxBidder_msg;
                     try {
-                        maxBidder = mapper.readValue(json, ServerBidRespond.class);
+                        maxBidder_msg = mapper.readValue(json, ReceiveMaxBidder.class);
+                        Platform.runLater(() -> {
+                            high_bidder.setText(String.valueOf(maxBidder_msg.maxBidder.name));
+                            current_amount.setText(String.valueOf(maxBidder_msg.maxBidder.amount));
+                        });
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     }
-                    System.out.println("nguoi cao nhat hien tai la " + maxBidder.name + " voi gia la " + maxBidder.amount);
+
                 }
             }
         });
