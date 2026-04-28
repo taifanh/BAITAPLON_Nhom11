@@ -113,7 +113,7 @@ public class ClientHandler implements Runnable {
                             info.amount));
                     ServerBidRespond maxBidder = bidTransactions.getMaxBidder(auctionId);
                     ReceiveMaxBidder maxBidder_msg = new ReceiveMaxBidder(maxBidder);
-                    send(new Gson().toJson(maxBidder_msg));
+                    AuctionRoom.getInstance().broadcast(new Gson().toJson(maxBidder_msg));
                 }
 
                 case "GET_AUCTIONS" -> {
