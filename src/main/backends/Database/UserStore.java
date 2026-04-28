@@ -211,6 +211,28 @@ public class UserStore {
             throw new IOException("Khong the cập nhật balance trong SQLite.", e);
         }
     }
+    public void change_info(String new_name , String new_email , String new_phonenumber ,String new_password ,  String id) throws IOException {
+        try(Connection connection = openConnection();
+            PreparedStatement statement = connection.prepareStatement("""
+                  UPDATE users
+                  SET name = ?, email = ?, phone_number = ?, password = ?
+                  WHERE id = ?
+""")) {
+            statement.setString(1, new_name);
+            statement.setString(2, new_email);
+            statement.setString(3, new_phonenumber);
+            statement.setString(4, new_password);
+            statement.setString(5, id );
+
+            try{
+                statement.executeUpdate();
+            } catch(SQLException e) {
+                throw new IOException("khong the thay doi thong tin. " ,e );
+            }
+        } catch (SQLException e) {
+            throw new IOException("khong the thay doi thong tin." ,e);
+        }
+    }
 
     private void initializeStorage() throws IOException, SQLException {
         ensureDataDirectoryExists();

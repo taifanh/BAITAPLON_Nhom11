@@ -122,7 +122,38 @@ public class ClientHandler implements Runnable {
                     userStore.update_balance(payload.getAmount(), userId);
 
                     ObjectNode responseNode = mapper.createObjectNode();// tạo 1 kiểu payloadjson để có thể dùng chung cho các phương thức khác
-                    responseNode.put("type", "OK");
+                    responseNode.put("type", "deposit_OK");
+                    responseNode.put("payloadJson", gson.toJson(payload));
+
+                    send(responseNode.toString());
+                }
+                case  "additem" -> {
+                    String userId = node.get("Id_user").asText();
+                    String payloadJson = node.get("payloadJson").asText();
+//                    String request_type = node.get("request_type").asText();
+                    // tạo lại 1 message từ message của client để có thể lưu vào request_log -> client không tự lưu vào request_log
+                    Message msg = new Message();
+                    msg.Id_user = userId;
+                    msg.payloadJson = payloadJson;
+                    msg.messageType = "additem";
+
+                    Createitempayload payload = mapper.readValue(payloadJson, Createitempayload.class);// cần constructor rỗng
+                    // response này chỉ chứa các thông tin chính của sản phẩm
+                    ObjectNode responseNode = mapper.createObjectNode();
+                    responseNode.put("type", "add_item_OK");
+                    responseNode.put("payloadJson", gson.toJson(payload));
+
+                    request_log.save_request(msg);// save to request database waitting for admin's acceptance
+                    send(responseNode.toString());// send back to user and admin
+                }
+                case "change_info" -> {
+                    String userId = node.get("Id_user").asText();
+                    String payloadJson = node.get("payloadJson").asText();
+
+                    Change_infopayload payload = mapper.readValue(payloadJson,Change_infopayload.class);
+
+                    ObjectNode responseNode = mapper.createObjectNode();
+                    responseNode.put("type", "change_info_OK");
                     responseNode.put("payloadJson", gson.toJson(payload));
 
                     send(responseNode.toString());

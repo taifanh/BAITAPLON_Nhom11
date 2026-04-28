@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="720.0" prefWidth="1080.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.frontendcontrollers.userinfocontroller">
+<AnchorPane prefHeight="720.0" prefWidth="1080.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.frontendcontrollers.userinfocontroller">
     <children>
         <TabPane prefHeight="720.0" prefWidth="1080.0" side="TOP" style="-fx-background-color: transparent; -fx-tab-min-width: 180; -fx-tab-max-width: 180;">
             <tabs>
@@ -33,12 +42,12 @@
                                                         <ImageView fx:id="UserImange" fitHeight="120.0" fitWidth="120.0" layoutX="40.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" />
                                                     </children>
                                                 </Pane>
-                                                <Label alignment="CENTER" layoutX="26.0" layoutY="290.0" prefHeight="34.0" prefWidth="228.0" text="Full Name" textAlignment="CENTER" textFill="WHITE">
+                                                <Label fx:id="infoname" alignment="CENTER" layoutX="26.0" layoutY="290.0" prefHeight="34.0" prefWidth="228.0" text="Full Name" textAlignment="CENTER" textFill="WHITE">
                                                     <font>
                                                         <Font size="22.0" />
                                                     </font>
                                                 </Label>
-                                                <Label alignment="CENTER" layoutX="26.0" layoutY="324.0" prefHeight="40.0" prefWidth="228.0" text="email@example.com" textAlignment="CENTER" textFill="#cbd5e1" wrapText="true">
+                                                <Label fx:id="infoemail" alignment="CENTER" layoutX="26.0" layoutY="324.0" prefHeight="40.0" prefWidth="228.0" text="email@example.com" textAlignment="CENTER" textFill="#cbd5e1" wrapText="true">
                                                     <font>
                                                         <Font size="14.0" />
                                                     </font>
@@ -112,7 +121,7 @@
                                                         <Font size="15.0" />
                                                     </font>
                                                 </Label>
-                                                <TextField fx:id="infoname" accessibleRole="TEXT" alignment="CENTER" editable="false" layoutX="142.0" layoutY="46.0" prefHeight="55.0" prefWidth="435.0" style="-fx-background-color: white; -fx-text-fill: #0f172a; -fx-prompt-text-fill: #64748b; -fx-border-color: #ea580c; -fx-background-radius: 10; -fx-border-radius: 14;" />
+                                                <TextField fx:id="changable_infoname" accessibleRole="TEXT" alignment="CENTER" editable="false" layoutX="142.0" layoutY="46.0" prefHeight="55.0" prefWidth="435.0" style="-fx-background-color: white; -fx-text-fill: #0f172a; -fx-prompt-text-fill: #64748b; -fx-border-color: #ea580c; -fx-background-radius: 10; -fx-border-radius: 14;" />
                                                 <Pane layoutX="141.0" layoutY="105.0" prefHeight="55.0" prefWidth="436.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #ea580c; -fx-border-radius: 14;">
                                                     <children>
                                                         <Label fx:id="infophonenumber" alignment="CENTER" layoutX="-1.0" layoutY="4.0" prefHeight="48.0" prefWidth="438.0" textAlignment="JUSTIFY" textFill="#0f172a" />
@@ -120,7 +129,7 @@
                                                 </Pane>
                                                 <Pane layoutX="141.0" layoutY="163.0" prefHeight="55.0" prefWidth="436.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #ea580c; -fx-border-radius: 14;">
                                                     <children>
-                                                        <Label fx:id="infoemail" alignment="CENTER" layoutX="1.0" layoutY="3.0" prefHeight="50.0" prefWidth="433.0" textAlignment="JUSTIFY" textFill="#0f172a" />
+                                                        <Label fx:id="changable_infoemail" alignment="CENTER" layoutX="1.0" layoutY="3.0" prefHeight="50.0" prefWidth="433.0" textAlignment="JUSTIFY" textFill="#0f172a" />
                                                     </children>
                                                 </Pane>
                                             </children>
@@ -253,7 +262,10 @@
                               </Label>
                            </children>
                         </Pane>
-                        <Pane layoutX="20.0" layoutY="118.0" prefHeight="561.0" prefWidth="1039.0" style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 22, 0.12, 0, 8);" />
+                        <Pane layoutX="20.0" layoutY="118.0" prefHeight="561.0" prefWidth="1039.0" style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 22, 0.12, 0, 8);">
+                           <children>
+                              <ListView fx:id="List_AcceptedItem" layoutX="14.0" layoutY="14.0" prefHeight="536.0" prefWidth="1016.0" />
+                           </children></Pane>
                      </children></AnchorPane>
               </content>
             </Tab>
