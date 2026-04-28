@@ -1,7 +1,7 @@
 package models.core;
 
 public class Account extends Entity {
-    protected String name,phoneNumber,Email,password;
+    protected String name,phoneNumber,Email,password,role;
     public Account(String id, String name, String Email, String phoneNumber, String password){
         this.id = id;
         this.name=name;
@@ -21,5 +21,8 @@ public class Account extends Entity {
     public String getPassword(){
         return password;
     }
-
+    public String getRole(){return role;}
+    public void setRole(String role){
+        this.role = role;
+    }
 }

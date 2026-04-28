@@ -1,6 +1,6 @@
 package controllers.frontendcontrollers;
 
-import Database.request_log;
+import Database.RequestLog;
 import com.google.gson.Gson;
 import controllers.UserSession;
 import javafx.collections.FXCollections;
@@ -30,7 +30,7 @@ public class createitemcontroller {
     @FXML
     public ComboBox<String> item_type;
 
-    private final request_log requestLog = new request_log();
+    private final RequestLog requestLog = new RequestLog();
 
     public void handle_create_ok(ActionEvent event) throws IOException {
         String type = item_type.getSelectionModel().getSelectedItem().toString();

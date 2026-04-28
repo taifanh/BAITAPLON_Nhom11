@@ -1,10 +1,8 @@
 package controllers.frontendcontrollers;
 
-import controllers.AdminService;
+import Database.Inventory;
 import controllers.UserSession;
 import controllers.ViewLoader;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -12,21 +10,13 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.cell.CheckBoxListCell;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
-import javafx.util.StringConverter;
-import models.accounts.User;
+import models.core.Account;
 import models.core.Item;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class admininfocontroller {
     @FXML
@@ -45,157 +35,67 @@ public class admininfocontroller {
     private CheckBox passshow;
 
     @FXML
-    private ListView<AdminService.PendingItemRequest> ITEMLIST11;
+    private ListView<String> requestlist;
 
     @FXML
-    private ListView<InventoryEntry> ITEMLIST111;
+    private ListView<Item> inventory;
 
     @FXML
-    private ListView<InventoryEntry> ITEMLIST1;
+    private ListView<Item> upcomingitem;
 
     @FXML
-    private Label itemname1;
+    private Label itemname;
 
     @FXML
-    private TextField baseprice1;
+    private TextField baseprice;
 
     @FXML
-    private TextField increment1;
+    private TextField increment;
 
-    private User user;
+    @FXML
+    private TextField changeincremt;
 
-    private final ObservableList<AdminService.PendingItemRequest> requestItems = FXCollections.observableArrayList();
-    private final ObservableList<InventoryEntry> inventoryItems = FXCollections.observableArrayList();
-    private final ObservableList<InventoryEntry> upcomingItems = FXCollections.observableArrayList();
-    private final Map<Integer, BooleanProperty> requestSelection = new HashMap<>();
+    @FXML
+    private TextField settime;
+
+    private Account adminAccount;
 
     @FXML
     public void initialize() {
-        if (passshow != null) {
-            passshow.selectedProperty().addListener((observable, oldValue, newValue) -> refreshPasswordField());
-        }
+        passshow.selectedProperty().addListener((observable, oldValue, newValue) -> refreshPasswordField());
+        setAdmin(UserSession.getCurrentAccount());
 
-        setupLists();
+        inventory.setCellFactory(listView -> new ListCell<>() {
+            @Override
+            protected void updateItem(Item item, boolean empty) {
+                super.updateItem(item, empty);
 
-        User currentUser = UserSession.getCurrentUser();
-        if (currentUser != null) {
-            setUser(currentUser);
-        }
-
-        refreshAdminData();
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-        if (user == null) {
-            return;
-        }
-
-        if (infoname != null) {
-            infoname.setText(user.getName());
-        }
-        if (infoemail != null) {
-            infoemail.setText(user.getEmail());
-        }
-        if (infophonenumber != null) {
-            infophonenumber.setText(user.getPhoneNumber());
-        }
-        refreshPasswordField();
-    }
-
-    private void setupLists() {
-        if (ITEMLIST11 != null) {
-            ITEMLIST11.setItems(requestItems);
-            ITEMLIST11.setCellFactory(CheckBoxListCell.forListView(
-                    item -> requestSelection.computeIfAbsent(item.requestId(), key -> new SimpleBooleanProperty(false)),
-                    new StringConverter<>() {
-                        @Override
-                        public String toString(AdminService.PendingItemRequest object) {
-                            return object == null ? "" : object.toString();
-                        }
-
-                        @Override
-                        public AdminService.PendingItemRequest fromString(String string) {
-                            return null;
-                        }
-                    }
-            ));
-        }
-
-        if (ITEMLIST111 != null) {
-            ITEMLIST111.setItems(inventoryItems);
-            ITEMLIST111.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) ->
-                    showItemSummary(newValue));
-        }
-
-        if (ITEMLIST1 != null) {
-            ITEMLIST1.setItems(upcomingItems);
-            ITEMLIST1.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-                if (newValue != null) {
-                    showItemSummary(newValue);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(
+                            "Name: " + item.getName() + "\n" +
+                                    "Price: " + item.getPrices() + "\n" +
+                                    "Type: " + item.getType() + "\n" +
+                                    "Desc: " + item.getInfo()
+                    );
                 }
-            });
-        }
+            }
+        });
+
+        loadInventoryData();
     }
 
-    private void refreshPasswordField() {
-        if (user == null || infopassword == null || passshow == null) {
+    public void setAdmin(Account account) {
+        adminAccount = account;
+        if (account == null) {
             return;
         }
 
-        infopassword.setText(passshow.isSelected()
-                ? user.getPassword()
-                : "*".repeat(user.getPassword().length()));
-    }
-
-    @FXML
-    public void handle_accept_requests(ActionEvent event) {
-        List<Integer> selectedRequestIds = getSelectedRequestIds();
-        if (selectedRequestIds.isEmpty()) {
-            showAlert(Alert.AlertType.INFORMATION, "Requests", "Chua chon request", "Hay tick it nhat mot request de accept.");
-            return;
-        }
-
-        try {
-            AdminService.acceptRequests(selectedRequestIds);
-            refreshAdminData();
-        } catch (IOException e) {
-            showAlert(Alert.AlertType.ERROR, "Requests", "Khong the accept request", e.getMessage());
-        }
-    }
-
-    @FXML
-    public void handle_reject_requests(ActionEvent event) {
-        List<Integer> selectedRequestIds = getSelectedRequestIds();
-        if (selectedRequestIds.isEmpty()) {
-            showAlert(Alert.AlertType.INFORMATION, "Requests", "Chua chon request", "Hay tick it nhat mot request de reject.");
-            return;
-        }
-
-        try {
-            AdminService.rejectRequests(selectedRequestIds);
-            refreshAdminData();
-        } catch (IOException e) {
-            showAlert(Alert.AlertType.ERROR, "Requests", "Khong the reject request", e.getMessage());
-        }
-    }
-
-    @FXML
-    public void handle_start_auction(ActionEvent event) {
-        InventoryEntry selectedInventoryItem = ITEMLIST111 == null
-                ? null
-                : ITEMLIST111.getSelectionModel().getSelectedItem();
-        if (selectedInventoryItem == null) {
-            showAlert(Alert.AlertType.INFORMATION, "Inventory", "Chua chon item", "Hay chon mot item trong inventory de dua vao bidding.");
-            return;
-        }
-
-        try {
-            AdminService.moveInventoryItemToBidding(selectedInventoryItem.itemId());
-            refreshAdminData();
-        } catch (IOException e) {
-            showAlert(Alert.AlertType.ERROR, "Inventory", "Khong the bat dau bidding", e.getMessage());
-        }
+        infoname.setText(account.getName());
+        infoemail.setText(account.getEmail());
+        infophonenumber.setText(account.getPhoneNumber());
+        refreshPasswordField();
     }
 
     @FXML
@@ -211,82 +111,62 @@ public class admininfocontroller {
         window.show();
     }
 
-    public void autobid(ActionEvent event) {
-        showAlert(Alert.AlertType.INFORMATION, "Bidding", "Chua ho tro", "Phan dieu khien auction chi moi duoc noi du lieu danh sach.");
-    }
-
-    public void placebid(ActionEvent event) {
-        showAlert(Alert.AlertType.INFORMATION, "Bidding", "Chua ho tro", "Huy phien dau gia se can noi tiep voi AuctionService.");
-    }
-
-    private void refreshAdminData() {
+    private void loadInventoryData() {
         try {
-            List<AdminService.PendingItemRequest> pendingRequests = AdminService.getPendingItemRequests();
-            requestItems.setAll(pendingRequests);
-            requestSelection.keySet().retainAll(pendingRequests.stream().map(AdminService.PendingItemRequest::requestId).toList());
-            pendingRequests.forEach(request -> requestSelection.computeIfAbsent(request.requestId(), key -> new SimpleBooleanProperty(false)));
+            Inventory inventoryDB = new Inventory();
 
-            inventoryItems.setAll(AdminService.getWaitingInventoryItems().stream().map(InventoryEntry::fromItem).toList());
-            upcomingItems.setAll(AdminService.getItemsInAuction().stream().map(InventoryEntry::fromItem).toList());
+            // Lấy các item WAITING
+            List<Item> items = inventoryDB.getItemsByStatus(Inventory.STATUS_WAITING);
 
-            InventoryEntry preferredItem = !upcomingItems.isEmpty()
-                    ? upcomingItems.get(0)
-                    : inventoryItems.isEmpty() ? null : inventoryItems.get(0);
-            showItemSummary(preferredItem);
-        } catch (IOException e) {
-            showAlert(Alert.AlertType.ERROR, "Admin", "Khong the tai du lieu", e.getMessage());
+            inventory.setItems(FXCollections.observableArrayList(items));
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    private List<Integer> getSelectedRequestIds() {
-        return requestItems.stream()
-                .filter(item -> {
-                    BooleanProperty property = requestSelection.get(item.requestId());
-                    return property != null && property.get();
-                })
-                .map(AdminService.PendingItemRequest::requestId)
-                .toList();
+    @FXML
+    public void handle_reject_requests(ActionEvent event) {
+        showPlaceholderAlert();
     }
 
-    private void showItemSummary(InventoryEntry entry) {
-        if (itemname1 == null || baseprice1 == null || increment1 == null) {
+    @FXML
+    public void handle_accept_requests(ActionEvent event) {
+        showPlaceholderAlert();
+    }
+
+    @FXML
+    public void handle_start_auction(ActionEvent event) {
+        showPlaceholderAlert();
+    }
+
+    @FXML
+    public void autobid(ActionEvent event) {
+        showPlaceholderAlert();
+    }
+
+    @FXML
+    public void placebid(ActionEvent event) {
+        showPlaceholderAlert();
+    }
+
+    private void refreshPasswordField() {
+        if (adminAccount == null) {
             return;
         }
 
-        if (entry == null) {
-            itemname1.setText("Item name");
-            baseprice1.setText("");
-            increment1.setText("");
-            return;
+        if (passshow.isSelected()) {
+            infopassword.setText(adminAccount.getPassword());
+        } else {
+            infopassword.setText("*".repeat(adminAccount.getPassword().length()));
         }
-
-        itemname1.setText(entry.name());
-        baseprice1.setText(String.valueOf(entry.basePrice()));
-        increment1.setText("N/A");
     }
 
-    private void showAlert(Alert.AlertType type, String title, String header, String content) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(header);
-        alert.setContentText(content);
+    private void showPlaceholderAlert() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Thong bao");
+        alert.setHeaderText(null);
+        alert.setContentText("Chuc nang nay chua duoc cai dat.");
         alert.showAndWait();
-    }
-
-    private record InventoryEntry(String itemId, String name, String type, double basePrice, String description) {
-        static InventoryEntry fromItem(Item item) {
-            return new InventoryEntry(
-                    item.getId(),
-                    item.getName(),
-                    item.getType(),
-                    item.getPrices(),
-                    item.getInfo()
-            );
-        }
-
-        @Override
-        public String toString() {
-            return "[" + type + "] " + name + " | " + itemId + " | Base: " + basePrice + " | " + description;
-        }
     }
 }

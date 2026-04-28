@@ -1,6 +1,8 @@
 package Database;
 
+import models.accounts.Admin;
 import models.accounts.User;
+import models.core.Account;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,7 +28,8 @@ public class UserStore {
                 phone_number TEXT NOT NULL UNIQUE,
                 email TEXT NOT NULL,
                 password TEXT NOT NULL,
-                balance DOUBLE
+                balance DOUBLE,
+                role TEXT NOT NULL
             )
             """;
 
@@ -89,10 +92,11 @@ public class UserStore {
         }
     }
 
-    public Optional<User> authenticate(String phoneNumber, String password) throws IOException {
+    //kiểm tra role của account để trả về User hay Admin
+    public Optional<Account> authenticate(String phoneNumber, String password) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     SELECT id, name, email , phone_number, password , balance
+                     SELECT id, name, email , phone_number, password , balance, role
                      FROM users
                      WHERE phone_number = ? AND password = ?
                      LIMIT 1
@@ -105,16 +109,31 @@ public class UserStore {
                     return Optional.empty();
                 }
 
-                User user = new User(
-                        resultSet.getString("id"),
-                        resultSet.getString("name"),
-                        resultSet.getString("email"),
-                        resultSet.getString("phone_number"),
-                        resultSet.getString("password"),
-                        resultSet.getDouble("balance")
-                );
-                user.setId(resultSet.getString("id"));
-                return Optional.of(user);
+                String role = resultSet.getString("role");
+                Account account;
+
+                if ("Admin".equalsIgnoreCase(role)) {
+                    account = new Admin(
+                            resultSet.getString("id"),
+                            resultSet.getString("name"),
+                            resultSet.getString("email"),
+                            resultSet.getString("phone_number"),
+                            resultSet.getString("password")
+                    );
+                } else {
+                    account = new User(
+                            resultSet.getString("id"),
+                            resultSet.getString("name"),
+                            resultSet.getString("email"),
+                            resultSet.getString("phone_number"),
+                            resultSet.getString("password"),
+                            resultSet.getDouble("balance")
+                    );
+                }
+
+                account.setId(resultSet.getString("id"));
+                account.setRole(role);
+                return Optional.of(account);
             }
         } catch (SQLException e) {
             throw new IOException("Khong the xac thuc nguoi dung tu SQLite.", e);
@@ -141,8 +160,8 @@ public class UserStore {
     public void saveUser(User user) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     INSERT INTO users (id, name, email ,phone_number, password , balance)
-                     VALUES (?, ?, ?, ?, ? , ? )
+                     INSERT INTO users (id, name, email ,phone_number, password , balance,role)
+                     VALUES (?, ?, ?, ?, ? , ? , ?)
                      """)) {
             statement.setString(1, user.getId());
             statement.setString(2, user.getName());
@@ -150,6 +169,25 @@ public class UserStore {
             statement.setString(4, user.getPhoneNumber());
             statement.setString(5, user.getPassword());
             statement.setDouble(6,0.0);
+            statement.setString(7,"User");
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IOException("Khong the luu nguoi dung vao SQLite.", e);
+        }
+    }
+    public void saveAdmin(Admin admin) throws IOException {
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement("""
+                     INSERT INTO users (id, name, email ,phone_number, password , balance,role)
+                     VALUES (?, ?, ?, ?, ? , ? , ?)
+                     """)) {
+            statement.setString(1, admin.getId());
+            statement.setString(2, admin.getName());
+            statement.setString(3, admin.getEmail());
+            statement.setString(4, admin.getPhoneNumber());
+            statement.setString(5, admin.getPassword());
+            statement.setDouble(6,0.0);
+            statement.setString(7,"Admin");
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new IOException("Khong the luu nguoi dung vao SQLite.", e);

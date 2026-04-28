@@ -9,7 +9,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class request_log {
+public class RequestLog {
     private static final Path DATA_DIRECTORY = Path.of("data");
     static final Path DATABASE_FILE = DATA_DIRECTORY.resolve("request_log.db");
     private static final String DATABASE_URL = "jdbc:sqlite:" + DATABASE_FILE;
@@ -22,7 +22,7 @@ public class request_log {
             )
             """;
 
-    public request_log(){
+    public RequestLog(){
         try{
             initializeRequest_Log();
 

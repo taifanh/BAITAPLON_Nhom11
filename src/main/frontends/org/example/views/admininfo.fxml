@@ -169,7 +169,7 @@
                                                         <Font size="13.0" />
                                                     </font>
                                                 </Label>
-                                                <ListView fx:id="ITEMLIST11" layoutX="20.0" layoutY="96.0" prefHeight="272.0" prefWidth="972.0" style="-fx-background-color: #f8fafc; -fx-background-radius: 18; -fx-border-radius: 18; -fx-border-color: #dbe4f0;" />
+                                                <ListView fx:id="requestlist" layoutX="20.0" layoutY="96.0" prefHeight="272.0" prefWidth="972.0" style="-fx-background-color: #f8fafc; -fx-background-radius: 18; -fx-border-radius: 18; -fx-border-color: #dbe4f0;" />
                                             </children>
                                         </Pane>
                                         <Pane layoutX="24.0" layoutY="622.0" prefHeight="68.0" prefWidth="1012.0" style="-fx-background-color: white; -fx-background-radius: 22; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 18, 0.10, 0, 6);">
@@ -197,7 +197,7 @@
                         </ScrollPane>
                     </content>
                 </Tab>
-                <Tab text="Inventory">
+                <Tab fx:id="Inventory" text="Inventory">
                     <content>
                         <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" pannable="true" prefHeight="692.0" prefWidth="1080.0" style="-fx-background: transparent; -fx-background-color: transparent;">
                             <content>
@@ -239,7 +239,7 @@
                                                         <Font size="13.0" />
                                                     </font>
                                                 </Label>
-                                                <ListView fx:id="ITEMLIST111" layoutX="20.0" layoutY="96.0" prefHeight="272.0" prefWidth="972.0" style="-fx-background-color: #f8fafc; -fx-background-radius: 18; -fx-border-radius: 18; -fx-border-color: #dbe4f0;" />
+                                                <ListView fx:id="inventory" layoutX="20.0" layoutY="96.0" prefHeight="272.0" prefWidth="972.0" style="-fx-background-color: #f8fafc; -fx-background-radius: 18; -fx-border-radius: 18; -fx-border-color: #dbe4f0;" />
                                             </children>
                                         </Pane>
                                         <Pane layoutX="24.0" layoutY="622.0" prefHeight="68.0" prefWidth="1012.0" style="-fx-background-color: white; -fx-background-radius: 22; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 18, 0.10, 0, 6);">
@@ -285,12 +285,12 @@
                                                         <Font size="13.0" />
                                                     </font>
                                                 </Label>
-                                                <ListView fx:id="ITEMLIST1" layoutX="24.0" layoutY="98.0" prefHeight="372.0" prefWidth="252.0" style="-fx-background-radius: 18; -fx-border-radius: 18; -fx-border-color: #dbe4f0;" />
+                                                <ListView fx:id="upcomingitem" layoutX="24.0" layoutY="98.0" prefHeight="372.0" prefWidth="252.0" style="-fx-background-radius: 18; -fx-border-radius: 18; -fx-border-color: #dbe4f0;" />
                                             </children>
                                         </Pane>
                                         <Pane layoutX="740.0" layoutY="34.0" prefHeight="184.0" prefWidth="305.0" style="-fx-background-color: white; -fx-background-radius: 24; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 22, 0.12, 0, 8);">
                                             <children>
-                                                <Label fx:id="itemname1" layoutX="28.0" layoutY="28.0" text="Item name" textFill="#0f172a">
+                                                <Label fx:id="itemname" layoutX="28.0" layoutY="28.0" text="Item name" textFill="#0f172a">
                                                     <font>
                                                         <Font size="20.0" />
                                                     </font>
@@ -305,8 +305,8 @@
                                                         <Font size="13.0" />
                                                     </font>
                                                 </Label>
-                                                <TextField fx:id="baseprice1" layoutX="28.0" layoutY="78.0" prefHeight="36.0" prefWidth="249.0" style="-fx-background-color: #f8fafc; -fx-background-radius: 12; -fx-border-radius: 14; -fx-border-color: #dbe4f0;" />
-                                                <TextField fx:id="increment1" layoutX="28.0" layoutY="141.0" prefHeight="37.0" prefWidth="249.0" style="-fx-background-color: #f8fafc; -fx-background-radius: 12; -fx-border-radius: 14; -fx-border-color: #dbe4f0;" />
+                                                <TextField fx:id="baseprice" layoutX="28.0" layoutY="78.0" prefHeight="36.0" prefWidth="249.0" style="-fx-background-color: #f8fafc; -fx-background-radius: 12; -fx-border-radius: 14; -fx-border-color: #dbe4f0;" />
+                                                <TextField fx:id="increment" layoutX="28.0" layoutY="141.0" prefHeight="37.0" prefWidth="249.0" style="-fx-background-color: #f8fafc; -fx-background-radius: 12; -fx-border-radius: 14; -fx-border-color: #dbe4f0;" />
                                             </children>
                                         </Pane>
                                         <Pane layoutX="740.0" layoutY="228.0" prefHeight="424.0" prefWidth="306.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5); -fx-background-radius: 24; -fx-effect: dropshadow(gaussian, rgba(234,88,12,0.12), 22, 0.14, 0, 8);">
@@ -321,7 +321,7 @@
                                                         <Font size="13.0" />
                                                     </font>
                                                 </Label>
-                                                <TextField fx:id="autoincrement1" layoutX="31.0" layoutY="78.0" prefHeight="46.0" prefWidth="244.0" promptText="Change Bid Increment" style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #fdba74;">
+                                                <TextField fx:id="changeincremt" layoutX="31.0" layoutY="78.0" prefHeight="46.0" prefWidth="244.0" promptText="Change Bid Increment" style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #fdba74;">
                                                     <font>
                                                         <Font size="14.0" />
                                                     </font>
@@ -337,7 +337,7 @@
                                                         <Font size="13.0" />
                                                     </font>
                                                 </Label>
-                                                <TextField fx:id="autoincrement11" layoutX="31.0" layoutY="252.0" prefHeight="46.0" prefWidth="244.0" promptText="Set Time" style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #fdba74;">
+                                                <TextField fx:id="settime" layoutX="31.0" layoutY="252.0" prefHeight="46.0" prefWidth="244.0" promptText="Set Time" style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #fdba74;">
                                                     <font>
                                                         <Font size="14.0" />
                                                     </font>

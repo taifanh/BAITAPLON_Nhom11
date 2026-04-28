@@ -1,7 +1,10 @@
 package models.accounts;
 
 import Database.Inventory;
+import Database.RequestLog;
+import com.google.gson.Gson;
 import controllers.AuctionService;
+import models.Extra.messages.Message;
 import models.bidding.Auction;
 import models.bidding.CanBidding;
 import models.core.Account;
@@ -28,17 +31,17 @@ public class User extends Account implements CanBidding, CanSelling {
     public User(String id, String name, String email, String phoneNumber, String password , double balance) {
         super(id, name, email,phoneNumber, password);
         this.balance = balance;
-
+        this.role="User";
     }
     public User(String id, String name, String email, String phoneNumber, String password) {
         super(id, name, email,phoneNumber,  password);
-
+        this.role="User";
     }
 
     public User(String name, String email, String phoneNumber, String password) {
         this(buildGeneratedId(phoneNumber), name, email,phoneNumber,  password);
         this.balance = 0.0;
-
+        this.role="User";
     }
 
     private static String buildGeneratedId(String phoneNumber) {
@@ -57,18 +60,6 @@ public class User extends Account implements CanBidding, CanSelling {
 
     public void withdraw(double amount) {
         this.balance -= amount;
-    }
-
-    //tao san pham
-    public void addItem(ItemType itemType, String itemName, double itemPrice, String itemDescription) {
-        Item item = itemFactory.createItem(itemType, itemName, itemPrice, itemDescription);
-        try {
-            Inventory inventory = new Inventory();
-            inventory.saveItem(item, getId());
-            items.add(item);
-        } catch (IOException e) {
-            throw new RuntimeException("Khong the tao san pham", e);
-        }
     }
 
     @Override

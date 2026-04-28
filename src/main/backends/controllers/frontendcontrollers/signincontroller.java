@@ -15,6 +15,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import models.accounts.User;
+import models.core.Account;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -44,24 +45,37 @@ public class signincontroller {
         }
 
         try {
-            Optional<User> userOptional = userStore.authenticate(phoneNumber, password);
-            if (userOptional.isEmpty()) {
+            Optional<Account> accountOptional = userStore.authenticate(phoneNumber, password);
+            if (accountOptional.isEmpty()) {
                 showAlert(Alert.AlertType.ERROR, "Loi", "Dang nhap that bai", "Sai tai khoan hoac mat khau. Vui long thu lai.");
                 return;
             }
 
-            User user = userOptional.get();
-            UserSession.setCurrentUser(user);
+            Account account = accountOptional.get();
+            UserSession.setCurrentAccount(account);
+            String viewFileName;
+            String windowTitle;
 
-            FXMLLoader loader = ViewLoader.loader("userinfo.fxml");
+            //kiểm tra role để mở màn hình Info
+            if ("Admin".equalsIgnoreCase(account.getRole())) {
+                viewFileName = "admininfo.fxml";
+                windowTitle = "Thong tin admin";
+            } else {
+                viewFileName = "userinfo.fxml";
+                windowTitle = "Thong tin nguoi dung";
+            }
+
+            FXMLLoader loader = ViewLoader.loader(viewFileName);
             Parent root = loader.load();
-            userinfocontroller controller = loader.getController();
-            controller.setUser(user);
+            Object controller = loader.getController();
+            if (account instanceof User user && controller instanceof userinfocontroller userController) {
+                userController.setUser(user);
+            }
 
             Scene sceneMain = new Scene(root);
             Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
             window.setScene(sceneMain);
-            window.setTitle("Thong tin nguoi dung");
+            window.setTitle(windowTitle);
             window.centerOnScreen();
             window.show();
         } catch (IOException e) {

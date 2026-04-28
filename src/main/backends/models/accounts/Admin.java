@@ -14,12 +14,12 @@ public class Admin extends Account {
     private static Admin instance;
     private final Map<String, String> userItem = new HashMap<>();
 
-    public Admin(String id, String name, String phoneNumber, String email, String password) {
-        super(id, name, email,phoneNumber,  password);
+    public Admin(String id, String name, String email, String phoneNumber, String password) {
+        super(id, name, email, phoneNumber,  password);
         instance = this;
     }
 
-    private Admin(String name, String phoneNumber, String email, String password) {
+    private Admin(String name, String email, String phoneNumber, String password) {
         this(buildGeneratedId(phoneNumber), name, email ,phoneNumber, password);
     }
 
@@ -35,9 +35,9 @@ public class Admin extends Account {
         instance = admin;
     }
 
-    public Admin creating_admin(String name, String phoneNumber, String email, String password) {
+    public static Admin creating_admin(String name, String email, String phoneNumber, String password) {
         if (instance == null) {
-            instance = new Admin(name, phoneNumber, email, password);
+            instance = new Admin(name, email, phoneNumber, password);
             return instance;
         }
 
