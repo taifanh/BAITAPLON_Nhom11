@@ -323,7 +323,7 @@ class CustomItemCell extends ListCell<String>{
         spacer = new Pane();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        content = new HBox(10, name_item ,  View_info, remove_item);
+        content = new HBox(10, name_item , spacer , View_info, remove_item);
         content.setAlignment(Pos.CENTER_LEFT);
 
         View_info.setOnAction(event ->{
@@ -341,7 +341,7 @@ class CustomItemCell extends ListCell<String>{
 
     }
     @Override
-    protected void updateItem(String item , boolean empty){
+    protected void updateItem(String item , boolean empty){// javafx AUTO call it
         super.updateItem(item, empty);
         if(item!=null && !empty){
             name_item.setText(item);
