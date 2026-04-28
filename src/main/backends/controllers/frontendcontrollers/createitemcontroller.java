@@ -1,6 +1,6 @@
 package controllers.frontendcontrollers;
 
-import Database.request_log;
+import Database.RequestLog;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,7 +43,7 @@ public class createitemcontroller {
 
     private Consumer<String> createitemHandler;
 
-    private final request_log request_log = new request_log() ;
+    private final RequestLog requestLog = new RequestLog();
 
     public void handle_create_ok(ActionEvent event) throws IOException {
 

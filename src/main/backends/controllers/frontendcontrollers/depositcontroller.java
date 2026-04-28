@@ -57,7 +57,7 @@ public class depositcontroller {
                 ObjectNode node = (ObjectNode) mapper.readTree(rawJson);
                 String type = node.get("type").asText();
                 Platform.runLater(() -> {
-                    if (type.equals("OK")) {
+                    if (type.equals("deposit_OK")) {
                         showAlert(Alert.AlertType.INFORMATION, "Thành công", "Nạp tiền thành công!");
                         closeWindow();
                     } else {

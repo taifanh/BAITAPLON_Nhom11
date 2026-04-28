@@ -197,7 +197,9 @@ public class userinfocontroller {
             new Alert(Alert.AlertType.ERROR, "Invalid amount", ButtonType.OK).show();
             return;
         }
-        UserSession.getConnection().send(new ClientSendBid(UserSession.getCurrentUser().getId(), amount));
+        String currentUserId = UserSession.getCurrentUser().getId();
+        String auctionId = "USER_ROOM_" + currentUserId;
+        UserSession.getConnection().send(new ClientSendBid(currentUserId, amount, auctionId));
     }
 
     private String resolveMessageType(JsonNode node) {

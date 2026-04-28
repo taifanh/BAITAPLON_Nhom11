@@ -1,14 +1,18 @@
 package controllers.Server;
 
 import Database.BidTransactions;
+import Database.RequestLog;
 import Database.UserStore;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
+import models.Extra.messages.Change_infopayload;
 import models.Extra.messages.ClientSendBid;
+import models.Extra.messages.Createitempayload;
 import models.Extra.messages.Depositpayload;
+import models.Extra.messages.Message;
 import models.Extra.messages.ReceiveMaxBidder;
 import models.Extra.messages.ServerBidRespond;
 import models.accounts.User;
@@ -98,7 +102,12 @@ public class ClientHandler implements Runnable {
                     ClientSendBid info = mapper.readValue(json, ClientSendBid.class);
                     BidTransactions bidTransactions = new BidTransactions();
                     User thisUser = (new UserStore()).getUser(info.id);
-                    String auctionId = "0";
+                    String auctionId = info.auctionId;
+                    if (auctionId == null || auctionId.isBlank()) {
+                        auctionId = (watchingAuctionId == null || watchingAuctionId.isBlank())
+                                ? "USER_ROOM_" + info.id
+                                : watchingAuctionId;
+                    }
                     bidTransactions.saveBid(auctionId, new BidTransaction(thisUser,
                             itemFactory.createItem(ItemType.Art, "bao ngu", 0, "oc cak"),
                             info.amount));
@@ -143,7 +152,7 @@ public class ClientHandler implements Runnable {
                     responseNode.put("type", "add_item_OK");
                     responseNode.put("payloadJson", gson.toJson(payload));
 
-                    request_log.save_request(msg);// save to request database waitting for admin's acceptance
+                    RequestLog.save_request(msg);// save to request database waitting for admin's acceptance
                     send(responseNode.toString());// send back to user and admin
                 }
                 case "change_info" -> {
