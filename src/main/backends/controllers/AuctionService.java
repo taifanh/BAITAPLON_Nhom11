@@ -47,19 +47,44 @@ public final class AuctionService {
         }
 
         Inventory inventory = new Inventory();
-        Item waitingItem = inventory.getItemtoAuction(Inventory.STATUS_WAITING);
-        if (waitingItem == null) {
-            throw new IllegalStateException("Khong co san pham nao o trang thai WAITING");
+        Item itemAuction = inventory.getItemtoAuction(Inventory.STATUS_IN_AUCTION);
+        if (itemAuction == null) {
+            throw new IllegalStateException("Khong co san pham nao o trang thai STATUS_IN_AUCTION");
         }
 
-        Auction auction = new Auction(waitingItem);
+        Auction auction = new Auction(itemAuction);
         LocalDateTime now = LocalDateTime.now();
         auction.schedule(now, duration);
         auction.start(now);
 
-        Auctions auctionsRepository = new Auctions();
-        auctionsRepository.saveAuction(auction);
-        inventory.updateItemStatus(waitingItem.getId(), Inventory.STATUS_IN_AUCTION);
+//        Auctions auctionsRepository = new Auctions();
+//        auctionsRepository.saveAuction(auction);
+//        inventory.updateItemStatus(itemAuction.getId(), Inventory.STATUS_IN_AUCTION);
+        registerActiveAuction(auction);
+        scheduleAutoClose(auction, duration);
+        return auction;
+    }
+
+    // Tao phien dau gia cho item duoc chi dinh
+    public static Auction startAuction(Admin admin, Item item, int hours, int minutes, int seconds) throws IOException {
+        if (admin == null) {
+            throw new SecurityException("Chi admin moi duoc phep bat dau phien dau gia");
+        }
+        
+        if (item == null) {
+            throw new IllegalArgumentException("San pham khong hop le");
+        }
+
+        Duration duration = Duration.ofHours(hours).plusMinutes(minutes).plusSeconds(seconds);
+        if (duration.isZero() || duration.isNegative()) {
+            throw new IllegalArgumentException("Thoi gian dau gia phai lon hon 0");
+        }
+
+        Auction auction = new Auction(item);
+        LocalDateTime now = LocalDateTime.now();
+        auction.schedule(now, duration);
+        auction.start(now);
+
         registerActiveAuction(auction);
         scheduleAutoClose(auction, duration);
         return auction;
@@ -110,7 +135,7 @@ public final class AuctionService {
         Auction managedAuction = resolveAuction(auction);
         managedAuction.end(time);
         syncAuctionClosure(managedAuction);
-        unregisterActiveAuction(managedAuction.getAuctionId());
+        unregisterActiveAuction(managedAuction.getItem().getId());
     }
 
     // Huy phien dang dau gia, dua item ve lai WAITING va bo khoi registry active.
@@ -122,7 +147,7 @@ public final class AuctionService {
         Auction managedAuction = resolveAuction(auction);
         managedAuction.cancel();
         syncAuctionCancellation(managedAuction);
-        unregisterActiveAuction(managedAuction.getAuctionId());
+        unregisterActiveAuction(managedAuction.getItem().getId());
     }
 
     // Khoi phuc cac phien ACTIVE tu DB khi app/server bat lai.
@@ -156,8 +181,8 @@ public final class AuctionService {
     }
 
     // Tim phien active theo id tu registry trong RAM.
-    public static Auction getManagedActiveAuction(String auctionId) {
-        return ACTIVE_AUCTIONS.get(auctionId);
+    public static Auction getManagedActiveAuction(String itemId) {
+        return ACTIVE_AUCTIONS.get(itemId);
     }
 
     // Dang ky job dong phien sau mot khoang thoi gian con lai.
@@ -208,7 +233,7 @@ public final class AuctionService {
     // Lay instance Auction dang duoc service quan ly neu da ton tai,
     // nguoc lai dung object duoc truyen vao va dang ky no vao registry neu no dang ACTIVE.
     private static Auction resolveAuction(Auction auction) {
-        Auction managedAuction = ACTIVE_AUCTIONS.get(auction.getAuctionId());
+        Auction managedAuction = ACTIVE_AUCTIONS.get(auction.getItem().getId());
         if (managedAuction != null) {
             return managedAuction;
         }
@@ -220,13 +245,21 @@ public final class AuctionService {
 
     // Dua phien vao registry de cac tac vu tiep theo luon su dung cung mot instance trong RAM.
     private static void registerActiveAuction(Auction auction) {
-        ACTIVE_AUCTIONS.put(auction.getAuctionId(), auction);
+        ACTIVE_AUCTIONS.put(auction.getItem().getId(), auction);
     }
 
     // Xoa phien khoi registry active va huy job auto-close da dang ky truoc do.
-    private static void unregisterActiveAuction(String auctionId) {
-        ACTIVE_AUCTIONS.remove(auctionId);
-        cancelScheduledTask(auctionId);
+    private static void unregisterActiveAuction(String itemId) {
+        ACTIVE_AUCTIONS.remove(itemId);
+        cancelScheduledTask(itemId);
+    }
+
+    public static Duration getDuration(String itemId) {
+        Auction aut = ACTIVE_AUCTIONS.get(itemId);
+        if (aut == null) {
+            return Duration.ZERO;
+        }
+        return Duration.between(LocalDateTime.now(), aut.getEndAt());
     }
 
     // Huy job scheduler cu neu dang ton tai, tranh bi lap lich 2 lan cho cung mot phien.

@@ -67,10 +67,10 @@ public class signincontroller {
 
             FXMLLoader loader = ViewLoader.loader(viewFileName);
             Parent root = loader.load();
-            Object controller = loader.getController();
-            if (account instanceof User user && controller instanceof userinfocontroller userController) {
-                userController.setUser(user);
-            }
+//            Object controller = loader.getController();
+//            if (account instanceof User user && controller instanceof userinfocontroller userController) {
+//                userController.setUser(user);
+//            }
 
             Scene sceneMain = new Scene(root);
             Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
