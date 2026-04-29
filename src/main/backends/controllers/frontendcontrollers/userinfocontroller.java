@@ -1,6 +1,11 @@
 package controllers.frontendcontrollers;
 
 import Database.UserStore;
+import controllers.AuctionService;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,17 +29,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
-import models.Extra.messages.ClientSendBid;
-import models.Extra.messages.ReceiveMaxBidder;
-import models.Extra.messages.ServerBidRespond;
-import models.Extra.messages.Createitempayload;
-import models.Extra.messages.Message;
-import models.Extra.messages.placeBidpayload;
+import models.Extra.messages.*;
 import models.accounts.User;
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.function.Consumer;
 
 public class userinfocontroller {
@@ -49,6 +50,9 @@ public class userinfocontroller {
 
     @FXML
     private Label infophonenumber;
+
+    @FXML
+    private Label lblTimer;
 
     @FXML
     private CheckBox passshow;
@@ -69,6 +73,12 @@ public class userinfocontroller {
     private TextField bidprice;
 
     @FXML
+    private TextField baseprice;
+
+    @FXML
+    private TextField increment;
+
+    @FXML
     private Button autobid;
 
     @FXML
@@ -80,7 +90,9 @@ public class userinfocontroller {
     private Consumer<String> depositResultHandler;
     private Consumer<String> change_infoResultHandler;
     private Consumer<String> AdditemResultHandler;
-
+    private Consumer<String> auctionStartHandler;
+    private volatile LocalDateTime endAt;
+    private Timeline timeline;
 
     @FXML
     public void initialize() {
@@ -91,6 +103,26 @@ public class userinfocontroller {
         subscribeDepositResult();
         subcribePlaceBid();
         subscribeAdditemResult();
+        subscribeAuctionStart();
+        startUIUpdater();
+    }
+
+    private void startUIUpdater() {
+            timeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
+            try {
+                java.time.Duration remaining = java.time.Duration.between(LocalDateTime.now(), endAt);
+                if (remaining.isZero() || remaining.isNegative()) {
+                    lblTimer.setText("00:00:00");
+                    timeline.stop();
+                    return;
+                }
+                updateClock(remaining);
+            } catch (Exception e) {
+                System.err.println("Error updating user timer: " + e.getMessage());
+            }
+        }));
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
     }
 
     private void subcribePlaceBid() {
@@ -119,6 +151,33 @@ public class userinfocontroller {
                 }
             }
         });
+    }
+
+    private void subscribeAuctionStart() {
+        auctionStartHandler = rawJson -> {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                ObjectNode node = (ObjectNode) mapper.readTree(rawJson);
+                String type = node.get("type").asText();
+                Platform.runLater(() -> {
+                    if (type.equals("START_AUCTION")) {
+                        Gson gson = new Gson();
+                        StartAuctionMessage msg = gson.fromJson(rawJson, StartAuctionMessage.class);
+                        Platform.runLater(() -> {
+                            baseprice.setText(Double.toString(msg.startingPrice));
+                            increment.setText(Double.toString(msg.bidIncrement));
+                            endAt = msg.endAt;
+                        });
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "No auction", "no auction available");
+                    }
+                });
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        };
+
+        MessageBus.getInstance().subscribe(auctionStartHandler);
     }
 
     private void subscribeDepositResult() {
@@ -200,6 +259,19 @@ public class userinfocontroller {
         String currentUserId = UserSession.getCurrentUser().getId();
         String auctionId = "USER_ROOM_" + currentUserId;
         UserSession.getConnection().send(new ClientSendBid(currentUserId, amount, auctionId));
+    }
+
+    private void setClock0() {
+        lblTimer.setText("00:00:00");
+        lblTimer.setTextFill(javafx.scene.paint.Color.RED);
+    }
+
+    private void updateClock(java.time.Duration remaining) {
+        long h = remaining.toHours();
+        long m = remaining.toMinutesPart();
+        long s = remaining.toSecondsPart();
+        lblTimer.setText(String.format("%02d:%02d:%02d", h, m, s));
+        lblTimer.setTextFill(javafx.scene.paint.Color.web("#fbbf24"));
     }
 
     private String resolveMessageType(JsonNode node) {
