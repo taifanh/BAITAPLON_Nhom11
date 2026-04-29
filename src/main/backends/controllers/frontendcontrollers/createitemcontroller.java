@@ -41,6 +41,9 @@ public class createitemcontroller {
     @FXML
     public ComboBox<String> item_type;
 
+    @FXML
+    public TextField item_name;
+
     private Consumer<String> createitemHandler;
 
     private final RequestLog requestLog = new RequestLog();
@@ -51,9 +54,10 @@ public class createitemcontroller {
         double bprice = Double.parseDouble(base_price.getText());
         double bincrement = Double.parseDouble(bid_increment.getText());
         String iteminfo = item_info.getText();
+        String itemname = item_name.getText();
 // this part for handle send request to server database with request
         Gson gson = new Gson();
-        Createitempayload createitempayload = new  Createitempayload(type,iteminfo,bprice,bincrement);
+        Createitempayload createitempayload = new  Createitempayload(type,itemname,iteminfo,bprice,bincrement);
         String payload = gson.toJson(createitempayload);
 
         Message msg = new Message();

@@ -2,6 +2,7 @@ package controllers.frontendcontrollers;
 
 import Database.Inventory;
 import Database.RequestLog;
+import controllers.AuctionService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -11,6 +12,9 @@ import com.google.gson.Gson;
 import controllers.MessageBus;
 import controllers.UserSession;
 import controllers.ViewLoader;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -25,7 +29,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
+import javafx.util.Duration;
+import models.accounts.Admin;
 import models.Extra.messages.Createitempayload;
+import models.bidding.Auction;
 import models.core.Account;
 import models.core.Item;
 
@@ -75,11 +82,21 @@ public class admininfocontroller {
     @FXML
     private TextField settime;
 
+    @FXML
+    private Label error_create_auction;
+
+    @FXML
+    private Label error_start_auction;
+
+    @FXML
+    private Button start_end_auction;
+
+    @FXML
+    private Label lblTimer;
+
     private Account adminAccount;
 
     public Consumer<String> user_requesthandler;
-
-    private final RequestLog requestlog = new  RequestLog();
 
 
     @FXML
@@ -87,13 +104,23 @@ public class admininfocontroller {
         passshow.selectedProperty().addListener((observable, oldValue, newValue) -> refreshPasswordField());
         setAdmin(UserSession.getCurrentAccount());
 
-        inventory.setCellFactory(listView -> new ListCell<>() {
+        inventory.setCellFactory(this::createItemCell);
+        upcomingitem.setCellFactory(this::createItemCell);
+
+        subscribeuser_RequestResult();
+        loadInventoryData();
+        startUIUpdater();
+    }
+
+    private ListCell<Item> createItemCell(ListView<Item> listView) {
+        return new ListCell<>() {
             @Override
             protected void updateItem(Item item, boolean empty) {
                 super.updateItem(item, empty);
 
                 if (empty || item == null) {
                     setText(null);
+                    setGraphic(null);
                 } else {
                     setText(
                             "Name: " + item.getName() + "\n" +
@@ -103,13 +130,7 @@ public class admininfocontroller {
                     );
                 }
             }
-        });
-        //=====================
-        // load request từ requestlog
-        loadrequest();
-        subscribeuser_RequestResult();
-        loadInventoryData();
-
+        };
     }
 
     public void setAdmin(Account account) {
@@ -143,9 +164,20 @@ public class admininfocontroller {
 
             // Lấy các item WAITING
             List<Item> items = inventoryDB.getItemsByStatus(Inventory.STATUS_WAITING);
-
             inventory.setItems(FXCollections.observableArrayList(items));
 
+            // Lấy các item IN_AUCTION
+            List<Item> upcomingitems = inventoryDB.getItemsByStatus(Inventory.STATUS_IN_AUCTION);
+            upcomingitem.setItems(FXCollections.observableArrayList(upcomingitems));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private  void loadRequestList(){
+        try{
+            RequestLog requestLogDB = new RequestLog();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -162,8 +194,138 @@ public class admininfocontroller {
     }
 
     @FXML
-    public void handle_start_auction(ActionEvent event) {
-        showPlaceholderAlert();
+    public void handle_create_auction(ActionEvent event) throws IOException {
+        error_create_auction.setVisible(false);
+        Item currentItem = inventory.getSelectionModel().getSelectedItem();
+        if (currentItem == null) {
+            error_create_auction.setVisible(true);
+            return;
+        }
+        else {
+            inventory.getSelectionModel().clearSelection();
+        }
+
+        Inventory inventoryDB = new Inventory();
+        inventoryDB.updateItemStatus(currentItem.getId(), Inventory.STATUS_IN_AUCTION);
+
+        List<Item> items = inventoryDB.getItemsByStatus(Inventory.STATUS_IN_AUCTION);
+        upcomingitem.setItems(FXCollections.observableArrayList(items));
+
+        loadInventoryData();
+    }
+
+    private void startUIUpdater() {
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
+            try {
+                Item currentitem = upcomingitem.getSelectionModel().getSelectedItem();
+
+                if (currentitem != null) {
+                    Auction managedAuction = AuctionService.getManagedActiveAuction(currentitem.getId());
+                    if (managedAuction != null) {
+                        java.time.Duration remaining = AuctionService.getDuration(currentitem.getId());
+
+                        if (remaining.isZero() || remaining.isNegative()) {
+                            try {
+                                AuctionService.endAuction(managedAuction, java.time.LocalDateTime.now());
+                                System.out.println("Auto-ending auction for item: " + currentitem.getId());
+                            } catch (Exception e) {
+                                System.err.println("Error auto-ending auction: " + e.getMessage());
+                            }
+
+                            refreshUIState();
+                        } else {
+                            updateClock(remaining);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Error updating UI timer: " + e.getMessage());
+            }
+        }));
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
+    }
+
+    private void refreshUIState() {
+        try {
+            upcomingitem.getSelectionModel().clearSelection();
+            loadInventoryData();
+        } catch (Exception e) {
+            System.err.println("Error refreshing UI state: " + e.getMessage());
+        }
+    }
+
+    private void setClock0() {
+        lblTimer.setText("00:00:00");
+        lblTimer.setTextFill(javafx.scene.paint.Color.RED);
+        start_end_auction.setText("START AUCTION");
+        settime.setDisable(false);
+        settime.clear();
+    }
+
+    private void updateClock(java.time.Duration remaining) {
+        long h = remaining.toHours();
+        long m = remaining.toMinutesPart();
+        long s = remaining.toSecondsPart();
+        lblTimer.setText(String.format("%02d:%02d:%02d", h, m, s));
+        lblTimer.setTextFill(javafx.scene.paint.Color.web("#fbbf24"));
+    }
+
+    @FXML
+    public void handle_start_auction(ActionEvent event) throws IOException {
+        error_start_auction.setText("");
+
+        Item currentItem = upcomingitem.getSelectionModel().getSelectedItem();
+        if (currentItem == null) {
+            error_start_auction.setText("Please select an item");
+            return;
+        }
+
+        if (start_end_auction.getText().equals("START AUCTION")) {
+            String timestr = settime.getText();
+            if (timestr.equals("")) {
+                error_start_auction.setText("Please enter a time");
+                return;
+            }
+            int minutes;
+            try {
+                minutes = Integer.parseInt(timestr);
+            } catch (NumberFormatException e) {
+                error_start_auction.setText("Please enter a integer minutes");
+                return;
+            }
+            if (minutes < 0) {
+                error_start_auction.setText("Please minutes greater than 0");
+                return;
+            }
+
+            try {
+                System.out.println("Starting auction for item: " + currentItem.getId());
+                Auction currentAuction = AuctionService.startAuction((Admin) UserSession.getCurrentAccount(), currentItem, 0, minutes, 0);
+                System.out.println("Auction started successfully. Auction ID: " + currentAuction.getAuctionId());
+                start_end_auction.setText("END AUCTION");
+                settime.setDisable(true);
+            } catch (Exception e) {
+                System.err.println("Error starting auction: " + e.getMessage());
+                e.printStackTrace();
+                error_start_auction.setText("Lỗi: " + e.getMessage());
+            }
+        }
+        else {
+            try {
+                System.out.println("Ending auction for item: " + currentItem.getId());
+                Auction currentAuction = AuctionService.getManagedActiveAuction(currentItem.getId());
+                AuctionService.endAuction(currentAuction, java.time.LocalDateTime.now());
+
+                System.out.println("Auction ended successfully");
+                setClock0();
+                refreshUIState();
+            } catch (Exception e) {
+                System.err.println("Error ending auction: " + e.getMessage());
+                e.printStackTrace();
+                error_start_auction.setText("Lỗi: " + e.getMessage());
+            }
+        }
     }
 
     @FXML
@@ -219,21 +381,6 @@ public class admininfocontroller {
         alert.setContentText("Chuc nang nay chua duoc cai dat.");
         alert.showAndWait();
     }
-    private void loadrequest(){
-        try{
-            List<RequestLog.RequestRecord> requests = requestlog.getRequestsByType("additem");
-
-            Gson gson = new Gson();
-            for (RequestLog.RequestRecord request : requests) {
-                Createitempayload payload = gson.fromJson(request.requestInfo(),Createitempayload.class);
-                item_wait_accepted.add(payload.getItemType());
-            }
-            requestlist.setItems(item_wait_accepted);
-            requestlist.setCellFactory(ls -> new CustomItemrequestCell());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
 class CustomItemrequestCell  extends  ListCell<String> {
      private HBox content;
@@ -249,7 +396,7 @@ class CustomItemrequestCell  extends  ListCell<String> {
 
          name_item = new Label();
          selected = new CheckBox();
-         view = new  Button("view");
+         view = new  Button();
 
          content  = new HBox(10 , name_item , spacer, view , selected );
          content.setAlignment(Pos.CENTER_LEFT);
