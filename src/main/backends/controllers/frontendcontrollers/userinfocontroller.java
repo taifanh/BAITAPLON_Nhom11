@@ -1,5 +1,6 @@
 package controllers.frontendcontrollers;
 
+import Database.MyRequest;
 import Database.UserStore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -35,6 +36,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class userinfocontroller {
@@ -71,6 +73,7 @@ public class userinfocontroller {
     @FXML
     private Button autobid;
 
+    private final MyRequest myrequest = new MyRequest();
     @FXML
     private ListView<String> List_AcceptedItem;
 
@@ -83,11 +86,12 @@ public class userinfocontroller {
 
 
     @FXML
-    public void initialize() {
+    public void initialize() throws IOException {
         passshow.selectedProperty().addListener((observable, oldValue, newValue) -> refreshPasswordField());
         if (UserSession.getCurrentUser() != null) {
             setUser(UserSession.getCurrentUser());
         }
+        loaduser_request();
         subscribeDepositResult();
         subcribePlaceBid();
         subscribeAdditemResult();
@@ -282,6 +286,18 @@ public class userinfocontroller {
                    if (type.equals("add_item_OK") && node.has("payloadJson")) {
                        String payloadJson = node.get("payloadJson").asText();
                        Createitempayload payload =  new Gson().fromJson(payloadJson, Createitempayload.class);
+                       Gson gson = new Gson();
+                       String payloadjson = gson.toJson(payload);
+                       Message msg = new Message();
+                       msg.Id_user = UserSession.getCurrentUser().getId();
+                       msg.messageType = "additem";
+                       msg.payloadJson = payloadjson;
+
+                       try {
+                           myrequest.save_myrequest(msg);
+                       } catch (IOException e) {
+                           e.printStackTrace();
+                       }
                        AcceptedItem_info.add(payload.getItemType());// cập nhật danh sachs -> thêm 1 item mới
 
                    }
@@ -301,6 +317,17 @@ public class userinfocontroller {
         alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
+    }
+    public void loaduser_request() throws IOException {
+        List<MyRequest.RequestRecord> requests = myrequest.getMyRequestsByType("additem");
+
+        Gson gson = new Gson();
+        for ( MyRequest.RequestRecord request : requests){
+            Createitempayload payload = gson.fromJson(request.requestInfo(), Createitempayload.class);
+            AcceptedItem_info.add(payload.getItem_name());
+        }
+        List_AcceptedItem.setItems(AcceptedItem_info);
+        List_AcceptedItem.setCellFactory(lv -> new CustomItemCell());
     }
 }
 // custom khung cho hiện thị ở list item ,

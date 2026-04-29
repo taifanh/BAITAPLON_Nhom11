@@ -98,6 +98,7 @@ public class admininfocontroller {
 
     public Consumer<String> user_requesthandler;
 
+    private final RequestLog requestlog = new  RequestLog();
 
     @FXML
     public void initialize() {
@@ -107,6 +108,7 @@ public class admininfocontroller {
         inventory.setCellFactory(this::createItemCell);
         upcomingitem.setCellFactory(this::createItemCell);
 
+        loadrequest();
         subscribeuser_RequestResult();
         loadInventoryData();
         startUIUpdater();
@@ -381,6 +383,21 @@ public class admininfocontroller {
         alert.setContentText("Chuc nang nay chua duoc cai dat.");
         alert.showAndWait();
     }
+    private void loadrequest(){
+        try{
+            List<RequestLog.RequestRecord> requests = requestlog.getRequestsByType("additem");
+
+            Gson gson = new Gson();
+            for (RequestLog.RequestRecord request : requests) {
+                Createitempayload payload = gson.fromJson(request.requestInfo(),Createitempayload.class);
+                item_wait_accepted.add(payload.getItem_name());
+            }
+            requestlist.setItems(item_wait_accepted);
+            requestlist.setCellFactory(ls -> new CustomItemrequestCell());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
 class CustomItemrequestCell  extends  ListCell<String> {
      private HBox content;
@@ -396,7 +413,7 @@ class CustomItemrequestCell  extends  ListCell<String> {
 
          name_item = new Label();
          selected = new CheckBox();
-         view = new  Button();
+         view = new  Button("view");
 
          content  = new HBox(10 , name_item , spacer, view , selected );
          content.setAlignment(Pos.CENTER_LEFT);

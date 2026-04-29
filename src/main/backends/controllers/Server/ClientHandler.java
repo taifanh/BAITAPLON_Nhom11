@@ -162,7 +162,7 @@ public class ClientHandler implements Runnable {
 
                     send(responseNode.toString());
                 }
-                case "login" -> {
+                case "login" -> {// xử lý định danh cho từng clienthandler
                     String userId = node.get("Id_user").asText();
                     String payloadJson = node.get("payloadJson").asText();
 
