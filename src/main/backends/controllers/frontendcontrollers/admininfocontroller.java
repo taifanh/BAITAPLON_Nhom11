@@ -205,7 +205,10 @@ public class admininfocontroller {
         loadInventoryData();
     }
 
+    // bat dau chay khi initialize
+    // lien tuc chay de chay de cap nhat UI
     private void startUIUpdater() {
+        // moi 1s thi giao dien nhan event va phai hoan thanh tac vu duoi
         Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
             try {
                 Item currentitem = upcomingitem.getSelectionModel().getSelectedItem();
@@ -223,15 +226,10 @@ public class admininfocontroller {
                             } catch (Exception e) {
                                 System.err.println("Error auto-ending auction: " + e.getMessage());
                             }
-                            lblTimer.setText("00:00:00");
-                            lblTimer.setTextFill(javafx.scene.paint.Color.RED);
+
                             refreshUIState();
                         } else {
-                            long h = remaining.toHours();
-                            long m = remaining.toMinutesPart();
-                            long s = remaining.toSecondsPart();
-                            lblTimer.setText(String.format("%02d:%02d:%02d", h, m, s));
-                            lblTimer.setTextFill(javafx.scene.paint.Color.web("#fbbf24"));
+                            updateClock(remaining);
                         }
                     }
                 }
@@ -247,12 +245,25 @@ public class admininfocontroller {
         try {
             upcomingitem.getSelectionModel().clearSelection();
             loadInventoryData();
-            start_end_auction.setText("START AUCTION");
-            settime.setDisable(false);
-            settime.clear();
         } catch (Exception e) {
             System.err.println("Error refreshing UI state: " + e.getMessage());
         }
+    }
+
+    private void setClock0() {
+        lblTimer.setText("00:00:00");
+        lblTimer.setTextFill(javafx.scene.paint.Color.RED);
+        start_end_auction.setText("START AUCTION");
+        settime.setDisable(false);
+        settime.clear();
+    }
+
+    private void updateClock(java.time.Duration remaining) {
+        long h = remaining.toHours();
+        long m = remaining.toMinutesPart();
+        long s = remaining.toSecondsPart();
+        lblTimer.setText(String.format("%02d:%02d:%02d", h, m, s));
+        lblTimer.setTextFill(javafx.scene.paint.Color.web("#fbbf24"));
     }
 
     @FXML
@@ -278,7 +289,6 @@ public class admininfocontroller {
                 error_start_auction.setText("Please enter a integer minutes");
                 return;
             }
-
             if (minutes < 0) {
                 error_start_auction.setText("Please minutes greater than 0");
                 return;
@@ -303,12 +313,8 @@ public class admininfocontroller {
                 AuctionService.endAuction(currentAuction, java.time.LocalDateTime.now());
 
                 System.out.println("Auction ended successfully");
-                lblTimer.setText("00:00:00");
-                lblTimer.setTextFill(javafx.scene.paint.Color.RED);
-                start_end_auction.setText("START AUCTION");
-                settime.setDisable(false);
-                settime.clear();
-                loadInventoryData();
+                setClock0();
+                refreshUIState();
             } catch (Exception e) {
                 System.err.println("Error ending auction: " + e.getMessage());
                 e.printStackTrace();
