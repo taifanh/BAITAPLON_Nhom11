@@ -146,7 +146,8 @@ public class ClientHandler implements Runnable {
                     responseNode.put("type", "add_item_OK");
                     responseNode.put("payloadJson", gson.toJson(payload));
 
-                    RequestLog.save_request(msg);// save to request database waitting for admin's acceptance
+                    String requestId = RequestLog.save_request(msg);// save to request database waitting for admin's acceptance
+                    responseNode.put("request_id", requestId);
                     send(responseNode.toString());// send back to user and admin
                     AuctionRoom.sendadmin(responseNode.toString());
                 }

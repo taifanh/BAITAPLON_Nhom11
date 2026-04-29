@@ -1,5 +1,6 @@
 package Database;
 
+import models.Extra.IdGenerator;
 import models.Extra.messages.Message;
 
 import java.io.IOException;
@@ -15,7 +16,7 @@ public class RequestLog {
     private static final String DATABASE_URL = "jdbc:sqlite:" + DATABASE_FILE;
     private static final String CREATE_REQUEST_TABLE_SQL = """
             CREATE TABLE IF NOT EXISTS request_log (
-                STT INTEGER PRIMARY KEY AUTOINCREMENT,
+                request_id TEXT PRIMARY KEY,
                 id_user TEXT,
                 request_type TEXT ,
                 request_info TEXT
@@ -31,35 +32,38 @@ public class RequestLog {
         }
     }
 
-    public static void save_request(Message message) throws  IOException {
+    public static String save_request(Message message) throws  IOException {
+        String requestId = "REQ" + IdGenerator.nextId();
         try(Connection connection = openConnection();
             PreparedStatement statement = connection.prepareStatement("""
-            INSERT INTO request_log (id_user , request_type , request_info) VALUES (? , ? , ?)""")
+            INSERT INTO request_log (request_id, id_user , request_type , request_info) VALUES (?, ? , ? , ?)""")
         ){
-          statement.setString(1,message.Id_user);
-          statement.setString(2,message.messageType);
-          statement.setString(3, message.payloadJson);
+          statement.setString(1, requestId);
+          statement.setString(2,message.Id_user);
+          statement.setString(3,message.messageType);
+          statement.setString(4, message.payloadJson);
 
           statement.executeUpdate();
+          return requestId;
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        } ;
+        }
     }
 
     public List<RequestRecord> getRequestsByType(String requestType) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     SELECT STT, id_user, request_type, request_info
+                     SELECT request_id, id_user, request_type, request_info
                      FROM request_log
                      WHERE request_type = ?
-                     ORDER BY STT ASC
+                     ORDER BY request_id ASC
                      """)) {
             statement.setString(1, requestType);
             try (ResultSet resultSet = statement.executeQuery()) {
                 List<RequestRecord> requests = new ArrayList<>();
                 while (resultSet.next()) {
                     requests.add(new RequestRecord(
-                            resultSet.getInt("STT"),
+                            resultSet.getString("request_id"),
                             resultSet.getString("id_user"),
                             resultSet.getString("request_type"),
                             resultSet.getString("request_info")
@@ -72,7 +76,31 @@ public class RequestLog {
         }
     }
 
-    public void deleteRequests(List<Integer> requestIds) throws IOException {
+    public RequestRecord findByRequestId(String requestId) throws IOException {
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement("""
+                     SELECT request_id, id_user, request_type, request_info
+                     FROM request_log
+                     WHERE request_id = ?
+                     """)) {
+            statement.setString(1, requestId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (!resultSet.next()) {
+                    return null;
+                }
+                return new RequestRecord(
+                        resultSet.getString("request_id"),
+                        resultSet.getString("id_user"),
+                        resultSet.getString("request_type"),
+                        resultSet.getString("request_info")
+                );
+            }
+        } catch (SQLException e) {
+            throw new IOException("Khong the lay request theo id", e);
+        }
+    }
+
+    public void deleteRequests(List<String> requestIds) throws IOException {
         if (requestIds == null || requestIds.isEmpty()) {
             return;
         }
@@ -80,10 +108,10 @@ public class RequestLog {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
                      DELETE FROM request_log
-                     WHERE STT = ?
+                     WHERE request_id = ?
                      """)) {
-            for (Integer requestId : requestIds) {
-                statement.setInt(1, requestId);
+            for (String requestId : requestIds) {
+                statement.setString(1, requestId);
                 statement.addBatch();
             }
             statement.executeBatch();
@@ -108,6 +136,6 @@ public class RequestLog {
         return DriverManager.getConnection(DATABASE_URL);
     }
 
-    public record RequestRecord(int id, String userId, String requestType, String requestInfo) {
+    public record RequestRecord(String id, String userId, String requestType, String requestInfo) {
     }
 }

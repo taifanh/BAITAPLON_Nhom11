@@ -35,8 +35,11 @@ import models.Extra.messages.Createitempayload;
 import models.bidding.Auction;
 import models.core.Account;
 import models.core.Item;
+import models.items.ItemType;
+import models.items.itemFactory;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -187,12 +190,58 @@ public class admininfocontroller {
 
     @FXML
     public void handle_reject_requests(ActionEvent event) {
-        showPlaceholderAlert();
+        String requestId = requestlist.getSelectionModel().getSelectedItem();
+        if (requestId == null || requestId.isBlank()) {
+            showMessage("Thong bao", "Vui long chon request can tu choi.");
+            return;
+        }
+
+        try {
+            requestlog.deleteRequests(Collections.singletonList(requestId));
+            item_wait_accepted.remove(requestId);
+            requestlist.getSelectionModel().clearSelection();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showMessage("Loi", "Khong the xoa request.");
+        }
     }
 
     @FXML
     public void handle_accept_requests(ActionEvent event) {
-        showPlaceholderAlert();
+        String requestId = requestlist.getSelectionModel().getSelectedItem();
+        if (requestId == null || requestId.isBlank()) {
+            showMessage("Thong bao", "Vui long chon request can duyet.");
+            return;
+        }
+
+        try {
+            RequestLog.RequestRecord request = requestlog.findByRequestId(requestId);
+            if (request == null) {
+                showMessage("Thong bao", "Khong tim thay request.");
+                item_wait_accepted.remove(requestId);
+                return;
+            }
+
+            Createitempayload payload = new Gson().fromJson(request.requestInfo(), Createitempayload.class);
+            Item item = itemFactory.createItem(
+                    ItemType.valueOf(payload.getItemType()),
+                    payload.getItem_name(),
+                    payload.getBasePrice(),
+                    payload.getItemInfo()
+            );
+
+            Inventory inventoryDB = new Inventory();
+            inventoryDB.saveItem(item, request.userId());
+            requestlog.deleteRequests(Collections.singletonList(requestId));
+
+            item_wait_accepted.remove(requestId);
+            requestlist.getSelectionModel().clearSelection();
+            loadInventoryData();
+            showMessage("Thong bao", "Da duyet item vao inventory.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            showMessage("Loi", "Khong the duyet request.");
+        }
     }
 
     @FXML
@@ -359,11 +408,11 @@ public class admininfocontroller {
                 String type = node.get("type").asText();
                 Platform.runLater(() -> {
                    if (type.equals("add_item_OK") && node.has("payloadJson")){
-                       String payloadjson =   node.get("payloadJson").asText();
-
-                       Gson gson = new Gson();
-                       Createitempayload payload = gson.fromJson(  payloadjson, Createitempayload.class);
-                       item_wait_accepted.add(payload.getItemType());
+                       String requestId = node.path("request_id").asText("");
+                       if (requestId.isBlank() || item_wait_accepted.contains(requestId)) {
+                           return;
+                       }
+                       item_wait_accepted.add(requestId);
 
                        requestlist.setItems(item_wait_accepted);
                        requestlist.setCellFactory(ls -> new CustomItemrequestCell() );
@@ -377,20 +426,22 @@ public class admininfocontroller {
     }
 
     private void showPlaceholderAlert() {
+        showMessage("Thong bao", "Chuc nang nay chua duoc cai dat.");
+    }
+
+    private void showMessage(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Thong bao");
+        alert.setTitle(title);
         alert.setHeaderText(null);
-        alert.setContentText("Chuc nang nay chua duoc cai dat.");
+        alert.setContentText(message);
         alert.showAndWait();
     }
     private void loadrequest(){
         try{
             List<RequestLog.RequestRecord> requests = requestlog.getRequestsByType("additem");
 
-            Gson gson = new Gson();
             for (RequestLog.RequestRecord request : requests) {
-                Createitempayload payload = gson.fromJson(request.requestInfo(),Createitempayload.class);
-                item_wait_accepted.add(payload.getItem_name());
+                item_wait_accepted.add(request.id());
             }
             requestlist.setItems(item_wait_accepted);
             requestlist.setCellFactory(ls -> new CustomItemrequestCell());
@@ -405,6 +456,8 @@ class CustomItemrequestCell  extends  ListCell<String> {
      private Label name_item;
      private CheckBox selected;
      private Pane spacer;
+     private final RequestLog requestLog = new RequestLog();
+     private final Gson gson = new Gson();
 
      protected CustomItemrequestCell(){
          super();
@@ -419,17 +472,54 @@ class CustomItemrequestCell  extends  ListCell<String> {
          content.setAlignment(Pos.CENTER_LEFT);
 
          view.setOnAction(event -> {
-            System.out.println("admin dang xem thong tin san pham");
+            String requestId = getItem();
+            if (requestId == null) {
+                return;
+            }
+            try {
+                RequestLog.RequestRecord request = requestLog.findByRequestId(requestId);
+                if (request == null) {
+                    return;
+                }
+                Createitempayload payload = gson.fromJson(request.requestInfo(), Createitempayload.class);
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Thong tin item");
+                alert.setHeaderText(payload.getItem_name());
+                alert.setContentText(
+                        "Request ID: " + request.id() + "\n" +
+                        "User ID: " + request.userId() + "\n" +
+                        "Type: " + payload.getItemType() + "\n" +
+                        "Base price: " + payload.getBasePrice() + "\n" +
+                        "Increment: " + payload.getBidIncrement() + "\n" +
+                        "Info: " + payload.getItemInfo()
+                );
+                alert.showAndWait();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
          });
          selected.setOnAction(event -> {
-            System.out.println("admin will accept this item");
+            if (getListView() != null) {
+                getListView().getSelectionModel().select(getItem());
+            }
          });
      }
      @Override
      protected void updateItem(String item, boolean empty) {// javafx AUTO call it
          super.updateItem(item, empty);
          if (item!=null &&  !empty) {
-             name_item.setText(item);
+             try {
+                 RequestLog.RequestRecord request = requestLog.findByRequestId(item);
+                 if (request != null) {
+                     Createitempayload payload = gson.fromJson(request.requestInfo(), Createitempayload.class);
+                     name_item.setText(payload.getItem_name());
+                 } else {
+                     name_item.setText(item);
+                 }
+             } catch (IOException e) {
+                 name_item.setText(item);
+             }
+             selected.setSelected(getListView() != null && item.equals(getListView().getSelectionModel().getSelectedItem()));
              setGraphic(content);
          }
          else
