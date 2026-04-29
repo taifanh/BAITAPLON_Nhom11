@@ -113,8 +113,8 @@ public class Auction {
             throw new IllegalArgumentException("Start time is required");
         }
         this.startAt = time;
-        if (endAt != null && !endAt.isAfter(time)) {
-            throw new IllegalStateException("End time must be after start time");
+        if (endAt != null && !endAt.isAfter(time) && !endAt.equals(time)) {
+            throw new IllegalStateException("End time must be after or equal to start time");
         }
         this.status = Status.ACTIVE;
     }
