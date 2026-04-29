@@ -1,5 +1,8 @@
 package controllers.Server;
 
+import controllers.UserSession;
+
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,7 +20,8 @@ public class AuctionRoom {
     // Tương tự List<Consumer<String>> subscribers bên MessageBus
     // nhưng ở đây subscriber là ClientHandler (giữ socket thật)
     private final Set<ClientHandler> observers = ConcurrentHashMap.newKeySet();
-
+    // dùng cho gửi tin cho 1 số client nhất định
+    final Map<String , ClientHandler> connectors = new ConcurrentHashMap<>();
     // --- Biết client nào đang xem phiên nào ---
     // key: clientHandler, value: auctionId họ đang xem
     private final Map<ClientHandler, String> watchingMap = new ConcurrentHashMap<>();
@@ -61,6 +65,13 @@ public class AuctionRoom {
     public void broadcast(String json) {
         for (ClientHandler handler : observers) {
             handler.send(json);
+        }
+    }
+    public static void sendadmin(String json){
+        for (String key : AuctionRoom.getInstance().connectors.keySet() ){
+            if (key.equals("ADMIN12345")){
+                AuctionRoom.getInstance().connectors.get(key).send(json);
+            }
         }
     }
 

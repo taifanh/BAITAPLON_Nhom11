@@ -1,6 +1,7 @@
 package controllers.frontendcontrollers;
 
 import Database.UserStore;
+import com.google.gson.Gson;
 import controllers.UserSession;
 import controllers.ViewLoader;
 import javafx.event.ActionEvent;
@@ -14,6 +15,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import models.Extra.messages.Message;
+import models.Extra.messages.loginpayload;
 import models.accounts.User;
 import models.core.Account;
 
@@ -56,6 +59,7 @@ public class signincontroller {
             String viewFileName;
             String windowTitle;
 
+
             //kiểm tra role để mở màn hình Info
             if ("Admin".equalsIgnoreCase(account.getRole())) {
                 viewFileName = "admininfo.fxml";
@@ -78,6 +82,19 @@ public class signincontroller {
             window.setTitle(windowTitle);
             window.centerOnScreen();
             window.show();
+
+            // send message login to server to save identity for clienthandler
+            loginpayload payload = new loginpayload(account.getRole());
+            Gson gson = new  Gson();
+            String payloadjson = gson.toJson(payload);
+
+            Message msg = new Message();
+            msg.Id_user = account.getId();
+            msg.messageType = "login";
+            msg.payloadJson = payloadjson;
+
+            UserSession.getConnection().send(msg);
+
         } catch (IOException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Loi co so du lieu", "Khong the dang nhap", "Khong the doc du lieu nguoi dung tu SQLite.");

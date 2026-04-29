@@ -8,13 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
-import models.Extra.messages.Change_infopayload;
-import models.Extra.messages.ClientSendBid;
-import models.Extra.messages.Createitempayload;
-import models.Extra.messages.Depositpayload;
-import models.Extra.messages.Message;
-import models.Extra.messages.ReceiveMaxBidder;
-import models.Extra.messages.ServerBidRespond;
+import models.Extra.messages.*;
 import models.accounts.User;
 import models.bidding.BidTransaction;
 import models.core.Item;
@@ -154,6 +148,7 @@ public class ClientHandler implements Runnable {
 
                     RequestLog.save_request(msg);// save to request database waitting for admin's acceptance
                     send(responseNode.toString());// send back to user and admin
+                    AuctionRoom.sendadmin(responseNode.toString());
                 }
                 case "change_info" -> {
                     String userId = node.get("Id_user").asText();
@@ -166,6 +161,14 @@ public class ClientHandler implements Runnable {
                     responseNode.put("payloadJson", gson.toJson(payload));
 
                     send(responseNode.toString());
+                }
+                case "login" -> {
+                    String userId = node.get("Id_user").asText();
+                    String payloadJson = node.get("payloadJson").asText();
+
+                    loginpayload payload = mapper.readValue(payloadJson, loginpayload.class);
+
+                    AuctionRoom.getInstance().connectors.put(userId, this);
                 }
 
                 default -> System.out.println("[ClientHandler] Unknown type: " + type);
