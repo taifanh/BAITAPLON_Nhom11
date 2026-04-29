@@ -1,14 +1,18 @@
 package controllers.Server;
 
 import Database.BidTransactions;
+import Database.RequestLog;
 import Database.UserStore;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
+import models.Extra.messages.Change_infopayload;
 import models.Extra.messages.ClientSendBid;
+import models.Extra.messages.Createitempayload;
 import models.Extra.messages.Depositpayload;
+import models.Extra.messages.Message;
 import models.Extra.messages.ReceiveMaxBidder;
 import models.Extra.messages.ServerBidRespond;
 import models.accounts.User;
@@ -98,13 +102,18 @@ public class ClientHandler implements Runnable {
                     ClientSendBid info = mapper.readValue(json, ClientSendBid.class);
                     BidTransactions bidTransactions = new BidTransactions();
                     User thisUser = (new UserStore()).getUser(info.id);
-                    String auctionId = "0";
+                    String auctionId = info.auctionId;
+                    if (auctionId == null || auctionId.isBlank()) {
+                        auctionId = (watchingAuctionId == null || watchingAuctionId.isBlank())
+                                ? "USER_ROOM_" + info.id
+                                : watchingAuctionId;
+                    }
                     bidTransactions.saveBid(auctionId, new BidTransaction(thisUser,
                             itemFactory.createItem(ItemType.Art, "bao ngu", 0, "oc cak"),
                             info.amount));
                     ServerBidRespond maxBidder = bidTransactions.getMaxBidder(auctionId);
                     ReceiveMaxBidder maxBidder_msg = new ReceiveMaxBidder(maxBidder);
-                    send(new Gson().toJson(maxBidder_msg));
+                    AuctionRoom.getInstance().broadcast(new Gson().toJson(maxBidder_msg));
                 }
 
                 case "GET_AUCTIONS" -> {
@@ -122,7 +131,38 @@ public class ClientHandler implements Runnable {
                     userStore.update_balance(payload.getAmount(), userId);
 
                     ObjectNode responseNode = mapper.createObjectNode();// tạo 1 kiểu payloadjson để có thể dùng chung cho các phương thức khác
-                    responseNode.put("type", "OK");
+                    responseNode.put("type", "deposit_OK");
+                    responseNode.put("payloadJson", gson.toJson(payload));
+
+                    send(responseNode.toString());
+                }
+                case  "additem" -> {
+                    String userId = node.get("Id_user").asText();
+                    String payloadJson = node.get("payloadJson").asText();
+//                    String request_type = node.get("request_type").asText();
+                    // tạo lại 1 message từ message của client để có thể lưu vào request_log -> client không tự lưu vào request_log
+                    Message msg = new Message();
+                    msg.Id_user = userId;
+                    msg.payloadJson = payloadJson;
+                    msg.messageType = "additem";
+
+                    Createitempayload payload = mapper.readValue(payloadJson, Createitempayload.class);// cần constructor rỗng
+                    // response này chỉ chứa các thông tin chính của sản phẩm
+                    ObjectNode responseNode = mapper.createObjectNode();
+                    responseNode.put("type", "add_item_OK");
+                    responseNode.put("payloadJson", gson.toJson(payload));
+
+                    RequestLog.save_request(msg);// save to request database waitting for admin's acceptance
+                    send(responseNode.toString());// send back to user and admin
+                }
+                case "change_info" -> {
+                    String userId = node.get("Id_user").asText();
+                    String payloadJson = node.get("payloadJson").asText();
+
+                    Change_infopayload payload = mapper.readValue(payloadJson,Change_infopayload.class);
+
+                    ObjectNode responseNode = mapper.createObjectNode();
+                    responseNode.put("type", "change_info_OK");
                     responseNode.put("payloadJson", gson.toJson(payload));
 
                     send(responseNode.toString());

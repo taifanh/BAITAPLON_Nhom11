@@ -12,6 +12,7 @@ public class Createitempayload {
         this.base_price = base_price;
         this.bid_increment = bid_increment;
     }
+    public Createitempayload(){}
 
     public String getItemType() {
         return item_type;
@@ -27,5 +28,21 @@ public class Createitempayload {
 
     public double getBidIncrement() {
         return bid_increment;
+    }
+
+    public void setItem_type(String item_type) {
+        this.item_type = item_type;
+    }
+
+    public void setItem_info(String item_info) {
+        this.item_info = item_info;
+    }
+
+    public void setBase_price(double base_price) {
+        this.base_price = base_price;
+    }
+
+    public void setBid_increment(double bid_increment) {
+        this.bid_increment = bid_increment;
     }
 }

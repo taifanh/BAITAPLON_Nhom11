@@ -14,8 +14,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class UserStore {
     private static final Path DATA_DIRECTORY = Path.of("data");
@@ -51,7 +53,9 @@ public class UserStore {
 
              statement.setString(1, id);
              try(ResultSet resultSet = statement.executeQuery()) {
-                 resultSet.next();
+                 if (!resultSet.next()) {
+                     throw new IOException("Khong co user voi id = " + id);
+                 }
                  User user = new User(
                          resultSet.getString("id"),
                          resultSet.getString("name"),
@@ -211,12 +215,63 @@ public class UserStore {
             throw new IOException("Khong the cập nhật balance trong SQLite.", e);
         }
     }
+    public void change_info(String new_name , String new_email , String new_phonenumber ,String new_password ,  String id) throws IOException {
+        try(Connection connection = openConnection();
+            PreparedStatement statement = connection.prepareStatement("""
+                  UPDATE users
+                  SET name = ?, email = ?, phone_number = ?, password = ?
+                  WHERE id = ?
+""")) {
+            statement.setString(1, new_name);
+            statement.setString(2, new_email);
+            statement.setString(3, new_phonenumber);
+            statement.setString(4, new_password);
+            statement.setString(5, id );
+
+            try{
+                statement.executeUpdate();
+            } catch(SQLException e) {
+                throw new IOException("khong the thay doi thong tin. " ,e );
+            }
+        } catch (SQLException e) {
+            throw new IOException("khong the thay doi thong tin." ,e);
+        }
+    }
 
     private void initializeStorage() throws IOException, SQLException {
         ensureDataDirectoryExists();
         try (Connection connection = openConnection();
              Statement statement = connection.createStatement()) {
             statement.executeUpdate(CREATE_USERS_TABLE_SQL);
+            ensureUsersTableColumns(connection);
+        }
+    }
+
+    private void ensureUsersTableColumns(Connection connection) throws SQLException {
+        Set<String> existingColumns = new HashSet<>();
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("PRAGMA table_info(users)")) {
+            while (resultSet.next()) {
+                existingColumns.add(resultSet.getString("name").toLowerCase());
+            }
+        }
+
+        if (!existingColumns.contains("email")) {
+            try (Statement statement = connection.createStatement()) {
+                statement.executeUpdate("ALTER TABLE users ADD COLUMN email TEXT NOT NULL DEFAULT ''");
+            }
+        }
+
+        if (!existingColumns.contains("balance")) {
+            try (Statement statement = connection.createStatement()) {
+                statement.executeUpdate("ALTER TABLE users ADD COLUMN balance DOUBLE NOT NULL DEFAULT 0.0");
+            }
+        }
+
+        if (!existingColumns.contains("role")) {
+            try (Statement statement = connection.createStatement()) {
+                statement.executeUpdate("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'User'");
+            }
         }
     }
 

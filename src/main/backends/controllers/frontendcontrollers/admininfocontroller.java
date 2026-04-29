@@ -2,27 +2,42 @@ package controllers.frontendcontrollers;
 
 import Database.Inventory;
 import controllers.AuctionService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.gson.Gson;
+import controllers.MessageBus;
 import controllers.UserSession;
 import controllers.ViewLoader;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import models.accounts.Admin;
 import models.bidding.Auction;
+import models.Extra.messages.Createitempayload;
 import models.core.Account;
 import models.core.Item;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class admininfocontroller {
     @FXML
@@ -42,6 +57,8 @@ public class admininfocontroller {
 
     @FXML
     private ListView<String> requestlist;
+
+    private ObservableList<String> item_wait_accepted = FXCollections.observableArrayList();
 
     @FXML
     private ListView<Item> inventory;
@@ -78,6 +95,9 @@ public class admininfocontroller {
 
     private Account adminAccount;
 
+    public Consumer<String> user_requesthandler;
+
+
     @FXML
     public void initialize() {
         passshow.selectedProperty().addListener((observable, oldValue, newValue) -> refreshPasswordField());
@@ -86,6 +106,7 @@ public class admininfocontroller {
         inventory.setCellFactory(this::createItemCell);
         upcomingitem.setCellFactory(this::createItemCell);
 
+        subscribeuser_RequestResult();
         loadInventoryData();
         startUIUpdater();
     }
@@ -317,6 +338,31 @@ public class admininfocontroller {
             infopassword.setText("*".repeat(adminAccount.getPassword().length()));
         }
     }
+    public void subscribeuser_RequestResult(){
+        user_requesthandler = rawJson -> {
+            ObjectMapper mapper = new ObjectMapper();
+            try{
+                JsonNode node = mapper.readTree(rawJson);
+                String type = node.get("type").asText();
+                Platform.runLater(() -> {
+                   if (type.equals("add_item_OK") && node.has("payloadJson")){
+                       String payloadjson =   node.get("payloadJson").asText();
+
+                       Gson gson = new Gson();
+                       Createitempayload payload = gson.fromJson(  payloadjson, Createitempayload.class);
+
+                       item_wait_accepted.add(payload.getItemType());
+
+                       requestlist.setItems(item_wait_accepted);
+                       requestlist.setCellFactory(ls -> new CustomItemrequestCell() );
+                   }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        };
+        MessageBus.getInstance().subscribe(user_requesthandler);
+    }
 
     private void showPlaceholderAlert() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -325,4 +371,41 @@ public class admininfocontroller {
         alert.setContentText("Chuc nang nay chua duoc cai dat.");
         alert.showAndWait();
     }
+}
+class CustomItemrequestCell  extends  ListCell<String> {
+     private HBox content;
+     private Button view;
+     private Label name_item;
+     private CheckBox selected;
+     private Pane spacer;
+
+     protected CustomItemrequestCell(){
+         super();
+         spacer = new Pane();
+         HBox.setHgrow(spacer , Priority.ALWAYS);
+
+         name_item = new Label();
+         selected = new CheckBox();
+         view = new  Button();
+
+         content  = new HBox(10 , name_item , spacer, view , selected );
+         content.setAlignment(Pos.CENTER_LEFT);
+
+         view.setOnAction(event -> {
+            System.out.println("admin dang xem thong tin san pham");
+         });
+         selected.setOnAction(event -> {
+            System.out.println("admin will accept this item");
+         });
+     }
+     @Override
+     protected void updateItem(String item, boolean empty) {// javafx AUTO call it
+         super.updateItem(item, empty);
+         if (item!=null &&  !empty) {
+             name_item.setText(item);
+             setGraphic(content);
+         }
+         else
+             setGraphic(null);
+     }
 }
