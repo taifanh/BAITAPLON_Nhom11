@@ -18,7 +18,8 @@ public class MyRequest {
                 STT INTEGER PRIMARY KEY AUTOINCREMENT,
                 id_user TEXT,
                 request_type TEXT ,
-                request_info TEXT
+                request_info TEXT,
+                send_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP                               
             )
             """;
 
@@ -52,7 +53,7 @@ public class MyRequest {
                      SELECT STT, id_user, request_type, request_info
                      FROM my_request
                      WHERE request_type = ?
-                     ORDER BY STT ASC
+                     ORDER BY send_at ASC
                      """)) {
             statement.setString(1, requestType);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -62,7 +63,8 @@ public class MyRequest {
                             resultSet.getInt("STT"),
                             resultSet.getString("id_user"),
                             resultSet.getString("request_type"),
-                            resultSet.getString("request_info")
+                            resultSet.getString("request_info"),
+                            resultSet.getString("send_at")
                     ));
                 }
                 return requests;
@@ -108,6 +110,6 @@ public class MyRequest {
         return DriverManager.getConnection(DATABASE_URL);
     }
 
-    public record RequestRecord(int id, String userId, String requestType, String requestInfo) {
+    public record RequestRecord(int id, String userId, String requestType, String requestInfo,String time) {
     }
 }
