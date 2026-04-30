@@ -8,23 +8,10 @@ import models.accounts.Admin;
 
 import java.util.Scanner;
 
-public class Launcher {
+public class ServerLauncher {
     public static String serverIp = "localhost";
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        System.out.print("👉 Nhập địa chỉ IP Server (Nhấn Enter để dùng localhost): ");
-        String input = sc.nextLine();
-
-        if (!input.trim().isEmpty()) {
-            serverIp = input;
-        }
-        if (serverIp.equals("localhost")) {
-            ServerStart();
-            ClientStart(args);
-        }
-        else {
-            ClientStart(args);
-        }
+        ServerStart();
     }
 
     public static void ServerStart() {

@@ -1,6 +1,9 @@
 package models.bidding;
 
 import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import controllers.AuctionService;
 import controllers.Server.AuctionRoom;
 import models.Extra.IdGenerator;
@@ -30,7 +33,9 @@ public class Auction {
     private double currentHighestBid;
     private BidTransaction highestBid;
     private String currentHighestBidderId;
-    private Gson gson;
+    private static final ObjectMapper mapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule()) // Quan trọng nhất: để hiểu LocalDateTime
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); // Để xuất ra định dạng chuỗi ISO thay vì số
     // Tao mot auction moi cho item vua duoc dua vao phien.
     public Auction(Item item) {
         this.auctionId = generateAuctionId();
@@ -122,13 +127,20 @@ public class Auction {
         }
         this.status = Status.ACTIVE;
         if (endAt != null) {
-            String itemName = this.item.getName();
-            Auction currentAuction = AuctionService.getManagedActiveAuction(this.item.getId());
-            double startingPrice = currentAuction.getItem().getPrices();
-            double bidIncrement = 0;
-            StartAuctionMessage startAuction = new StartAuctionMessage(endAt, itemName, startingPrice, bidIncrement);
-            String msg = gson.toJson(startAuction);
-            AuctionRoom.getInstance().broadcast(msg);
+            try {
+                String itemName = this.item.getName();
+                double startingPrice = this.item.getPrices();
+                double bidIncrement = 0;
+
+                StartAuctionMessage startAuction = new StartAuctionMessage(endAt, itemName, startingPrice, bidIncrement);
+
+                String msg = mapper.writeValueAsString(startAuction);
+
+                AuctionRoom.getInstance().broadcast(msg);
+            } catch (Exception e) {
+                System.err.println("Lỗi khi serialize tin nhắn đấu giá: " + e.getMessage());
+                e.printStackTrace();
+            }
         } else {
             throw new IllegalArgumentException("End time is not available");
         }

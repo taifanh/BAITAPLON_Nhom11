@@ -346,6 +346,7 @@ public class admininfocontroller {
             try {
                 System.out.println("Starting auction for item: " + currentItem.getId());
                 Auction currentAuction = AuctionService.startAuction((Admin) UserSession.getCurrentAccount(), currentItem, 0, minutes, 0);
+
                 System.out.println("Auction started successfully. Auction ID: " + currentAuction.getAuctionId());
                 start_end_auction.setText("END AUCTION");
                 settime.setDisable(true);

@@ -83,10 +83,15 @@ public final class AuctionService {
         Auction auction = new Auction(item);
         LocalDateTime now = LocalDateTime.now();
         auction.schedule(now, duration);
-        auction.start(now);
-
         registerActiveAuction(auction);
-        scheduleAutoClose(auction, duration);
+
+        try {
+            auction.start(now);
+            scheduleAutoClose(auction, duration);
+        } catch (Exception e) {
+            unregisterActiveAuction(item.getId());
+            throw e;
+        }
         return auction;
     }
 
