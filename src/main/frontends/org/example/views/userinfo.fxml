@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="720.0" prefWidth="1080.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.frontendcontrollers.userinfocontroller">
+<AnchorPane prefHeight="720.0" prefWidth="1080.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.frontendcontrollers.userinfocontroller">
     <children>
         <TabPane prefHeight="720.0" prefWidth="1080.0" side="TOP" style="-fx-background-color: transparent; -fx-tab-min-width: 180; -fx-tab-max-width: 180;">
             <tabs>
@@ -209,7 +209,7 @@
                                                 </TextField>
                                                 <TextField fx:id="maxlimit" layoutX="28.0" layoutY="121.0" prefHeight="46.0" prefWidth="244.0" promptText="Max limit" style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #fdba74;" />
                                                 <Button alignment="CENTER" layoutX="28.0" layoutY="177.0" mnemonicParsing="false" onAction="#autobid" prefHeight="38.0" prefWidth="108.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="AUTO" />
-                                                <TextField fx:id="bidprice" layoutX="28.0" layoutY="242.0" prefHeight="46.0" prefWidth="244.0" promptText="your bid" style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #fdba74;">
+                                                <TextField fx:id="bidprice" layoutX="28.0" layoutY="242.0" prefHeight="46.0" prefWidth="244.0" promptText="Your bid" style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #fdba74;">
                                                     <font>
                                                         <Font size="15.0" />
                                                     </font>
@@ -217,23 +217,33 @@
                                                 <Button alignment="CENTER" layoutX="29.0" layoutY="297.0" mnemonicParsing="false" onAction="#placebid" prefHeight="34.0" prefWidth="107.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="PLACE" />
                                             </children>
                                         </Pane>
-                                        <Pane layoutX="328.0" layoutY="67.0" prefHeight="547.0" prefWidth="395.0" style="-fx-background-color: #D3D3D3; -fx-background-radius: 18; -fx-border-radius: 18;">
+                                        <Pane layoutX="327.0" layoutY="66.0" prefHeight="547.0" prefWidth="395.0" style="-fx-background-color: #D3D3D3; -fx-background-radius: 18; -fx-border-radius: 18;">
                                  <children>
                                     <Label alignment="CENTER" layoutX="41.0" layoutY="30.0" prefHeight="61.0" prefWidth="313.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5); -fx-background-radius: 12;" text="Current Auction Info" textFill="#9a3412">
                                        <font>
                                           <Font size="24.0" />
                                        </font>
                                     </Label>
-                                    <Label alignment="CENTER" layoutX="4.0" layoutY="201.0" prefHeight="35.0" prefWidth="137.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5); -fx-background-radius: 10;" text="The High Bidder" textFill="#9a3412">
+                                    <Label alignment="CENTER" layoutX="6.0" layoutY="239.0" prefHeight="35.0" prefWidth="137.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5); -fx-background-radius: 10;" text="The High Bidder" textFill="#9a3412">
                                        <font>
                                           <Font size="18.0" />
                                        </font>
                                     </Label>
-                                    <TextField fx:id="high_bidder" layoutX="144.0" layoutY="200.0" prefHeight="37.0" prefWidth="237.0" style="-fx-background-radius: 12;" />
-                                    <TextField fx:id="current_amount" layoutX="144.0" layoutY="250.0" prefHeight="36.0" prefWidth="237.0" style="-fx-background-radius: 12;" />
-                                    <Label alignment="CENTER" layoutX="3.0" layoutY="251.0" prefHeight="34.0" prefWidth="138.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5); -fx-background-radius: 10;" text="Current  Bid" textFill="#9a3412">
+                                    <TextField fx:id="current_amount" layoutX="156.0" layoutY="285.0" prefHeight="36.0" prefWidth="225.0" style="-fx-background-radius: 12;" />
+                                    <Label alignment="CENTER" layoutX="5.0" layoutY="287.0" prefHeight="34.0" prefWidth="138.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5); -fx-background-radius: 10;" text="Current  Bid" textFill="#9a3412">
                                        <font>
                                           <Font size="18.0" />
+                                       </font>
+                                    </Label>
+                                    <Label fx:id="lblTimer" alignment="CENTER" layoutX="31.0" layoutY="141.0" prefHeight="70.0" prefWidth="333.0" style="-fx-background-color: #0f172a; -fx-background-radius: 15;" text="00:00:00" textFill="#fbbf24">
+                                       <font>
+                                          <Font name="System Bold" size="42.0" />
+                                       </font>
+                                    </Label>
+                                    <TextField fx:id="current_amount1" layoutX="156.0" layoutY="239.0" prefHeight="36.0" prefWidth="225.0" style="-fx-background-radius: 12;" />
+                                    <Label layoutX="31.0" layoutY="115.0" text="Time Remaining" textFill="#64748b">
+                                       <font>
+                                          <Font size="13.0" />
                                        </font>
                                     </Label>
                                  </children>

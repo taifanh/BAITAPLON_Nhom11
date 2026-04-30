@@ -1,6 +1,10 @@
 package models.bidding;
 
+import com.google.gson.Gson;
+import controllers.AuctionService;
+import controllers.Server.AuctionRoom;
 import models.Extra.IdGenerator;
+import models.Extra.messages.StartAuctionMessage;
 import models.core.Item;
 
 import java.time.Duration;
@@ -26,7 +30,7 @@ public class Auction {
     private double currentHighestBid;
     private BidTransaction highestBid;
     private String currentHighestBidderId;
-
+    private Gson gson;
     // Tao mot auction moi cho item vua duoc dua vao phien.
     public Auction(Item item) {
         this.auctionId = generateAuctionId();
@@ -117,6 +121,17 @@ public class Auction {
             throw new IllegalStateException("End time must be after or equal to start time");
         }
         this.status = Status.ACTIVE;
+        if (endAt != null) {
+            String itemName = this.item.getName();
+            Auction currentAuction = AuctionService.getManagedActiveAuction(this.item.getId());
+            double startingPrice = currentAuction.getItem().getPrices();
+            double bidIncrement = 0;
+            StartAuctionMessage startAuction = new StartAuctionMessage(endAt, itemName, startingPrice, bidIncrement);
+            String msg = gson.toJson(startAuction);
+            AuctionRoom.getInstance().broadcast(msg);
+        } else {
+            throw new IllegalArgumentException("End time is not available");
+        }
     }
 
     // Dong phien tai mot thoi diem cu the.
