@@ -121,14 +121,14 @@ public class RequestLog {
             throw new IOException("Khong the xoa request", e);
         }
     }
-    public void set_selected_request(String request_id){
+    public void set_selected_request(String request_id,boolean selected){
         try(Connection connection = openConnection();
             PreparedStatement statement = connection.prepareStatement("""
             UPDATE request_log
             SET selected = ?
             WHERE request_id = ?
 """)){
-            statement.setBoolean(1,true);
+            statement.setBoolean(1,selected);
             statement.setString(2,request_id);
             statement.executeUpdate();
         } catch (SQLException e) {

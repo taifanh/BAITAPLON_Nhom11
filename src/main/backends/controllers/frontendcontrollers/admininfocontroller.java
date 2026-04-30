@@ -227,9 +227,12 @@ public class admininfocontroller {
 
             inventoryDB.saveItem(item, userId);
              // xóa request khỏi request_list -> chuyển sang inventory
+
             requestlog.deleteRequests(Collections.singletonList(request.id()));
+
             item_wait_accepted.remove(request.id());
         }
+        item_wait_accepted.clear();
         loadrequest();
         loadInventoryData();
     }
@@ -491,7 +494,7 @@ class CustomItemrequestCell  extends  ListCell<String> {
          selected.setOnAction(event -> {
             if (getListView() != null) {
                 getListView().getSelectionModel().select(getItem());
-                requestLog.set_selected_request(getItem());
+                requestLog.set_selected_request(getItem(),selected.isSelected());
             }
          });
      }
@@ -504,13 +507,15 @@ class CustomItemrequestCell  extends  ListCell<String> {
                  if (request != null) {
                      Createitempayload payload = gson.fromJson(request.requestInfo(), Createitempayload.class);
                      name_item.setText(payload.getItem_name());
+                     selected.setSelected(request.selected());
                  } else {
                      name_item.setText(item);
+                     selected.setSelected(false);
                  }
              } catch (IOException e) {
                  name_item.setText(item);
+                 selected.setSelected(false);
              }
-             selected.setSelected(getListView() != null && item.equals(getListView().getSelectionModel().getSelectedItem()));
              setGraphic(content);
          }
          else
