@@ -491,7 +491,8 @@ class CustomItemrequestCell  extends  ListCell<String> {
                         "Type: " + payload.getItemType() + "\n" +
                         "Base price: " + payload.getBasePrice() + "\n" +
                         "Increment: " + payload.getBidIncrement() + "\n" +
-                        "Info: " + payload.getItemInfo()
+                        "Info: " + payload.getItemInfo() + "\n" +
+                        "Time: " + request.time()
                 );
                 alert.showAndWait();
             } catch (IOException e) {

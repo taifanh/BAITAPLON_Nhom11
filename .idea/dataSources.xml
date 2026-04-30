@@ -8,26 +8,5 @@
       <jdbc-url>jdbc:sqlite:C:\Users\DELL\IdeaProjects\BAITAPLON_Nhom11\data\users.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="auctions.db" uuid="32a42a74-d832-4df6-a92b-417f7d024825">
-      <driver-ref>sqlite.xerial</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:C:\Users\DELL\IdeaProjects\BAITAPLON_Nhom11\data\auctions.db</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
-    <data-source source="LOCAL" name="inventory.db" uuid="24551cd9-cd19-47b0-bc8a-6e4c1c45f2d7">
-      <driver-ref>sqlite.xerial</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:C:\Users\DELL\IdeaProjects\BAITAPLON_Nhom11\data\inventory.db</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
-    <data-source source="LOCAL" name="request_log.db" uuid="351b511e-971b-4eb6-b9a2-fcda14971321">
-      <driver-ref>sqlite.xerial</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:C:\Users\DELL\IdeaProjects\BAITAPLON_Nhom11\data\request_log.db</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
   </component>
 </project>
