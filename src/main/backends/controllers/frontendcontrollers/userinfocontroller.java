@@ -115,7 +115,6 @@ public class userinfocontroller {
         ITEMLIST.setCellFactory(this::createUpcomingAuctionCell);
         ITEMLIST.setItems(upcomingAuctions);
         loadInAuctionItems();
-        startUpcomingSync();
         ITEMLIST.getSelectionModel().selectedItemProperty().addListener((obs, oldItem, selected) -> {
             if (selected == null) return;
             itemName.setText(selected.getName());
@@ -139,14 +138,6 @@ public class userinfocontroller {
         }
     }
 
-    private void startUpcomingSync() {
-        upcomingSyncTimeline = new Timeline(
-                new KeyFrame(Duration.seconds(2), e -> loadInAuctionItems())
-        );
-        upcomingSyncTimeline.setCycleCount(Animation.INDEFINITE);
-        upcomingSyncTimeline.play();
-    }
-
     private ListCell<Item> createUpcomingAuctionCell(ListView<Item> listView) {
         return new ListCell<>() {
             @Override
@@ -168,22 +159,33 @@ public class userinfocontroller {
     }
 
     private void startUIUpdater() {
-            timeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
-            try {
-                if (endAt == null) {
-                    setClock0();
-                    return;
-                }
-                java.time.Duration remaining = java.time.Duration.between(LocalDateTime.now(), endAt);
-                if (remaining.isZero() || remaining.isNegative()) {
-                    lblTimer.setText("00:00:00");
-                    return;
-                }
-                updateClock(remaining);
-            } catch (Exception e) {
-                System.err.println("Error updating user timer: " + e.getMessage());
-            }
-        }));
+        timeline = new Timeline(
+                new KeyFrame(Duration.seconds(1), event -> {
+                    try {
+                        if (endAt == null) {
+                            setClock0();
+                        } else {
+                            java.time.Duration remaining =
+                                    java.time.Duration.between(LocalDateTime.now(), endAt);
+
+                            if (remaining.isZero() || remaining.isNegative()) {
+                                setClock0();
+                            } else {
+                                updateClock(remaining);
+                            }
+                        }
+                        long currentSecond = System.currentTimeMillis() / 1000;
+
+                        if (currentSecond % 2 == 0) {
+                            loadInAuctionItems();
+                        }
+
+                    } catch (Exception e) {
+                        System.err.println("Error updating UI: " + e.getMessage());
+                    }
+                })
+        );
+
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();
     }
