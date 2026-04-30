@@ -80,6 +80,9 @@ public class ClientHandler implements Runnable {
             String type = resolveMessageType(node);
 
             switch (type) {
+                case "AUCTION_ITEMS_RESPONSE" -> {
+                    AuctionRoom.getInstance().broadcast(json);
+                }
 
                 case "WATCH_AUCTION" -> {
                     // Client mở màn hình chi tiết phiên

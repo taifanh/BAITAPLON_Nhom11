@@ -30,6 +30,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import models.Extra.messages.AuctionItemDto;
+import models.Extra.messages.AuctionItemsResponse;
 import models.accounts.Admin;
 import models.Extra.messages.Createitempayload;
 import models.bidding.Auction;
@@ -257,12 +259,31 @@ public class admininfocontroller {
 
         loadInventoryData();
     }
+    private void sendListItem() {
+        try {
+            Inventory inventoryDB = new Inventory();
+            List<Item> items = inventoryDB.getItemsByStatus(Inventory.STATUS_IN_AUCTION);
 
+            List<AuctionItemDto> upcomingitems = items.stream()
+                    .map(i -> new AuctionItemDto(
+                            i.getId(),
+                            i.getType(),
+                            i.getName(),
+                            i.getPrices(),
+                            i.getInfo()
+                    ))
+                    .toList();
+
+            UserSession.getConnection().send(new AuctionItemsResponse(upcomingitems));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     private void startUIUpdater() {
         Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
             try {
                 Item currentitem = upcomingitem.getSelectionModel().getSelectedItem();
-
+                sendListItem();
                 if (currentitem != null) {
                     Auction managedAuction = AuctionService.getManagedActiveAuction(currentitem.getId());
                     if (managedAuction != null) {

@@ -35,6 +35,10 @@ import models.accounts.User;
 import javafx.collections.ObservableList;
 import Database.Inventory;
 import models.core.Item;
+import models.items.Art;
+import models.items.Electronics;
+import models.items.Vehicle;
+
 import java.util.List;
 
 import java.io.IOException;
@@ -118,7 +122,6 @@ public class userinfocontroller {
         loaduser_request();
         ITEMLIST.setCellFactory(this::createUpcomingAuctionCell);
         ITEMLIST.setItems(upcomingAuctions);
-        loadInAuctionItems();
         ITEMLIST.getSelectionModel().selectedItemProperty().addListener((obs, oldItem, selected) -> {
             if (selected == null) return;
             itemName.setText(selected.getName());
@@ -129,17 +132,42 @@ public class userinfocontroller {
         subscribeAdditemResult();
         subscribechangeResult();
         subscribeAuctionStart();
+        subscribeAuctionList();
         startUIUpdater();
     }
 
-    private void loadInAuctionItems() {
-        try {
-            Inventory inventoryDB = new Inventory();
-            List<Item> items = inventoryDB.getItemsByStatus(Inventory.STATUS_IN_AUCTION);
-            upcomingAuctions.setAll(items);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void subscribeAuctionList() {
+        MessageBus.getInstance().subscribe(json -> {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode node = null;
+            try {
+                node = mapper.readTree(json);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+            String type = resolveMessageType(node);
+            switch (type) {
+                case "AUCTION_ITEMS_RESPONSE" -> {
+                    AuctionItemsResponse msg;
+                    try {
+                        msg = mapper.readValue(json, AuctionItemsResponse.class);
+                        List<Item> items = msg.items.stream()
+                                .map(dto -> switch (dto.getType()) {
+                                    case "Electronics" -> new Electronics(dto.getId(), dto.getName(), dto.getPrice(), dto.getInfo());
+                                    case "Art" -> new Art(dto.getId(), dto.getName(), dto.getPrice(), dto.getInfo());
+                                    case "Vehicle" -> new Vehicle(dto.getId(), dto.getName(), dto.getPrice(), dto.getInfo());
+                                    default -> throw new IllegalArgumentException("Unknown type: " + dto.getType());
+                                })
+                                .toList();
+
+                        Platform.runLater(() -> ITEMLIST.setItems(FXCollections.observableArrayList(items)));
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                }
+            }
+        });
     }
 
     private ListCell<Item> createUpcomingAuctionCell(ListView<Item> listView) {
@@ -177,11 +205,6 @@ public class userinfocontroller {
                             } else {
                                 updateClock(remaining);
                             }
-                        }
-                        long currentSecond = System.currentTimeMillis() / 1000;
-
-                        if (currentSecond % 2 == 0) {
-                            loadInAuctionItems();
                         }
 
                     } catch (Exception e) {
@@ -401,9 +424,10 @@ public class userinfocontroller {
 //                        }
                         showAlert(Alert.AlertType.INFORMATION, "thanh cong" , "change information sucessfull!");
                     }
-                    else
-                        showAlert(Alert.AlertType.WARNING, "khong thanh cong" , "cannot change your information");
-
+                    else {
+                        return;
+                        //showAlert(Alert.AlertType.WARNING, "khong thanh cong" , "cannot change your information");
+                    }
                 });
 
             } catch (Exception e){
