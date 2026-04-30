@@ -50,7 +50,7 @@ public class MyRequest {
     public List<RequestRecord> getMyRequestsByType(String requestType) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     SELECT STT, id_user, request_type, request_info
+                     SELECT STT, id_user, request_type, request_info, send_at
                      FROM my_request
                      WHERE request_type = ?
                      ORDER BY send_at ASC
