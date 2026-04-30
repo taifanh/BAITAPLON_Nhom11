@@ -190,7 +190,7 @@ public class admininfocontroller {
 
     @FXML
     public void handle_reject_requests(ActionEvent event) {
-        String requestId = requestlist.getSelectionModel().getSelectedItem();
+        String requestId = requestlist.getSelectionModel().getSelectedItem();// lấy các item không được tích chọn
         if (requestId == null || requestId.isBlank()) {
             showMessage("Thong bao", "Vui long chon request can tu choi.");
             return;
@@ -207,41 +207,31 @@ public class admininfocontroller {
     }
 
     @FXML
-    public void handle_accept_requests(ActionEvent event) {
-        String requestId = requestlist.getSelectionModel().getSelectedItem();
-        if (requestId == null || requestId.isBlank()) {
-            showMessage("Thong bao", "Vui long chon request can duyet.");
-            return;
-        }
+    public void handle_accept_requests(ActionEvent event) throws IOException {
+        Inventory inventoryDB = new Inventory();// item và userid
+        List<RequestLog.RequestRecord> selected_requests = requestlog.selected_requests();
+        Gson gson = new Gson();
 
-        try {
-            RequestLog.RequestRecord request = requestlog.findByRequestId(requestId);
-            if (request == null) {
-                showMessage("Thong bao", "Khong tim thay request.");
-                item_wait_accepted.remove(requestId);
-                return;
-            }
+        for (RequestLog.RequestRecord request : selected_requests) {
+             String payload = request.requestInfo();
+             String userId = request.userId();
 
-            Createitempayload payload = new Gson().fromJson(request.requestInfo(), Createitempayload.class);
-            Item item = itemFactory.createItem(
-                    ItemType.valueOf(payload.getItemType()),
-                    payload.getItem_name(),
-                    payload.getBasePrice(),
-                    payload.getItemInfo()
+             Createitempayload createitempayload = gson.fromJson(payload, Createitempayload.class);
+             ItemType itemType = ItemType.valueOf(createitempayload.getItemType());
+             Item item = itemFactory.createItem(
+                    itemType,
+                    createitempayload.getItem_name(),
+                    createitempayload.getBasePrice(),
+                    createitempayload.getItemInfo()
             );
 
-            Inventory inventoryDB = new Inventory();
-            inventoryDB.saveItem(item, request.userId());
-            requestlog.deleteRequests(Collections.singletonList(requestId));
-
-            item_wait_accepted.remove(requestId);
-            requestlist.getSelectionModel().clearSelection();
-            loadInventoryData();
-            showMessage("Thong bao", "Da duyet item vao inventory.");
-        } catch (Exception e) {
-            e.printStackTrace();
-            showMessage("Loi", "Khong the duyet request.");
+            inventoryDB.saveItem(item, userId);
+             // xóa request khỏi request_list -> chuyển sang inventory
+            requestlog.deleteRequests(Collections.singletonList(request.id()));
+            item_wait_accepted.remove(request.id());
         }
+        loadrequest();
+        loadInventoryData();
     }
 
     @FXML
@@ -501,6 +491,7 @@ class CustomItemrequestCell  extends  ListCell<String> {
          selected.setOnAction(event -> {
             if (getListView() != null) {
                 getListView().getSelectionModel().select(getItem());
+                requestLog.set_selected_request(getItem());
             }
          });
      }

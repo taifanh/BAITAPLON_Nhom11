@@ -19,7 +19,8 @@ public class RequestLog {
                 request_id TEXT PRIMARY KEY,
                 id_user TEXT,
                 request_type TEXT ,
-                request_info TEXT
+                request_info TEXT,
+                selected BOOLEAN
             )
             """;
 
@@ -31,18 +32,18 @@ public class RequestLog {
             throw new IllegalStateException(" KHONG THE KHOI TAO request database");
         }
     }
-
+    // ============dùng cho khi add new item ============================
     public static String save_request(Message message) throws  IOException {
         String requestId = "REQ" + IdGenerator.nextId();
         try(Connection connection = openConnection();
             PreparedStatement statement = connection.prepareStatement("""
-            INSERT INTO request_log (request_id, id_user , request_type , request_info) VALUES (?, ? , ? , ?)""")
+            INSERT INTO request_log (request_id, id_user , request_type , request_info, selected ) VALUES (?, ? , ? , ? , ?)""")
         ){
           statement.setString(1, requestId);
           statement.setString(2,message.Id_user);
           statement.setString(3,message.messageType);
           statement.setString(4, message.payloadJson);
-
+          statement.setBoolean(5,false);
           statement.executeUpdate();
           return requestId;
         } catch (SQLException e) {
@@ -53,7 +54,7 @@ public class RequestLog {
     public List<RequestRecord> getRequestsByType(String requestType) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     SELECT request_id, id_user, request_type, request_info
+                     SELECT request_id, id_user, request_type, request_info , selected
                      FROM request_log
                      WHERE request_type = ?
                      ORDER BY request_id ASC
@@ -66,7 +67,8 @@ public class RequestLog {
                             resultSet.getString("request_id"),
                             resultSet.getString("id_user"),
                             resultSet.getString("request_type"),
-                            resultSet.getString("request_info")
+                            resultSet.getString("request_info"),
+                            resultSet.getBoolean("selected")
                     ));
                 }
                 return requests;
@@ -79,7 +81,7 @@ public class RequestLog {
     public RequestRecord findByRequestId(String requestId) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     SELECT request_id, id_user, request_type, request_info
+                     SELECT request_id, id_user, request_type, request_info , selected
                      FROM request_log
                      WHERE request_id = ?
                      """)) {
@@ -92,8 +94,8 @@ public class RequestLog {
                         resultSet.getString("request_id"),
                         resultSet.getString("id_user"),
                         resultSet.getString("request_type"),
-                        resultSet.getString("request_info")
-                );
+                        resultSet.getString("request_info"),
+                        resultSet.getBoolean("selected"));
             }
         } catch (SQLException e) {
             throw new IOException("Khong the lay request theo id", e);
@@ -119,6 +121,46 @@ public class RequestLog {
             throw new IOException("Khong the xoa request", e);
         }
     }
+    public void set_selected_request(String request_id){
+        try(Connection connection = openConnection();
+            PreparedStatement statement = connection.prepareStatement("""
+            UPDATE request_log
+            SET selected = ?
+            WHERE request_id = ?
+""")){
+            statement.setBoolean(1,true);
+            statement.setString(2,request_id);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+    public List<RequestLog.RequestRecord> selected_requests() throws IOException{
+        try(Connection connection = openConnection();
+            PreparedStatement statement = connection.prepareStatement("""
+                    SELECT request_id, id_user, request_type, request_info , selected
+                     FROM request_log
+                     WHERE selected = true
+                    ORDER  BY request_id ASC
+                    """)){
+            try (ResultSet resultSet = statement.executeQuery()) {
+                List<RequestRecord> requests = new ArrayList<>();
+                while(resultSet.next()){
+                    requests.add(new RequestRecord(
+                            resultSet.getString("request_id"),
+                            resultSet.getString("id_user"),
+                            resultSet.getString("request_type"),
+                            resultSet.getString("request_info"),
+                            resultSet.getBoolean("selected")
+                    ));
+            }
+                return requests;
+            }
+        } catch (Exception e){
+            throw new IOException("cannot load requests", e);
+        }
+    }
 
     private void initializeRequest_Log() throws IOException, SQLException {
         ensureDataDirectoryExists();
@@ -136,6 +178,6 @@ public class RequestLog {
         return DriverManager.getConnection(DATABASE_URL);
     }
 
-    public record RequestRecord(String id, String userId, String requestType, String requestInfo) {
+    public record RequestRecord(String id, String userId, String requestType, String requestInfo, boolean selected) {
     }
 }
