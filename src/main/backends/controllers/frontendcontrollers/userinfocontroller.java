@@ -32,7 +32,9 @@ import javafx.stage.Stage;
 import models.Extra.messages.*;
 import models.accounts.User;
 import javafx.collections.ObservableList;
-import javafx.collections.FXCollections;
+import Database.Inventory;
+import models.core.Item;
+import java.util.List;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -79,6 +81,10 @@ public class userinfocontroller {
     private TextField increment;
 
     @FXML
+    private TextField itemName;
+
+
+    @FXML
     private Button autobid;
 
     @FXML
@@ -87,12 +93,18 @@ public class userinfocontroller {
     private ObservableList<String> AcceptedItem_info = FXCollections.observableArrayList();
     private User user;
 
+    @FXML
+    private ListView<Item> ITEMLIST;
+    private ObservableList<Item> upcomingAuctions = FXCollections.observableArrayList();
+
     private Consumer<String> depositResultHandler;
     private Consumer<String> change_infoResultHandler;
     private Consumer<String> AdditemResultHandler;
     private Consumer<String> auctionStartHandler;
     private volatile LocalDateTime endAt;
     private Timeline timeline;
+    private Timeline upcomingSyncTimeline;
+
 
     @FXML
     public void initialize() {
@@ -100,20 +112,71 @@ public class userinfocontroller {
         if (UserSession.getCurrentUser() != null) {
             setUser(UserSession.getCurrentUser());
         }
+        ITEMLIST.setCellFactory(this::createUpcomingAuctionCell);
+        ITEMLIST.setItems(upcomingAuctions);
+        loadInAuctionItems();
+        startUpcomingSync();
+        ITEMLIST.getSelectionModel().selectedItemProperty().addListener((obs, oldItem, selected) -> {
+            if (selected == null) return;
+            itemName.setText(selected.getName());
+            baseprice.setText(Double.toString(selected.getPrices()));
+        });
         subscribeDepositResult();
         subcribePlaceBid();
         subscribeAdditemResult();
+        subscribechangeResult();
         subscribeAuctionStart();
         startUIUpdater();
+    }
+
+    private void loadInAuctionItems() {
+        try {
+            Inventory inventoryDB = new Inventory();
+            List<Item> items = inventoryDB.getItemsByStatus(Inventory.STATUS_IN_AUCTION);
+            upcomingAuctions.setAll(items);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void startUpcomingSync() {
+        upcomingSyncTimeline = new Timeline(
+                new KeyFrame(Duration.seconds(2), e -> loadInAuctionItems())
+        );
+        upcomingSyncTimeline.setCycleCount(Animation.INDEFINITE);
+        upcomingSyncTimeline.play();
+    }
+
+    private ListCell<Item> createUpcomingAuctionCell(ListView<Item> listView) {
+        return new ListCell<>() {
+            @Override
+            protected void updateItem(Item item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    setText(
+                            "Name: " + item.getName() + "\n" +
+                                    "Opening: " + item.getPrices() + "\n" +
+                                    "Type: " + item.getType() + "\n" +
+                                    "Desc: " + item.getInfo()
+                    );
+                }
+            }
+        };
     }
 
     private void startUIUpdater() {
             timeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
             try {
+                if (endAt == null) {
+                    setClock0();
+                    return;
+                }
                 java.time.Duration remaining = java.time.Duration.between(LocalDateTime.now(), endAt);
                 if (remaining.isZero() || remaining.isNegative()) {
                     lblTimer.setText("00:00:00");
-                    timeline.stop();
                     return;
                 }
                 updateClock(remaining);
@@ -163,13 +226,12 @@ public class userinfocontroller {
                     if (type.equals("START_AUCTION")) {
                         Gson gson = new Gson();
                         StartAuctionMessage msg = gson.fromJson(rawJson, StartAuctionMessage.class);
-                        Platform.runLater(() -> {
-                            baseprice.setText(Double.toString(msg.startingPrice));
-                            increment.setText(Double.toString(msg.bidIncrement));
-                            endAt = msg.endAt;
-                        });
+                        baseprice.setText(Double.toString(msg.startingPrice));
+                        increment.setText(Double.toString(msg.bidIncrement));
+                        endAt = msg.endAt;
+                        itemName.setText(msg.itemName);
                     } else {
-                        showAlert(Alert.AlertType.ERROR, "No auction", "no auction available");
+                        return;
                     }
                 });
             } catch (JsonProcessingException e) {
