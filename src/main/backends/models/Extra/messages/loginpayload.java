@@ -10,7 +10,9 @@ public class loginpayload {
     public String getRole() {
         return role;
     }
-    public void setRole(String role) {}
+    public void setRole(String role) {
+        this.role = role;
+    }
 
     public loginpayload(){}
 }

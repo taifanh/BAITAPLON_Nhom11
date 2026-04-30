@@ -1,7 +1,7 @@
 package models.Extra.messages;
 
 public class ServerBidRespond {
-    public final String type = "PLACE_BID";
+    public String type = "PLACE_BID";
     public String name;
     public double amount;
     public ServerBidRespond() {}

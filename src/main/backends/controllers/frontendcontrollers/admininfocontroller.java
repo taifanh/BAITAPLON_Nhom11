@@ -30,6 +30,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import models.Extra.messages.ReceiveMaxBidder;
 import models.Extra.messages.AuctionItemDto;
 import models.Extra.messages.AuctionItemsResponse;
 import models.accounts.Admin;
@@ -60,6 +61,12 @@ public class admininfocontroller {
 
     @FXML
     private CheckBox passshow;
+
+    @FXML
+    private TextField high_bidder;
+
+    @FXML
+    private TextField current_amount;
 
     @FXML
     private ListView<String> requestlist;
@@ -115,8 +122,45 @@ public class admininfocontroller {
 
         loadrequest();
         subscribeuser_RequestResult();
+        subcribePlaceBid();
         loadInventoryData();
         startUIUpdater();
+    }
+
+    private void subcribePlaceBid() {
+        MessageBus.getInstance().subscribe(json -> {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode node = null;
+            try {
+                node = mapper.readTree(json);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+            String type = resolveMessageType(node);
+            switch (type) {
+                case "RECEIVE_BID" -> {
+                    ReceiveMaxBidder maxBidder_msg;
+                    try {
+                        maxBidder_msg = mapper.readValue(json, ReceiveMaxBidder.class);
+                        Platform.runLater(() -> {
+                            high_bidder.setText(String.valueOf(maxBidder_msg.maxBidder.name));
+                            current_amount.setText(String.valueOf(maxBidder_msg.maxBidder.amount));
+                        });
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                }
+            }
+        });
+    }
+
+    private String resolveMessageType(JsonNode node) {
+        String messageType = node.path("messageType").asText("");
+        if (!messageType.isBlank()) {
+            return messageType;
+        }
+        return node.path("type").asText("");
     }
 
     private ListCell<Item> createItemCell(ListView<Item> listView) {
@@ -282,29 +326,25 @@ public class admininfocontroller {
     private void startUIUpdater() {
         Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
             try {
-                Item currentitem = upcomingitem.getSelectionModel().getSelectedItem();
+                List<Auction> activeAuctions = AuctionService.getManagedActiveAuctions();
                 sendListItem();
-                if (currentitem != null) {
-                    Auction managedAuction = AuctionService.getManagedActiveAuction(currentitem.getId());
-                    if (managedAuction != null) {
-                        java.time.Duration remaining = AuctionService.getDuration(currentitem.getId());
+                if (!activeAuctions.isEmpty()) {
+                    Auction currentAuction = activeAuctions.get(0);
+                    java.time.Duration remaining = AuctionService.getDuration(currentAuction.getItem().getId());
 
-                        if (remaining.isZero() || remaining.isNegative()) {
-                            try {
-                                AuctionService.endAuction(managedAuction, java.time.LocalDateTime.now());
-                                System.out.println("Auto-ending auction for item: " + currentitem.getId());
-                            } catch (Exception e) {
-                                System.err.println("Error auto-ending auction: " + e.getMessage());
-                            }
+                    if (remaining.isZero() || remaining.isNegative()) {
+                        setClock0();
+                        refreshUIState();
+                    } else {
+                        updateClock(remaining);
 
-                            refreshUIState();
-                        } else {
-                            updateClock(remaining);
-                        }
+                        itemname.setText(currentAuction.getItem().getName());
                     }
+                } else {
+                    setClock0(); // Không có phiên nào đang chạy
                 }
             } catch (Exception e) {
-                System.err.println("Error updating UI timer: " + e.getMessage());
+                 System.err.println("Error updating UI timer: " + e.getMessage());
             }
         }));
         timeline.setCycleCount(Animation.INDEFINITE);

@@ -120,13 +120,7 @@ public class userinfocontroller {
             setUser(UserSession.getCurrentUser());
         }
         loaduser_request();
-        ITEMLIST.setCellFactory(this::createUpcomingAuctionCell);
-        ITEMLIST.setItems(upcomingAuctions);
-        ITEMLIST.getSelectionModel().selectedItemProperty().addListener((obs, oldItem, selected) -> {
-            if (selected == null) return;
-            itemName.setText(selected.getName());
-            baseprice.setText(Double.toString(selected.getPrices()));
-        });
+        loadupcomingAuctions();
         subscribeDepositResult();
         subcribePlaceBid();
         subscribeAdditemResult();
@@ -134,6 +128,16 @@ public class userinfocontroller {
         subscribeAuctionStart();
         subscribeAuctionList();
         startUIUpdater();
+    }
+
+    private void loadupcomingAuctions() {
+        ITEMLIST.setCellFactory(this::createUpcomingAuctionCell);
+        ITEMLIST.setItems(upcomingAuctions);
+        ITEMLIST.getSelectionModel().selectedItemProperty().addListener((obs, oldItem, selected) -> {
+            if (selected == null) return;
+            itemName.setText(selected.getName());
+            baseprice.setText(Double.toString(selected.getPrices()));
+        });
     }
 
     private void subscribeAuctionList() {

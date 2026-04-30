@@ -173,6 +173,7 @@ public class ClientHandler implements Runnable {
                     loginpayload payload = mapper.readValue(payloadJson, loginpayload.class);
 
                     AuctionRoom.getInstance().connectors.put(userId, this);
+                    System.out.println("User " + userId + " với role " + payload.getRole() + " đã kết nối thành công!");
                 }
 
                 default -> System.out.println("[ClientHandler] Unknown type: " + type);
