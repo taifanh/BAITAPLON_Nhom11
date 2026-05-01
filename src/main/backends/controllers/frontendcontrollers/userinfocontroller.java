@@ -3,6 +3,8 @@ package controllers.frontendcontrollers;
 import Database.MyRequest;
 import Database.RequestLog;
 import Database.UserStore;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import controllers.AuctionService;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -252,18 +254,23 @@ public class userinfocontroller {
 
     private void subscribeAuctionStart() {
         auctionStartHandler = rawJson -> {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
             try {
                 ObjectNode node = (ObjectNode) mapper.readTree(rawJson);
                 String type = node.get("type").asText();
                 Platform.runLater(() -> {
                     if (type.equals("START_AUCTION")) {
-                        Gson gson = new Gson();
-                        StartAuctionMessage msg = gson.fromJson(rawJson, StartAuctionMessage.class);
-                        baseprice.setText(Double.toString(msg.startingPrice));
-                        increment.setText(Double.toString(msg.bidIncrement));
-                        endAt = msg.endAt;
-                        itemName.setText(msg.itemName);
+                        StartAuctionMessage msg = null;
+                        try {
+                            msg = mapper.readValue(rawJson, StartAuctionMessage.class);
+                            baseprice.setText(Double.toString(msg.startingPrice));
+                            increment.setText(Double.toString(msg.bidIncrement));
+                            endAt = msg.endAt;
+                            itemName.setText(msg.itemName);
+                            System.out.println("AUCTION_START");
+                        } catch (JsonProcessingException e) {
+                            throw new RuntimeException(e);
+                        }
                     } else {
                         return;
                     }

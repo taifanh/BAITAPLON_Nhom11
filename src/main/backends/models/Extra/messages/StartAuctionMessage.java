@@ -9,6 +9,9 @@ public class StartAuctionMessage {
     public String itemName;
     public double startingPrice;
     public double bidIncrement;
+    public StartAuctionMessage() {
+
+    }
     public StartAuctionMessage(LocalDateTime endAt, String itemName, double startingPrice, double bidIncrement ) {
         this.endAt = endAt;
         this.itemName = itemName;

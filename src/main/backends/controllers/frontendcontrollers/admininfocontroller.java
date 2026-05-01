@@ -30,11 +30,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import models.Extra.messages.ReceiveMaxBidder;
-import models.Extra.messages.AuctionItemDto;
-import models.Extra.messages.AuctionItemsResponse;
+import models.Extra.messages.*;
 import models.accounts.Admin;
-import models.Extra.messages.Createitempayload;
+import models.accounts.User;
 import models.bidding.Auction;
 import models.core.Account;
 import models.core.Item;
@@ -408,7 +406,16 @@ public class admininfocontroller {
             try {
                 System.out.println("Starting auction for item: " + currentItem.getId());
                 Auction currentAuction = AuctionService.startAuction((Admin) UserSession.getCurrentAccount(), currentItem, 0, minutes, 0);
-
+                System.out.println("about to send");
+                UserSession.getConnection().send(
+                        new StartAuctionMessage(
+                                currentAuction.getEndAt(),
+                                currentAuction.getItem().getName(),
+                                currentAuction.getItem().getPrices(),
+                                0
+                        )
+                );
+                System.out.println("sent");
                 System.out.println("Auction started successfully. Auction ID: " + currentAuction.getAuctionId());
                 start_end_auction.setText("END AUCTION");
                 settime.setDisable(true);

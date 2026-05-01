@@ -6,7 +6,9 @@ import Database.UserStore;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.gson.Gson;
 import controllers.UserSession;
 import models.Extra.messages.*;
@@ -28,7 +30,7 @@ public class ClientHandler implements Runnable {
 
     private final Socket socket;
     private PrintWriter out;                        // field — dùng lâu dài
-    private final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);;;
     private String watchingAuctionId = null;        // client đang xem phiên nào
 
     public Gson gson = new Gson();
@@ -82,6 +84,11 @@ public class ClientHandler implements Runnable {
 
             switch (type) {
                 case "AUCTION_ITEMS_RESPONSE" -> {
+                    AuctionRoom.getInstance().broadcast(json);
+                }
+
+                case "START_AUCTION" -> {
+                    System.out.println("Server received START_AUCTION: " + json);
                     AuctionRoom.getInstance().broadcast(json);
                 }
 

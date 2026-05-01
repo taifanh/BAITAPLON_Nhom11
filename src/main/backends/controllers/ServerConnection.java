@@ -1,6 +1,8 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javafx.application.Platform;
 
 import java.io.*;
@@ -11,7 +13,7 @@ public class ServerConnection {
     private Socket socket;
     private PrintWriter out;
     private BufferedReader in;
-    private final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);;
     private volatile boolean running = false;
 
     public void connect(String host, int port) throws IOException {

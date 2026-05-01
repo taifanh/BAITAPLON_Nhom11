@@ -126,24 +126,6 @@ public class Auction {
             throw new IllegalStateException("End time must be after or equal to start time");
         }
         this.status = Status.ACTIVE;
-        if (endAt != null) {
-            try {
-                String itemName = this.item.getName();
-                double startingPrice = this.item.getPrices();
-                double bidIncrement = 0;
-
-                StartAuctionMessage startAuction = new StartAuctionMessage(endAt, itemName, startingPrice, bidIncrement);
-
-                String msg = mapper.writeValueAsString(startAuction);
-
-                AuctionRoom.getInstance().broadcast(msg);
-            } catch (Exception e) {
-                System.err.println("Lỗi khi serialize tin nhắn đấu giá: " + e.getMessage());
-                e.printStackTrace();
-            }
-        } else {
-            throw new IllegalArgumentException("End time is not available");
-        }
     }
 
     // Dong phien tai mot thoi diem cu the.
