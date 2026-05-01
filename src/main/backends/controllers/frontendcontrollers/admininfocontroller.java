@@ -411,6 +411,7 @@ public class admininfocontroller {
                         new StartAuctionMessage(
                                 currentAuction.getEndAt(),
                                 currentAuction.getItem().getName(),
+                                currentAuction.getAuctionId(),
                                 currentAuction.getItem().getPrices(),
                                 0
                         )

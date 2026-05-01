@@ -112,6 +112,7 @@ public class userinfocontroller {
     private Consumer<String> AdditemResultHandler;
     private Consumer<String> auctionStartHandler;
     private volatile LocalDateTime endAt;
+    private volatile String currentAuctionId;
     private Timeline timeline;
     private Timeline upcomingSyncTimeline;
 
@@ -267,7 +268,7 @@ public class userinfocontroller {
                             increment.setText(Double.toString(msg.bidIncrement));
                             endAt = msg.endAt;
                             itemName.setText(msg.itemName);
-                            System.out.println("AUCTION_START");
+                            currentAuctionId = msg.auctionId;
                         } catch (JsonProcessingException e) {
                             throw new RuntimeException(e);
                         }
@@ -360,8 +361,7 @@ public class userinfocontroller {
             return;
         }
         String currentUserId = UserSession.getCurrentUser().getId();
-        String auctionId = "USER_ROOM_" + currentUserId;
-        UserSession.getConnection().send(new ClientSendBid(currentUserId, amount, auctionId));
+        UserSession.getConnection().send(new ClientSendBid(currentUserId, amount, currentAuctionId));
     }
 
     private void setClock0() {
