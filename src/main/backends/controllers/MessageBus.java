@@ -28,7 +28,9 @@ public class MessageBus {
 
     // Listener thread gọi hàm này với mỗi dòng nhận được từ server
     public void dispatch(String rawJson) {
+        System.out.println("[MessageBus] Dispatching message: " + rawJson);
         for (Consumer<String> sub : subscribers) {
+            System.out.println("[MessageBus] Sending to subscriber: " + sub);
             sub.accept(rawJson);
         }
     }

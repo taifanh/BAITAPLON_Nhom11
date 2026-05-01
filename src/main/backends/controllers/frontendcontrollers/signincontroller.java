@@ -56,11 +56,13 @@ public class signincontroller {
 
             Account account = accountOptional.get();
             UserSession.setCurrentAccount(account);
+            System.out.println("sigin accout" +  account.getId());
             String viewFileName;
             String windowTitle;
 
 
             //kiểm tra role để mở màn hình Info
+            System.out.println(account.getRole());
             if ("Admin".equalsIgnoreCase(account.getRole())) {
                 viewFileName = "admininfo.fxml";
                 windowTitle = "Thong tin admin";

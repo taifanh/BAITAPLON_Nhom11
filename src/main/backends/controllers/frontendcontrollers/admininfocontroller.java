@@ -129,6 +129,7 @@ public class admininfocontroller {
 
     private void subcribePlaceBid() {
         MessageBus.getInstance().subscribe(json -> {
+            System.out.println("[AdminInfoController] Received message: " + json);
             ObjectMapper mapper = new ObjectMapper();
             JsonNode node = null;
             try {
@@ -137,6 +138,7 @@ public class admininfocontroller {
                 throw new RuntimeException(e);
             }
             String type = resolveMessageType(node);
+            System.out.println("[AdminInfoController] Message type: " + type);
             switch (type) {
                 case "RECEIVE_BID" -> {
                     ReceiveMaxBidder maxBidder_msg;

@@ -41,7 +41,7 @@
                                                         <ImageView fx:id="UserImange" fitHeight="120.0" fitWidth="120.0" layoutX="40.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" />
                                                     </children>
                                                 </Pane>
-                                                <Label alignment="CENTER" layoutX="26.0" layoutY="290.0" prefHeight="34.0" prefWidth="228.0" text="Full Name" textAlignment="CENTER" textFill="WHITE">
+                                                <Label alignment="CENTER" layoutX="26.0" layoutY="290.0" prefHeight="34.0" prefWidth="228.0" textAlignment="CENTER" textFill="WHITE">
                                                     <font>
                                                         <Font size="22.0" />
                                                     </font>
@@ -382,14 +382,14 @@
                                                         <Font size="18.0" />
                                                     </font>
                                                 </Label>
-                                                <TextField layoutX="181.0" layoutY="284.0" prefHeight="37.0" prefWidth="182.0" style="-fx-background-color: #f8fafc; -fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #dbe4f0;" />
+                                                <TextField fx:id="high_bidder" layoutX="181.0" layoutY="284.0" prefHeight="37.0" prefWidth="182.0" style="-fx-background-color: #f8fafc; -fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #dbe4f0;" />
 
                                                 <Label alignment="CENTER" layoutX="24.0" layoutY="335.0" prefHeight="34.0" prefWidth="146.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5); -fx-background-radius: 10;" text="Current Bid" textFill="#9a3412">
                                                     <font>
                                                         <Font size="18.0" />
                                                     </font>
                                                 </Label>
-                                                <TextField layoutX="181.0" layoutY="334.0" prefHeight="36.0" prefWidth="182.0" style="-fx-background-color: #f8fafc; -fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #dbe4f0;" />
+                                                <TextField fx:id="current_amount" layoutX="181.0" layoutY="334.0" prefHeight="36.0" prefWidth="182.0" style="-fx-background-color: #f8fafc; -fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #dbe4f0;" />
 
                                                 <Pane layoutX="31.0" layoutY="400.0" prefHeight="120.0" prefWidth="332.0" style="-fx-background-color: #f8fafc; -fx-background-radius: 18; -fx-border-color: #dbe4f0; -fx-border-radius: 18;">
                                                     <children>

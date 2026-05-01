@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
+import controllers.UserSession;
 import models.Extra.messages.*;
 import models.accounts.User;
 import models.bidding.BidTransaction;
@@ -110,7 +111,9 @@ public class ClientHandler implements Runnable {
                             info.amount));
                     ServerBidRespond maxBidder = bidTransactions.getMaxBidder(auctionId);
                     ReceiveMaxBidder maxBidder_msg = new ReceiveMaxBidder(maxBidder);
-                    AuctionRoom.getInstance().broadcast(new Gson().toJson(maxBidder_msg));
+                    String jsonMessage = new Gson().toJson(maxBidder_msg);
+                    System.out.println("[Server] Sending RECEIVE_BID message: " + jsonMessage);
+                    AuctionRoom.getInstance().broadcast(jsonMessage);
                 }
 
                 case "GET_AUCTIONS" -> {
