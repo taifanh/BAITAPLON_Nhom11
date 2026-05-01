@@ -105,22 +105,26 @@ public class ClientHandler implements Runnable {
 
                 case "PLACE_BID" -> {
                     ClientSendBid info = mapper.readValue(json, ClientSendBid.class);
-                    BidTransactions bidTransactions = new BidTransactions();
-                    User thisUser = (new UserStore()).getUser(info.id);
-                    String auctionId = info.auctionId;
+
+                    String auctionId = (info.auctionId != null && !info.auctionId.isBlank())
+                            ? info.auctionId
+                            : watchingAuctionId;
+
                     if (auctionId == null || auctionId.isBlank()) {
-                        auctionId = (watchingAuctionId == null || watchingAuctionId.isBlank())
-                                ? "USER_ROOM_" + info.id
-                                : watchingAuctionId;
+                        send(errorJson("Không xác định được phiên đấu giá"));
+                        return;
                     }
-                    bidTransactions.saveBid(auctionId, new BidTransaction(thisUser,
-                            itemFactory.createItem(ItemType.Art, "bao ngu", 0, "oc cak"),
-                            info.amount));
-                    ServerBidRespond maxBidder = bidTransactions.getMaxBidder(auctionId);
-                    ReceiveMaxBidder maxBidder_msg = new ReceiveMaxBidder(maxBidder);
-                    String jsonMessage = new Gson().toJson(maxBidder_msg);
-                    System.out.println("[Server] Sending RECEIVE_BID message: " + jsonMessage);
-                    AuctionRoom.getInstance().broadcast(jsonMessage);
+
+                    // ← Chỉ cần 1 dòng này, batch processor lo phần còn lại
+                    BidBatchProcessor.getInstance().submitBid(info.id, auctionId, info.amount);
+
+                    // ACK ngay cho client biết server đã nhận bid
+                    // (kết quả thực sự sẽ broadcast sau tối đa 10 giây)
+                    ObjectNode ack = mapper.createObjectNode();
+                    ack.put("type", "BID_QUEUED");
+                    ack.put("auctionId", auctionId);
+                    ack.put("amount", info.amount);
+                    send(ack.toString());
                 }
 
                 case "GET_AUCTIONS" -> {

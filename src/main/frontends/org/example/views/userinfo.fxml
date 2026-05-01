@@ -215,7 +215,7 @@
                                                         <Font size="15.0" />
                                                     </font>
                                                 </TextField>
-                                                <Button alignment="CENTER" layoutX="29.0" layoutY="297.0" mnemonicParsing="false" onAction="#placebid" prefHeight="34.0" prefWidth="107.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="PLACE" />
+                                                <Button fx:id="placebid" alignment="CENTER" layoutX="29.0" layoutY="297.0" mnemonicParsing="false" onAction="#placebid" prefHeight="34.0" prefWidth="107.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="PLACE" />
                                             </children>
                                         </Pane>
                                         <Pane layoutX="327.0" layoutY="66.0" prefHeight="547.0" prefWidth="395.0" style="-fx-background-color: #D3D3D3; -fx-background-radius: 18; -fx-border-radius: 18;">

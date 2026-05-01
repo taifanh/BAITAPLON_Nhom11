@@ -123,6 +123,11 @@ public class userinfocontroller {
         if (UserSession.getCurrentUser() != null) {
             setUser(UserSession.getCurrentUser());
         }
+        high_bidder.setEditable(false);
+        current_amount.setEditable(false);
+        itemName.setEditable(false);
+        baseprice.setEditable(false);
+        increment.setEditable(false);
         loaduser_request();
         loadupcomingAuctions();
         subscribeDepositResult();
@@ -243,11 +248,23 @@ public class userinfocontroller {
                         Platform.runLater(() -> {
                             high_bidder.setText(String.valueOf(maxBidder_msg.maxBidder.name));
                             current_amount.setText(String.valueOf(maxBidder_msg.maxBidder.amount));
+                            placebid.setDisable(false);
+                            bidprice.setDisable(false);
+                            bidprice.clear();
                         });
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     }
-
+                }
+                case "BID_QUEUED" -> {
+                    double queuedAmount = node.get("amount").asDouble();
+                    Platform.runLater(() -> {
+                        // Hiển thị thông báo nhỏ: bid đang chờ xử lý
+                        bidprice.setStyle("-fx-border-color: orange;");
+                        bidprice.setText("Your bid: " + queuedAmount + " is submitted");
+                        placebid.setDisable(true);
+                        bidprice.setDisable(true);
+                    });
                 }
             }
         });
@@ -361,7 +378,13 @@ public class userinfocontroller {
             return;
         }
         String currentUserId = UserSession.getCurrentUser().getId();
-        UserSession.getConnection().send(new ClientSendBid(currentUserId, amount, currentAuctionId));
+        java.time.Duration remaining = java.time.Duration.between(LocalDateTime.now(), endAt);
+        if (remaining.isZero() || remaining.isNegative()) {
+            new Alert(Alert.AlertType.ERROR, "The bidding period has expired", ButtonType.OK).show();
+            return;
+        } else {
+            UserSession.getConnection().send(new ClientSendBid(currentUserId, amount, currentAuctionId));
+        }
     }
 
     private void setClock0() {

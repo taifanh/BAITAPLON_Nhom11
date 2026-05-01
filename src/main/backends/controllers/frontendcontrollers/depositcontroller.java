@@ -61,7 +61,8 @@ public class depositcontroller {
                         showAlert(Alert.AlertType.INFORMATION, "Thành công", "Nạp tiền thành công!");
                         closeWindow();
                     } else {
-                        showAlert(Alert.AlertType.ERROR, "Thất bại", "Nạp tiền thất bại!");
+                        return;
+                        //showAlert(Alert.AlertType.ERROR, "Thất bại", "Nạp tiền thất bại!");
                     }
                 });
         } catch (JsonProcessingException e) {
