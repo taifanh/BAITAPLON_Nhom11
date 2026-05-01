@@ -1,6 +1,7 @@
 package controllers.frontendcontrollers;
 
 import Database.MyRequest;
+import Database.RequestLog;
 import Database.UserStore;
 import controllers.AuctionService;
 import javafx.animation.Animation;
@@ -412,6 +413,9 @@ public class userinfocontroller {
                 String type = node.get("type").asText();
 
 //                JsonNode payloadJson = node.get("payloadJson");
+                if(!type.equals("change_info_OK)")){
+                    return;
+                }
 
                 Platform.runLater(() ->{
                     if (type.equals("change_info_OK") && node.has("payloadJson")) {
@@ -429,8 +433,7 @@ public class userinfocontroller {
                         showAlert(Alert.AlertType.INFORMATION, "thanh cong" , "change information sucessfull!");
                     }
                     else {
-                        return;
-                        //showAlert(Alert.AlertType.WARNING, "khong thanh cong" , "cannot change your information");
+                        showAlert(Alert.AlertType.WARNING, "khong thanh cong" , "cannot change your information");
                     }
                 });
 
@@ -456,14 +459,16 @@ public class userinfocontroller {
                        msg.Id_user = UserSession.getCurrentUser().getId();
                        msg.messageType = "additem";
                        msg.payloadJson = payloadjson;
+                       String requestId = node.has("request_id") ? node.get("request_id").asText() : null;
 
                        try {
-                           myrequest.save_myrequest(msg);
+                           myrequest.save_myrequest(msg, requestId);
+                           if (requestId != null) {
+                               AcceptedItem_info.add(requestId);
+                           }
                        } catch (IOException e) {
                            e.printStackTrace();
                        }
-                       AcceptedItem_info.add(payload.getItemType());// cập nhật danh sachs -> thêm 1 item mới
-
                    }
                    List_AcceptedItem.setItems(AcceptedItem_info);// listview load item từ AcceptedItem_info
                    // set up cell factory -> để tạo ra 1 dòng chứa nhiều loại icon và button tương tác
@@ -485,10 +490,11 @@ public class userinfocontroller {
     public void loaduser_request() throws IOException {
         List<MyRequest.RequestRecord> requests = myrequest.getMyRequestsByType("additem");
 
-        Gson gson = new Gson();
-        for ( MyRequest.RequestRecord request : requests){
-            Createitempayload payload = gson.fromJson(request.requestInfo(), Createitempayload.class);
-            AcceptedItem_info.add(payload.getItem_name());
+        AcceptedItem_info.clear();
+        for (MyRequest.RequestRecord request : requests) {
+            if (request.requestId() != null) {
+                AcceptedItem_info.add(request.requestId());
+            }
         }
         List_AcceptedItem.setItems(AcceptedItem_info);
         List_AcceptedItem.setCellFactory(lv -> new CustomItemCell());
@@ -501,6 +507,8 @@ class CustomItemCell extends ListCell<String>{
     private Button View_info;
     private Button remove_item;
     private Pane spacer;
+    private final RequestLog requestLog = new RequestLog();
+    private final Gson gson = new Gson();
 
     public CustomItemCell(){
         super();
@@ -518,10 +526,33 @@ class CustomItemCell extends ListCell<String>{
         content.setAlignment(Pos.CENTER_LEFT);
 
         View_info.setOnAction(event ->{
-            String item = getItem();
-            // tạo giao diện cho phần hiển thị thông tin
-            // tạm thời in terminal
-           System.out.println("đang xem thông tin của item : ");
+            String requestId = getItem();
+            if (requestId == null) {
+                return;
+            }
+            try {
+                RequestLog.RequestRecord request = requestLog.findByRequestId(requestId);
+                if (request == null) {
+                    return;
+                }
+                Createitempayload payload = gson.fromJson(request.requestInfo(), Createitempayload.class);
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Thong tin item");
+                alert.setHeaderText(payload.getItem_name());
+                alert.setContentText(
+                        "Request ID: " + request.id() + "\n" +
+                                "User ID: " + request.userId() + "\n" +
+                                "Type: " + payload.getItemType() + "\n" +
+                                "Base price: " + payload.getBasePrice() + "\n" +
+                                "Increment: " + payload.getBidIncrement() + "\n" +
+                                "Info: " + payload.getItemInfo() + "\n" +
+                                "Status: " + request.status() + "\n" +
+                                "Time: " + request.time()
+                );
+                alert.showAndWait();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         });
         remove_item.setOnAction(event ->{
             String item = getItem();
@@ -535,7 +566,17 @@ class CustomItemCell extends ListCell<String>{
     protected void updateItem(String item , boolean empty){// javafx AUTO call it
         super.updateItem(item, empty);
         if(item!=null && !empty){
-            name_item.setText(item);
+            try {
+                RequestLog.RequestRecord request = requestLog.findByRequestId(item);
+                if (request != null) {
+                    Createitempayload payload = gson.fromJson(request.requestInfo(), Createitempayload.class);
+                    name_item.setText(payload.getItem_name());
+                } else {
+                    name_item.setText(item);
+                }
+            } catch (IOException e) {
+                name_item.setText(item);
+            }
             setGraphic(content);
         }
         else

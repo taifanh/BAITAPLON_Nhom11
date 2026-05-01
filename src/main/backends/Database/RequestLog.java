@@ -11,6 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RequestLog {
+    public static final String STATUS_PENDING = "PENDING";
+    public static final String STATUS_ACCEPTED = "ACCEPTED";
+    public static final String STATUS_REJECTED = "REJECTED";
+
     private static final Path DATA_DIRECTORY = Path.of("data");
     static final Path DATABASE_FILE = DATA_DIRECTORY.resolve("request_log.db");
     private static final String DATABASE_URL = "jdbc:sqlite:" + DATABASE_FILE;
@@ -20,7 +24,9 @@ public class RequestLog {
                 id_user TEXT,
                 request_type TEXT ,
                 request_info TEXT,
-                selected BOOLEAN
+                send_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                selected BOOLEAN,
+                status TEXT DEFAULT 'PENDING'
             )
             """;
 
@@ -37,13 +43,14 @@ public class RequestLog {
         String requestId = "REQ" + IdGenerator.nextId();
         try(Connection connection = openConnection();
             PreparedStatement statement = connection.prepareStatement("""
-            INSERT INTO request_log (request_id, id_user , request_type , request_info, selected ) VALUES (?, ? , ? , ? , ?)""")
+            INSERT INTO request_log (request_id, id_user , request_type , request_info, selected, status ) VALUES (?, ? , ? , ? , ?, ?)""")
         ){
           statement.setString(1, requestId);
           statement.setString(2,message.Id_user);
           statement.setString(3,message.messageType);
           statement.setString(4, message.payloadJson);
           statement.setBoolean(5,false);
+          statement.setString(6, STATUS_PENDING);
           statement.executeUpdate();
           return requestId;
         } catch (SQLException e) {
@@ -54,12 +61,13 @@ public class RequestLog {
     public List<RequestRecord> getRequestsByType(String requestType) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     SELECT request_id, id_user, request_type, request_info , selected
+                     SELECT request_id, id_user, request_type, request_info ,send_at, selected, status
                      FROM request_log
-                     WHERE request_type = ?
-                     ORDER BY request_id ASC
+                     WHERE request_type = ? AND status = ?
+                     ORDER BY send_at ASC
                      """)) {
             statement.setString(1, requestType);
+            statement.setString(2, STATUS_PENDING);
             try (ResultSet resultSet = statement.executeQuery()) {
                 List<RequestRecord> requests = new ArrayList<>();
                 while (resultSet.next()) {
@@ -68,7 +76,9 @@ public class RequestLog {
                             resultSet.getString("id_user"),
                             resultSet.getString("request_type"),
                             resultSet.getString("request_info"),
-                            resultSet.getBoolean("selected")
+                            resultSet.getString("send_at"),
+                            resultSet.getBoolean("selected"),
+                            resultSet.getString("status")
                     ));
                 }
                 return requests;
@@ -81,7 +91,7 @@ public class RequestLog {
     public RequestRecord findByRequestId(String requestId) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     SELECT request_id, id_user, request_type, request_info , selected
+                     SELECT request_id, id_user, request_type, request_info ,send_at, selected, status
                      FROM request_log
                      WHERE request_id = ?
                      """)) {
@@ -95,10 +105,27 @@ public class RequestLog {
                         resultSet.getString("id_user"),
                         resultSet.getString("request_type"),
                         resultSet.getString("request_info"),
-                        resultSet.getBoolean("selected"));
+                        resultSet.getString("send_at"),
+                        resultSet.getBoolean("selected"),
+                        resultSet.getString("status"));
             }
         } catch (SQLException e) {
             throw new IOException("Khong the lay request theo id", e);
+        }
+    }
+
+    public void updateRequestStatus(String requestId, String status) throws IOException {
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement("""
+                     UPDATE request_log
+                     SET status = ?, selected = false
+                     WHERE request_id = ?
+                     """)) {
+            statement.setString(1, status);
+            statement.setString(2, requestId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IOException("Khong the cap nhat trang thai request", e);
         }
     }
 
@@ -139,11 +166,12 @@ public class RequestLog {
     public List<RequestLog.RequestRecord> selected_requests() throws IOException{
         try(Connection connection = openConnection();
             PreparedStatement statement = connection.prepareStatement("""
-                    SELECT request_id, id_user, request_type, request_info , selected
+                    SELECT request_id, id_user, request_type, request_info ,send_at, selected, status
                      FROM request_log
-                     WHERE selected = true
-                    ORDER  BY request_id ASC
+                     WHERE selected = true AND status = ?
+                    ORDER  BY send_at ASC
                     """)){
+            statement.setString(1, STATUS_PENDING);
             try (ResultSet resultSet = statement.executeQuery()) {
                 List<RequestRecord> requests = new ArrayList<>();
                 while(resultSet.next()){
@@ -152,7 +180,9 @@ public class RequestLog {
                             resultSet.getString("id_user"),
                             resultSet.getString("request_type"),
                             resultSet.getString("request_info"),
-                            resultSet.getBoolean("selected")
+                            resultSet.getString("send_at"),
+                            resultSet.getBoolean("selected"),
+                            resultSet.getString("status")
                     ));
             }
                 return requests;
@@ -167,6 +197,19 @@ public class RequestLog {
         try(Connection conn = openConnection();
             Statement statement = conn.createStatement()){
             statement.executeUpdate(CREATE_REQUEST_TABLE_SQL);
+            ensureStatusColumnExists(conn);
+        }
+    }
+    private void ensureStatusColumnExists(Connection connection) throws SQLException {
+        try (ResultSet columns = connection.getMetaData().getColumns(null, null, "request_log", "status")) {
+            if (!columns.next()) {
+                try (Statement statement = connection.createStatement()) {
+                    statement.executeUpdate("ALTER TABLE request_log ADD COLUMN status TEXT DEFAULT 'PENDING'");
+                }
+            }
+        }
+        try (Statement statement = connection.createStatement()) {
+            statement.executeUpdate("UPDATE request_log SET status = 'PENDING' WHERE status IS NULL OR status = ''");
         }
     }
     private void ensureDataDirectoryExists() throws IOException {
@@ -178,6 +221,6 @@ public class RequestLog {
         return DriverManager.getConnection(DATABASE_URL);
     }
 
-    public record RequestRecord(String id, String userId, String requestType, String requestInfo, boolean selected) {
+    public record RequestRecord(String id, String userId, String requestType, String requestInfo,String time, boolean selected, String status) {
     }
 }

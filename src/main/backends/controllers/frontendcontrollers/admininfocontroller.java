@@ -42,7 +42,6 @@ import models.items.ItemType;
 import models.items.itemFactory;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -243,12 +242,12 @@ public class admininfocontroller {
         }
 
         try {
-            requestlog.deleteRequests(Collections.singletonList(requestId));
+            requestlog.updateRequestStatus(requestId, RequestLog.STATUS_REJECTED);
             item_wait_accepted.remove(requestId);
             requestlist.getSelectionModel().clearSelection();
         } catch (IOException e) {
             e.printStackTrace();
-            showMessage("Loi", "Khong the xoa request.");
+            showMessage("Loi", "Khong the tu choi request.");
         }
     }
 
@@ -274,7 +273,7 @@ public class admininfocontroller {
             inventoryDB.saveItem(item, userId);
              // xóa request khỏi request_list -> chuyển sang inventory
 
-            requestlog.deleteRequests(Collections.singletonList(request.id()));
+            requestlog.updateRequestStatus(request.id(), RequestLog.STATUS_ACCEPTED);
 
             item_wait_accepted.remove(request.id());
         }
@@ -493,6 +492,7 @@ public class admininfocontroller {
     }
     private void loadrequest(){
         try{
+            item_wait_accepted.clear();
             List<RequestLog.RequestRecord> requests = requestlog.getRequestsByType("additem");
 
             for (RequestLog.RequestRecord request : requests) {
@@ -546,7 +546,8 @@ class CustomItemrequestCell  extends  ListCell<String> {
                         "Type: " + payload.getItemType() + "\n" +
                         "Base price: " + payload.getBasePrice() + "\n" +
                         "Increment: " + payload.getBidIncrement() + "\n" +
-                        "Info: " + payload.getItemInfo()
+                        "Info: " + payload.getItemInfo() + "\n" +
+                        "Time: " + request.time()
                 );
                 alert.showAndWait();
             } catch (IOException e) {
