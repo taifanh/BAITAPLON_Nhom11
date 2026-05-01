@@ -16,6 +16,7 @@ public class MyRequest {
     private static final String CREATE_REQUEST_TABLE_SQL = """
             CREATE TABLE IF NOT EXISTS my_request (
                 STT INTEGER PRIMARY KEY AUTOINCREMENT,
+                request_id TEXT,
                 id_user TEXT,
                 request_type TEXT ,
                 request_info TEXT,
@@ -32,14 +33,15 @@ public class MyRequest {
         }
     }
 
-    public static void save_myrequest(Message message) throws  IOException {
+    public static void save_myrequest(Message message, String requestId) throws  IOException {
         try(Connection connection = openConnection();
             PreparedStatement statement = connection.prepareStatement("""
-            INSERT INTO my_request (id_user , request_type , request_info) VALUES (? , ? , ?)""")
+            INSERT INTO my_request (request_id, id_user , request_type , request_info) VALUES (?, ? , ? , ?)""")
         ){
-            statement.setString(1,message.Id_user);
-            statement.setString(2,message.messageType);
-            statement.setString(3, message.payloadJson);
+            statement.setString(1, requestId);
+            statement.setString(2,message.Id_user);
+            statement.setString(3,message.messageType);
+            statement.setString(4, message.payloadJson);
 
             statement.executeUpdate();
         } catch (SQLException e) {
@@ -50,7 +52,7 @@ public class MyRequest {
     public List<RequestRecord> getMyRequestsByType(String requestType) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     SELECT STT, id_user, request_type, request_info, send_at
+                     SELECT STT, request_id, id_user, request_type, request_info, send_at
                      FROM my_request
                      WHERE request_type = ?
                      ORDER BY send_at ASC
@@ -61,6 +63,7 @@ public class MyRequest {
                 while (resultSet.next()) {
                     requests.add(new RequestRecord(
                             resultSet.getInt("STT"),
+                            resultSet.getString("request_id"),
                             resultSet.getString("id_user"),
                             resultSet.getString("request_type"),
                             resultSet.getString("request_info"),
@@ -110,6 +113,6 @@ public class MyRequest {
         return DriverManager.getConnection(DATABASE_URL);
     }
 
-    public record RequestRecord(int id, String userId, String requestType, String requestInfo,String time) {
+    public record RequestRecord(int id, String requestId, String userId, String requestType, String requestInfo,String time) {
     }
 }
