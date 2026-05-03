@@ -20,7 +20,8 @@ import java.util.List;
 public class Inventory {
     // Trạng thái Item
     public static final String STATUS_WAITING = "WAITING";
-    public static final String STATUS_IN_AUCTION = "IN_AUCTION";
+    public static final String STATUS_SCHEDULED = "SCHEDULED";
+    public static final String STATUS_IN_PROGRESS = "IN_PROGRESS";
     public static final String STATUS_SOLD = "SOLD";
     public static final String STATUS_UNSOLD = "UNSOLD";
 
@@ -157,6 +158,25 @@ public class Inventory {
 
             if (rs.next()) {
                 return rs.getString("userId");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public String getStatusById(String itemId) {
+        String sql = "SELECT status FROM inventory WHERE ItemId = ?";
+        try (Connection conn = openConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, itemId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getString("status");
             }
 
         } catch (Exception e) {

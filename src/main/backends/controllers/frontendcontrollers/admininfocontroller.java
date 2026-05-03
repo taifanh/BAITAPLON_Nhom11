@@ -4,10 +4,8 @@ import Database.Inventory;
 import Database.RequestLog;
 import controllers.AuctionService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
 import controllers.MessageBus;
 import controllers.UserSession;
@@ -32,7 +30,6 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import models.Extra.messages.*;
 import models.accounts.Admin;
-import models.accounts.User;
 import models.bidding.Auction;
 import models.core.Account;
 import models.core.Item;
@@ -40,6 +37,7 @@ import models.items.ItemType;
 import models.items.itemFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -103,11 +101,16 @@ public class admininfocontroller {
     @FXML
     private Label lblTimer;
 
+    @FXML
+    private ListView<Item> runningitem;
+
     private Account adminAccount;
 
     public Consumer<String> user_requesthandler;
 
     private final RequestLog requestlog = new  RequestLog();
+
+    private Item itemAuction = null;
 
     @FXML
     public void initialize() {
@@ -121,6 +124,11 @@ public class admininfocontroller {
         subscribeuser_RequestResult();
         subcribePlaceBid();
         loadInventoryData();
+        upcomingitem.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                handleAuctionClick(newValue);
+            }
+        });
         startUIUpdater();
     }
 
@@ -160,6 +168,36 @@ public class admininfocontroller {
             return messageType;
         }
         return node.path("type").asText("");
+    }
+
+    private void handleAuctionClick(Item item) {
+        itemAuction = item;
+        Auction currentAuction = AuctionService.getManagedActiveAuction(itemAuction.getId());
+
+        Inventory inventoryDB;
+        try {
+            inventoryDB = new Inventory();
+            if (Inventory.STATUS_IN_PROGRESS.equals(inventoryDB.getStatusById(item.getId()))) {
+                if (currentAuction != null) {
+                    java.time.Duration remaining = AuctionService.getDuration(currentAuction.getItem().getId());
+                    updateClock(remaining);
+                } else {
+                    lblTimer.setText("00:00:00");
+                    lblTimer.setTextFill(javafx.scene.paint.Color.RED);
+                }
+                start_end_auction.setText("END AUCTION");
+                settime.setDisable(true);
+                itemname.setText(item.getName());
+            } else {
+                start_end_auction.setText("START AUCTION");
+                settime.setDisable(false);
+                itemname.setText(item.getName());
+                lblTimer.setText("00:00:00");
+                lblTimer.setTextFill(javafx.scene.paint.Color.RED);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private ListCell<Item> createItemCell(ListView<Item> listView) {
@@ -212,13 +250,41 @@ public class admininfocontroller {
         try {
             Inventory inventoryDB = new Inventory();
 
+            // Save old selections
+            Item selectedInventory = inventory.getSelectionModel().getSelectedItem();
+            Item selectedUpcoming = upcomingitem.getSelectionModel().getSelectedItem();
+
             // Lấy các item WAITING
             List<Item> items = inventoryDB.getItemsByStatus(Inventory.STATUS_WAITING);
+
+            // Chỉ cập nhật UI nếu có sự thay đổi (giảm tải lag freeze)
             inventory.setItems(FXCollections.observableArrayList(items));
 
-            // Lấy các item IN_AUCTION
-            List<Item> upcomingitems = inventoryDB.getItemsByStatus(Inventory.STATUS_IN_AUCTION);
-            upcomingitem.setItems(FXCollections.observableArrayList(upcomingitems));
+            List<Item> scheduledItems = inventoryDB.getItemsByStatus(Inventory.STATUS_SCHEDULED);
+            List<Item> inProgressItems = inventoryDB.getItemsByStatus(Inventory.STATUS_IN_PROGRESS);
+            List<Item> allItems = new ArrayList<>(scheduledItems);
+            allItems.addAll(inProgressItems);
+
+            upcomingitem.setItems(FXCollections.observableArrayList(allItems));
+
+            // Restore selections silently without triggering aggressive UI updates
+            if (selectedInventory != null) {
+                for (Item i : items) {
+                    if (i.getId().equals(selectedInventory.getId())) {
+                        inventory.getSelectionModel().select(i);
+                        break;
+                    }
+                }
+            }
+            if (selectedUpcoming != null) {
+                for (Item i : allItems) {
+                    if (i.getId().equals(selectedUpcoming.getId())) {
+                        upcomingitem.getSelectionModel().select(i);
+                        itemAuction = upcomingitem.getSelectionModel().getSelectedItem();
+                        break;
+                    }
+                }
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -258,12 +324,12 @@ public class admininfocontroller {
         Gson gson = new Gson();
 
         for (RequestLog.RequestRecord request : selected_requests) {
-             String payload = request.requestInfo();
-             String userId = request.userId();
+            String payload = request.requestInfo();
+            String userId = request.userId();
 
-             Createitempayload createitempayload = gson.fromJson(payload, Createitempayload.class);
-             ItemType itemType = ItemType.valueOf(createitempayload.getItemType());
-             Item item = itemFactory.createItem(
+            Createitempayload createitempayload = gson.fromJson(payload, Createitempayload.class);
+            ItemType itemType = ItemType.valueOf(createitempayload.getItemType());
+            Item item = itemFactory.createItem(
                     itemType,
                     createitempayload.getItem_name(),
                     createitempayload.getBasePrice(),
@@ -271,7 +337,7 @@ public class admininfocontroller {
             );
 
             inventoryDB.saveItem(item, userId);
-             // xóa request khỏi request_list -> chuyển sang inventory
+            // xóa request khỏi request_list -> chuyển sang inventory
 
             requestlog.updateRequestStatus(request.id(), RequestLog.STATUS_ACCEPTED);
 
@@ -295,9 +361,9 @@ public class admininfocontroller {
         }
 
         Inventory inventoryDB = new Inventory();
-        inventoryDB.updateItemStatus(currentItem.getId(), Inventory.STATUS_IN_AUCTION);
+        inventoryDB.updateItemStatus(currentItem.getId(), Inventory.STATUS_SCHEDULED);
 
-        List<Item> items = inventoryDB.getItemsByStatus(Inventory.STATUS_IN_AUCTION);
+        List<Item> items = inventoryDB.getItemsByStatus(Inventory.STATUS_SCHEDULED);
         upcomingitem.setItems(FXCollections.observableArrayList(items));
 
         loadInventoryData();
@@ -305,7 +371,10 @@ public class admininfocontroller {
     private void sendListItem() {
         try {
             Inventory inventoryDB = new Inventory();
-            List<Item> items = inventoryDB.getItemsByStatus(Inventory.STATUS_IN_AUCTION);
+            List<Item> scheduledItems = inventoryDB.getItemsByStatus(Inventory.STATUS_SCHEDULED);
+            List<Item> inProgressItems = inventoryDB.getItemsByStatus(Inventory.STATUS_IN_PROGRESS);
+            List<Item> items = new ArrayList<>(scheduledItems);
+            items.addAll(inProgressItems);
 
             List<AuctionItemDto> upcomingitems = items.stream()
                     .map(i -> new AuctionItemDto(
@@ -322,44 +391,73 @@ public class admininfocontroller {
             e.printStackTrace();
         }
     }
+    private Timeline uiTimeline; // Khai báo biến toàn cục trong class
+
     private void startUIUpdater() {
-        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
+        if (uiTimeline != null) uiTimeline.stop();
+
+        uiTimeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
             try {
-                List<Auction> activeAuctions = AuctionService.getManagedActiveAuctions();
-                sendListItem();
-                if (!activeAuctions.isEmpty()) {
-                    Auction currentAuction = activeAuctions.get(0);
-                    java.time.Duration remaining = AuctionService.getDuration(currentAuction.getItem().getId());
+                // 1. Lấy danh sách tất cả item từ ListView (hoặc từ Database/Service)
+                List<Item> allItems = new ArrayList<>(upcomingitem.getItems());
 
-                    if (remaining.isZero() || remaining.isNegative()) {
-                        setClock0();
-                        refreshUIState();
-                    } else {
-                        updateClock(remaining);
+                boolean needRefresh = false;
 
-                        itemname.setText(currentAuction.getItem().getName());
+                for (Item item : allItems) {
+                    // Kiểm tra từng item xem có phiên đấu giá nào đang chạy không
+                    Auction auction = AuctionService.getManagedActiveAuction(item.getId());
+
+                    if (auction != null) {
+                        java.time.Duration remaining = AuctionService.getDuration(item.getId());
+
+                        // 2. Nếu bất kỳ phiên nào hết giờ, thực hiện kết thúc ngay
+                        if (remaining.isZero() || remaining.isNegative()) {
+                            System.out.println("Auto ending auction for item: " + item.getName());
+
+                            // Gọi logic kết thúc (giống như khi bấm nút End Auction)
+                            AuctionService.endAuction(auction, java.time.LocalDateTime.now());
+
+                            // Gửi message báo cho các client khác (nếu cần)
+//                            UserSession.getConnection().send(new EndAuctionMessage(...));
+
+                            needRefresh = true;
+                        }
                     }
-                } else {
-                    setClock0(); // Không có phiên nào đang chạy
                 }
+
+                // 3. Cập nhật UI cho item đang được chọn (nếu có)
+                if (itemAuction != null) {
+                    Auction currentAuction = AuctionService.getManagedActiveAuction(itemAuction.getId());
+                    if (currentAuction != null) {
+                        updateClock(AuctionService.getDuration(itemAuction.getId()));
+                    } else {
+                        cleartUI();
+                    }
+                }
+
+                // 4. Nếu có item vừa kết thúc, làm mới danh sách
+                if (needRefresh) {
+                    refreshUIState();
+                }
+
             } catch (Exception e) {
-                 System.err.println("Error updating UI timer: " + e.getMessage());
+                System.err.println("Error in background update: " + e.getMessage());
             }
         }));
-        timeline.setCycleCount(Animation.INDEFINITE);
-        timeline.play();
+        uiTimeline.setCycleCount(Animation.INDEFINITE);
+        uiTimeline.play();
     }
 
     private void refreshUIState() {
         try {
-            upcomingitem.getSelectionModel().clearSelection();
+//            upcomingitem.getSelectionModel().clearSelection();
             loadInventoryData();
         } catch (Exception e) {
             System.err.println("Error refreshing UI state: " + e.getMessage());
         }
     }
 
-    private void setClock0() {
+    private void cleartUI() {
         lblTimer.setText("00:00:00");
         lblTimer.setTextFill(javafx.scene.paint.Color.RED);
         start_end_auction.setText("START AUCTION");
@@ -379,13 +477,16 @@ public class admininfocontroller {
     public void handle_start_auction(ActionEvent event) throws IOException {
         error_start_auction.setText("");
 
-        Item currentItem = upcomingitem.getSelectionModel().getSelectedItem();
-        if (currentItem == null) {
+        if (itemAuction == null) {
             error_start_auction.setText("Please select an item");
             return;
         }
 
         if (start_end_auction.getText().equals("START AUCTION")) {
+            if (itemAuction == null) {
+                error_start_auction.setText("Please select an item");
+                return;
+            }
             String timestr = settime.getText();
             if (timestr.equals("")) {
                 error_start_auction.setText("Please enter a time");
@@ -404,8 +505,8 @@ public class admininfocontroller {
             }
 
             try {
-                System.out.println("Starting auction for item: " + currentItem.getId());
-                Auction currentAuction = AuctionService.startAuction((Admin) UserSession.getCurrentAccount(), currentItem, 0, minutes, 0);
+                System.out.println("Starting auction for item: " + itemAuction.getId());
+                Auction currentAuction = AuctionService.startAuction((Admin) UserSession.getCurrentAccount(), itemAuction, 0, minutes, 0);
                 System.out.println("about to send");
                 UserSession.getConnection().send(
                         new StartAuctionMessage(
@@ -428,12 +529,32 @@ public class admininfocontroller {
         }
         else {
             try {
-                System.out.println("Ending auction for item: " + currentItem.getId());
-                Auction currentAuction = AuctionService.getManagedActiveAuction(currentItem.getId());
+                System.out.println("Ending auction for item: " + itemAuction.getId());
+                Auction currentAuction = AuctionService.getManagedActiveAuction(itemAuction.getId());
+
+                if (currentAuction == null) {
+                    System.out.println("Cảnh báo: Dữ liệu phiên đấu bị lỗi (Orphan). Đang tiến hành reset trạng thái item về WAITING...");
+                    Inventory inventoryDB = new Inventory();
+                    inventoryDB.updateItemStatus(itemAuction.getId(), Inventory.STATUS_WAITING);
+                    cleartUI();
+                    refreshUIState();
+                    return;
+                }
+
+//                UserSession.getConnection().send(
+//                        new EndAuctionMessage(
+//                                currentAuction.getEndAt(),
+//                                currentAuction.getItem().getName(),
+//                                currentAuction.getAuctionId(),
+//                                currentAuction.getItem().getPrices(),
+//                                0
+//                        )
+//                );
+
                 AuctionService.endAuction(currentAuction, java.time.LocalDateTime.now());
 
                 System.out.println("Auction ended successfully");
-                setClock0();
+                cleartUI();
                 refreshUIState();
             } catch (Exception e) {
                 System.err.println("Error ending auction: " + e.getMessage());
@@ -471,16 +592,16 @@ public class admininfocontroller {
                 JsonNode node = mapper.readTree(rawJson);
                 String type = node.get("type").asText();
                 Platform.runLater(() -> {
-                   if (type.equals("add_item_OK") && node.has("payloadJson")){
-                       String requestId = node.path("request_id").asText("");
-                       if (requestId.isBlank() || item_wait_accepted.contains(requestId)) {
-                           return;
-                       }
-                       item_wait_accepted.add(requestId);
+                    if (type.equals("add_item_OK") && node.has("payloadJson")){
+                        String requestId = node.path("request_id").asText("");
+                        if (requestId.isBlank() || item_wait_accepted.contains(requestId)) {
+                            return;
+                        }
+                        item_wait_accepted.add(requestId);
 
-                       requestlist.setItems(item_wait_accepted);
-                       requestlist.setCellFactory(ls -> new CustomItemrequestCell() );
-                   }
+                        requestlist.setItems(item_wait_accepted);
+                        requestlist.setCellFactory(ls -> new CustomItemrequestCell() );
+                    }
                 });
             } catch (Exception e) {
                 e.printStackTrace();
@@ -516,27 +637,27 @@ public class admininfocontroller {
     }
 }
 class CustomItemrequestCell  extends  ListCell<String> {
-     private HBox content;
-     private Button view;
-     private Label name_item;
-     private CheckBox selected;
-     private Pane spacer;
-     private final RequestLog requestLog = new RequestLog();
-     private final Gson gson = new Gson();
+    private HBox content;
+    private Button view;
+    private Label name_item;
+    private CheckBox selected;
+    private Pane spacer;
+    private final RequestLog requestLog = new RequestLog();
+    private final Gson gson = new Gson();
 
-     protected CustomItemrequestCell(){
-         super();
-         spacer = new Pane();
-         HBox.setHgrow(spacer , Priority.ALWAYS);
+    protected CustomItemrequestCell(){
+        super();
+        spacer = new Pane();
+        HBox.setHgrow(spacer , Priority.ALWAYS);
 
-         name_item = new Label();
-         selected = new CheckBox();
-         view = new  Button("view");
+        name_item = new Label();
+        selected = new CheckBox();
+        view = new  Button("view");
 
-         content  = new HBox(10 , name_item , spacer, view , selected );
-         content.setAlignment(Pos.CENTER_LEFT);
+        content  = new HBox(10 , name_item , spacer, view , selected );
+        content.setAlignment(Pos.CENTER_LEFT);
 
-         view.setOnAction(event -> {
+        view.setOnAction(event -> {
             String requestId = getItem();
             if (requestId == null) {
                 return;
@@ -552,46 +673,46 @@ class CustomItemrequestCell  extends  ListCell<String> {
                 alert.setHeaderText(payload.getItem_name());
                 alert.setContentText(
                         "Request ID: " + request.id() + "\n" +
-                        "User ID: " + request.userId() + "\n" +
-                        "Type: " + payload.getItemType() + "\n" +
-                        "Base price: " + payload.getBasePrice() + "\n" +
-                        "Increment: " + payload.getBidIncrement() + "\n" +
-                        "Info: " + payload.getItemInfo() + "\n" +
-                        "Time: " + request.time()
+                                "User ID: " + request.userId() + "\n" +
+                                "Type: " + payload.getItemType() + "\n" +
+                                "Base price: " + payload.getBasePrice() + "\n" +
+                                "Increment: " + payload.getBidIncrement() + "\n" +
+                                "Info: " + payload.getItemInfo() + "\n" +
+                                "Time: " + request.time()
                 );
                 alert.showAndWait();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-         });
-         selected.setOnAction(event -> {
+        });
+        selected.setOnAction(event -> {
             if (getListView() != null) {
                 getListView().getSelectionModel().select(getItem());
                 requestLog.set_selected_request(getItem(),selected.isSelected());
             }
-         });
-     }
-     @Override
-     protected void updateItem(String item, boolean empty) {// javafx AUTO call it
-         super.updateItem(item, empty);
-         if (item!=null &&  !empty) {
-             try {
-                 RequestLog.RequestRecord request = requestLog.findByRequestId(item);
-                 if (request != null) {
-                     Createitempayload payload = gson.fromJson(request.requestInfo(), Createitempayload.class);
-                     name_item.setText(payload.getItem_name());
-                     selected.setSelected(request.selected());
-                 } else {
-                     name_item.setText(item);
-                     selected.setSelected(false);
-                 }
-             } catch (IOException e) {
-                 name_item.setText(item);
-                 selected.setSelected(false);
-             }
-             setGraphic(content);
-         }
-         else
-             setGraphic(null);
-     }
+        });
+    }
+    @Override
+    protected void updateItem(String item, boolean empty) {// javafx AUTO call it
+        super.updateItem(item, empty);
+        if (item!=null &&  !empty) {
+            try {
+                RequestLog.RequestRecord request = requestLog.findByRequestId(item);
+                if (request != null) {
+                    Createitempayload payload = gson.fromJson(request.requestInfo(), Createitempayload.class);
+                    name_item.setText(payload.getItem_name());
+                    selected.setSelected(request.selected());
+                } else {
+                    name_item.setText(item);
+                    selected.setSelected(false);
+                }
+            } catch (IOException e) {
+                name_item.setText(item);
+                selected.setSelected(false);
+            }
+            setGraphic(content);
+        }
+        else
+            setGraphic(null);
+    }
 }

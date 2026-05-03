@@ -47,9 +47,9 @@ public final class AuctionService {
         }
 
         Inventory inventory = new Inventory();
-        Item itemAuction = inventory.getItemtoAuction(Inventory.STATUS_IN_AUCTION);
+        Item itemAuction = inventory.getItemtoAuction(Inventory.STATUS_IN_PROGRESS);
         if (itemAuction == null) {
-            throw new IllegalStateException("Khong co san pham nao o trang thai STATUS_IN_AUCTION");
+            throw new IllegalStateException("Khong co san pham nao o trang thai STATUS_IN_PROGRESS");
         }
 
         Auction auction = new Auction(itemAuction);
@@ -59,7 +59,7 @@ public final class AuctionService {
 
 //        Auctions auctionsRepository = new Auctions();
 //        auctionsRepository.saveAuction(auction);
-//        inventory.updateItemStatus(itemAuction.getId(), Inventory.STATUS_IN_AUCTION);
+//        inventory.updateItemStatus(itemAuction.getId(), Inventory.STATUS_IN_PROGRESS);
         registerActiveAuction(auction);
         scheduleAutoClose(auction, duration);
         return auction;
@@ -76,6 +76,8 @@ public final class AuctionService {
         }
 
         Duration duration = Duration.ofHours(hours).plusMinutes(minutes).plusSeconds(seconds);
+        Inventory inventory = new Inventory();
+        Item itemAuction = inventory.getItemtoAuction(Inventory.STATUS_IN_PROGRESS);
         if (duration.isZero() || duration.isNegative()) {
             throw new IllegalArgumentException("Thoi gian dau gia phai lon hon 0");
         }
