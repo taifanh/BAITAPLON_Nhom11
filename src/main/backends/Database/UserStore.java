@@ -116,7 +116,7 @@ public class UserStore {
                 String role = resultSet.getString("role");
                 Account account;
 
-                if ("Admin".equalsIgnoreCase(role)) {
+                if (Account.ADMIN.equalsIgnoreCase(role)) {
                     account = new Admin(
                             resultSet.getString("id"),
                             resultSet.getString("name"),

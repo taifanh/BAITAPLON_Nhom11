@@ -1,6 +1,7 @@
 package controllers.Server;
 
 import controllers.UserSession;
+import models.core.Account;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -67,10 +68,10 @@ public class AuctionRoom {
             handler.send(json);
         }
     }
-    public static void sendadmin(String json){
-        for (String key : AuctionRoom.getInstance().connectors.keySet() ){
-            if (key.equals("ADMIN12345")){
-                AuctionRoom.getInstance().connectors.get(key).send(json);
+    public static void sendadmin(String json) {
+        for (ClientHandler handler : AuctionRoom.getInstance().observers) {
+            if (handler.getRole() != null && handler.getRole().equalsIgnoreCase(Account.ADMIN)) {
+                handler.send(json);
             }
         }
     }

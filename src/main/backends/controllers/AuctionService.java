@@ -3,6 +3,7 @@ package controllers;
 import Database.Auctions;
 import Database.BidTransactions;
 import Database.Inventory;
+import controllers.Server.ServerAuctionManager;
 import models.accounts.Admin;
 import models.accounts.User;
 import models.bidding.Auction;
@@ -76,11 +77,11 @@ public final class AuctionService {
         }
 
         Duration duration = Duration.ofHours(hours).plusMinutes(minutes).plusSeconds(seconds);
-        Inventory inventory = new Inventory();
-        Item itemAuction = inventory.getItemtoAuction(Inventory.STATUS_IN_PROGRESS);
         if (duration.isZero() || duration.isNegative()) {
             throw new IllegalArgumentException("Thoi gian dau gia phai lon hon 0");
         }
+        Inventory inventory = new Inventory();
+        inventory.updateItemStatus(item.getId(), Inventory.STATUS_IN_PROGRESS);
 
         Auction auction = new Auction(item);
         LocalDateTime now = LocalDateTime.now();
@@ -198,6 +199,7 @@ public final class AuctionService {
         ScheduledFuture<?> future = AUCTION_SCHEDULER.schedule(() -> {
             try {
                 endAuction(auction, LocalDateTime.now());
+                ServerAuctionManager.getInstance().broadcastEnd(auction.getItem().getId());
             } catch (Exception e) {
                 System.err.println("Khong the tu dong dong phien dau gia " + auction.getAuctionId() + ": " + e.getMessage());
             }

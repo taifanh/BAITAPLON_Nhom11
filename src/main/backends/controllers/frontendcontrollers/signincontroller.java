@@ -63,7 +63,7 @@ public class signincontroller {
 
             //kiểm tra role để mở màn hình Info
             System.out.println(account.getRole());
-            if ("Admin".equalsIgnoreCase(account.getRole())) {
+            if (Account.ADMIN.equalsIgnoreCase(account.getRole())) {
                 viewFileName = "admininfo.fxml";
                 windowTitle = "Thong tin admin";
             } else {
@@ -71,21 +71,6 @@ public class signincontroller {
                 windowTitle = "Thong tin nguoi dung";
             }
 
-            FXMLLoader loader = ViewLoader.loader(viewFileName);
-            Parent root = loader.load();
-//            Object controller = loader.getController();
-//            if (account instanceof User user && controller instanceof userinfocontroller userController) {
-//                userController.setUser(user);
-//            }
-
-            Scene sceneMain = new Scene(root);
-            Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            window.setScene(sceneMain);
-            window.setTitle(windowTitle);
-            window.centerOnScreen();
-            window.show();
-
-            // send message login to server to save identity for clienthandler
             loginpayload payload = new loginpayload(account.getRole());
             Gson gson = new  Gson();
             String payloadjson = gson.toJson(payload);
@@ -96,6 +81,15 @@ public class signincontroller {
             msg.payloadJson = payloadjson;
 
             UserSession.getConnection().send(msg);
+
+            FXMLLoader loader = ViewLoader.loader(viewFileName);
+            Parent root = loader.load();
+            Scene sceneMain = new Scene(root);
+            Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            window.setScene(sceneMain);
+            window.setTitle(windowTitle);
+            window.centerOnScreen();
+            window.show();
 
         } catch (IOException e) {
             e.printStackTrace();

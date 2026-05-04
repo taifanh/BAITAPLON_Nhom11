@@ -40,13 +40,8 @@ public class Admin extends Account {
             instance = new Admin(name, email, phoneNumber, password);
             return instance;
         }
-
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Admin");
-        alert.setHeaderText("Admin register error");
-        alert.setContentText("One admin already exists.");
-        alert.showAndWait();
-        return instance;
+        // Vứt Exception ra, và Controller bên JavaFX sẽ bắt lấy để hiển thị Alert
+        throw new IllegalStateException("One admin already exists.");
     }
 
     public void manageAuction(Auction auction) {

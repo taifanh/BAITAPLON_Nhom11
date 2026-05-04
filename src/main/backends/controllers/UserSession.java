@@ -39,6 +39,10 @@ public final class UserSession {
 
     public static void clear() {
         currentAccount = null;
+    }
+
+    public static void shutdown() {
+        currentAccount = null;
         if (connection != null) {
             connection.disconnect();
             connection = null;

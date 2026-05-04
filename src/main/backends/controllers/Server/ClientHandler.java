@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.gson.Gson;
+import controllers.AuctionService;
 import controllers.UserSession;
 import models.Extra.messages.*;
 import models.accounts.User;
@@ -34,6 +35,10 @@ public class ClientHandler implements Runnable {
     private String watchingAuctionId = null;        // client đang xem phiên nào
 
     public Gson gson = new Gson();
+
+    private String userId = null;
+    private String role = null;
+
     public ClientHandler(Socket socket) {
         this.socket = socket;
     }
@@ -46,6 +51,9 @@ public class ClientHandler implements Runnable {
     }
 
     public String getWatchingAuctionId() { return watchingAuctionId; }
+
+    public String getRole() { return role; }
+    public String getUserId() { return userId; }
 
     @Override
     public void run() {
@@ -87,9 +95,107 @@ public class ClientHandler implements Runnable {
                     AuctionRoom.getInstance().broadcast(json);
                 }
 
-                case "START_AUCTION" -> {
-                    System.out.println("Server received START_AUCTION: " + json);
-                    AuctionRoom.getInstance().broadcast(json);
+                // ADMIN XIN DỮ LIỆU INVENTORY
+                case "FETCH_INVENTORY" -> {
+                    Database.Inventory inventoryDB = new Database.Inventory();
+                    InventoryDataResponse response = new InventoryDataResponse();
+
+                    response.waitingItems = inventoryDB.getItemsByStatus(Database.Inventory.STATUS_WAITING);
+                    response.scheduledItems = inventoryDB.getItemsByStatus(Database.Inventory.STATUS_SCHEDULED);
+                    response.inProgressItems = inventoryDB.getItemsByStatus(Database.Inventory.STATUS_IN_PROGRESS);
+
+                    send(mapper.writeValueAsString(response));
+                }
+
+                // LẤY THÔNG TIN CỦA AUCTION ĐƯỢC CLICK VÀO
+                case "FETCH_AUCTION_STATUS" -> {
+                    String itemId = node.get("itemId").asText();
+
+                    AuctionStatusMessage statusMsg = new AuctionStatusMessage();
+                    java.time.Duration remaining = AuctionService.getDuration(itemId);
+
+                    if (!remaining.isZero() && !remaining.isNegative()) {
+                        statusMsg.status = "STARTED";
+                        statusMsg.itemId = itemId;
+                        statusMsg.auctionId = AuctionService.getManagedActiveAuction(itemId).getAuctionId(); // hoặc lấy auctionId thật nếu cần
+                        statusMsg.endTimeEpoch = System.currentTimeMillis() + remaining.toMillis();
+                    } else {
+                        statusMsg.status = "ENDED";
+                        statusMsg.itemId = itemId;
+                        statusMsg.auctionId = AuctionService.getManagedActiveAuction(itemId).getAuctionId();
+                        statusMsg.endTimeEpoch = 0;
+                    }
+                    send(mapper.writeValueAsString(statusMsg));
+                }
+
+                // ADMIN XIN DỮ LIỆU REQUEST
+                case "FETCH_REQUESTS" -> {
+                    Database.RequestLog requestLogDB = new Database.RequestLog();
+                    RequestListDataResponse response = new RequestListDataResponse();
+
+                    response.requests = requestLogDB.getRequestsByType("additem");
+
+                    send(mapper.writeValueAsString(response));
+                }
+
+                // ADMIN RA LỆNH THAO TÁC DATABASE
+                case "ADMIN_ACTION" -> {
+                    AdminActionCommand cmd = mapper.readValue(json, AdminActionCommand.class);
+                    Database.Inventory inventoryDB = new Database.Inventory();
+                    Database.RequestLog requestLogDB = new Database.RequestLog();
+
+                    if ("SCHEDULE_ITEM".equals(cmd.action)) {
+                        inventoryDB.updateItemStatus(cmd.targetId, Database.Inventory.STATUS_SCHEDULED);
+
+                        // Báo lại cho Admin là đã xong để Admin load lại list
+                        ObjectNode ack = mapper.createObjectNode();
+                        ack.put("type", "ACTION_SUCCESS");
+                        send(ack.toString());
+                    }
+                    else if ("REJECT_REQUEST".equals(cmd.action)) {
+                        requestLogDB.updateRequestStatus(cmd.targetId, Database.RequestLog.STATUS_REJECTED);
+
+                        ObjectNode ack = mapper.createObjectNode();
+                        ack.put("type", "ACTION_SUCCESS");
+                        send(ack.toString());
+                    }
+                    else if ("ACCEPT_REQUEST".equals(cmd.action)) {
+                        // Tìm request trong DB
+                        Database.RequestLog.RequestRecord request = requestLogDB.findByRequestId(cmd.targetId);
+                        if (request != null) {
+                            Createitempayload payload = gson.fromJson(request.requestInfo(), Createitempayload.class);
+                            models.items.ItemType itemType = models.items.ItemType.valueOf(payload.getItemType());
+
+                            models.core.Item item = models.items.itemFactory.createItem(
+                                    itemType,
+                                    payload.getItem_name(),
+                                    payload.getBasePrice(),
+                                    payload.getItemInfo()
+                            );
+
+                            // Lưu vào Inventory và đổi trạng thái Request
+                            inventoryDB.saveItem(item, request.userId());
+                            requestLogDB.updateRequestStatus(cmd.targetId, Database.RequestLog.STATUS_ACCEPTED);
+
+                            ObjectNode ack = mapper.createObjectNode();
+                            ack.put("type", "ACTION_SUCCESS");
+                            send(ack.toString());
+                        }
+                    }
+                }
+
+                // Lệnh start và end auction
+                case "AUCTION_COMMAND" -> {
+                    AuctionCommandMessage cmd = mapper.readValue(json, AuctionCommandMessage.class);
+
+                    if ("START".equals(cmd.command)) {
+                        System.out.println("[Server] Nhan lenh START cho item: " + cmd.itemId);
+                        ServerAuctionManager.getInstance().startAuction(cmd.itemId, cmd.durationMinutes);
+
+                    } else if ("END".equals(cmd.command)) {
+                        System.out.println("[Server] Nhan lenh END ep buoc cho item: " + cmd.itemId);
+                        ServerAuctionManager.getInstance().endAuction(cmd.itemId);
+                    }
                 }
 
                 case "WATCH_AUCTION" -> {
@@ -185,6 +291,9 @@ public class ClientHandler implements Runnable {
                     String payloadJson = node.get("payloadJson").asText();
 
                     loginpayload payload = mapper.readValue(payloadJson, loginpayload.class);
+
+                    this.userId = userId;
+                    this.role = payload.getRole();
 
                     AuctionRoom.getInstance().connectors.put(userId, this);
                     System.out.println("User " + userId + " với role " + payload.getRole() + " đã kết nối thành công!");

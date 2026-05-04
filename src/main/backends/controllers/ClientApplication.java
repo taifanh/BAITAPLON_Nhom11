@@ -19,6 +19,7 @@ public class ClientApplication extends Application {
     @Override
     public void stop() throws Exception {
         System.out.println("Đang đóng chương trình User...");
+        UserSession.shutdown();
         System.exit(0);
     }
 }
