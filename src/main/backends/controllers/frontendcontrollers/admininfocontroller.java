@@ -241,6 +241,7 @@ public class admininfocontroller {
                 case "AUCTION_STATUS" -> {
                     try {
                         AuctionStatusMessage statusMsg = mapper.readValue(json, AuctionStatusMessage.class);
+                        System.out.println("[AdminInfoController] Received message AUCTION_STATUS: " + json);
                         Platform.runLater(() -> {
                             System.out.println("[Admin] Nhan duoc trang thai phien: " + statusMsg.status);
                             start_end_auction.setDisable(false);
@@ -306,12 +307,8 @@ public class admininfocontroller {
             if (epoch == null || epoch == 0) {
                 // Hỏi Server thay vì hỏi AuctionService local (vốn không có dữ liệu)
                 lblTimer.setText("--:--:--");
-                ObjectNode req = new ObjectMapper().createObjectNode();
-                req.put("type", "FETCH_AUCTION_STATUS");
-                req.put("itemId", item.getId());
-                UserSession.getConnection().send(req.toString());
-                // Khi server trả về AUCTION_STATUS với status=STARTED,
-                // case "AUCTION_STATUS" sẽ tự cập nhật currentEndTimeEpochs
+                System.out.println("Da xac nhan co kiem tra epoch == 0");
+                UserSession.getConnection().send(new FetchAuctionStatusRequest(item.getId()));
             }
         } else {
             // Phiên chưa chạy
@@ -362,6 +359,7 @@ public class admininfocontroller {
             uiTimeline.stop(); // Tắt đồng hồ đếm ngược
         }
         UserSession.clear();
+        MessageBus.getInstance().clearAllSubscribers();
         Parent root = ViewLoader.load("signin.fxml");
         Scene scene = new Scene(root);
 

@@ -110,19 +110,20 @@ public class ClientHandler implements Runnable {
                 // LẤY THÔNG TIN CỦA AUCTION ĐƯỢC CLICK VÀO
                 case "FETCH_AUCTION_STATUS" -> {
                     String itemId = node.get("itemId").asText();
+                    java.time.Duration remaining = AuctionService.getDuration(itemId);
 
                     AuctionStatusMessage statusMsg = new AuctionStatusMessage();
-                    java.time.Duration remaining = AuctionService.getDuration(itemId);
+                    statusMsg.itemId = itemId;
+
+                    // Lấy auctionId an toàn — không crash nếu null
+                    models.bidding.Auction managedAuction = AuctionService.getManagedActiveAuction(itemId);
+                    statusMsg.auctionId = (managedAuction != null) ? managedAuction.getAuctionId() : "";
 
                     if (!remaining.isZero() && !remaining.isNegative()) {
                         statusMsg.status = "STARTED";
-                        statusMsg.itemId = itemId;
-                        statusMsg.auctionId = AuctionService.getManagedActiveAuction(itemId).getAuctionId(); // hoặc lấy auctionId thật nếu cần
                         statusMsg.endTimeEpoch = System.currentTimeMillis() + remaining.toMillis();
                     } else {
                         statusMsg.status = "ENDED";
-                        statusMsg.itemId = itemId;
-                        statusMsg.auctionId = AuctionService.getManagedActiveAuction(itemId).getAuctionId();
                         statusMsg.endTimeEpoch = 0;
                     }
                     send(mapper.writeValueAsString(statusMsg));

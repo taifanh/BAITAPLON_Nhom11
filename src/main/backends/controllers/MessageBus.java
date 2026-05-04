@@ -26,6 +26,10 @@ public class MessageBus {
         subscribers.remove(handler);
     }
 
+    public void clearAllSubscribers() {
+        this.subscribers.clear(); // Giả sử list chứa các Consumer của bạn tên là subscribers
+    }
+
     // Listener thread gọi hàm này với mỗi dòng nhận được từ server
     public void dispatch(String rawJson) {
         System.out.println("[MessageBus] Dispatching message: " + rawJson);
