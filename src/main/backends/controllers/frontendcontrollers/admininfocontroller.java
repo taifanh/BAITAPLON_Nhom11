@@ -305,8 +305,6 @@ public class admininfocontroller {
             Long epoch = currentEndTimeEpochs.get(item.getId());
 
             if (epoch == null || epoch == 0) {
-                // Hỏi Server thay vì hỏi AuctionService local (vốn không có dữ liệu)
-                lblTimer.setText("--:--:--");
                 System.out.println("Da xac nhan co kiem tra epoch == 0");
                 UserSession.getConnection().send(new FetchAuctionStatusRequest(item.getId()));
             }
@@ -427,14 +425,12 @@ public class admininfocontroller {
     private void startUIUpdater() {
         if (uiTimeline != null) uiTimeline.stop();
 
-        uiTimeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
-            // Chỉ đếm ngược dựa vào cái biến Epoch đã lưu, không cần quan tâm DB hay RAM nữa
+        uiTimeline = new Timeline(new KeyFrame(Duration.seconds(0.1), event -> {
             if (itemAuction != null && currentEndTimeEpochs.containsKey(itemAuction.getId())) {
                 long remainingMillis = currentEndTimeEpochs.get(itemAuction.getId()) - System.currentTimeMillis();
 
                 if (remainingMillis <= 0) {
-                    lblTimer.setText("00:00:00");
-                    lblTimer.setTextFill(javafx.scene.paint.Color.RED);
+                    clearUI();
                 } else {
                     updateClock(java.time.Duration.ofMillis(remainingMillis));
                 }
@@ -505,7 +501,6 @@ public class admininfocontroller {
             upcomingitem.requestFocus();
         } else {
             System.out.println("Gui yeu cau END AUCTION (ep buoc) len Server...");
-            // Tương tự, gửi lệnh END lên Server
             UserSession.getConnection().send(new AuctionCommandMessage("END", itemAuction.getId(), 0));
             start_end_auction.setDisable(true);
         }
@@ -540,10 +535,8 @@ public class admininfocontroller {
                 String type = node.get("type").asText();
 
                 Platform.runLater(() -> {
-                    // Khi Server báo có 1 user vừa thêm request thành công
                     if (type.equals("add_item_OK") && node.has("payloadJson")){
                         System.out.println("[Admin] Co request moi tu User, dang tai lai danh sach...");
-                        // Lập tức gọi hàm loadrequest() để xin Server danh sách mới nhất
                         loadrequest();
                     }
                 });
@@ -567,9 +560,7 @@ public class admininfocontroller {
     }
     private void loadrequest() {
         try {
-            // Xóa danh sách các ô đã tick chọn trước đó để tránh lỗi dữ liệu
             selectedRequestIds.clear();
-            // Xin Server danh sách Request mới nhất
             UserSession.getConnection().send(new FetchDataRequest("FETCH_REQUESTS"));
         } catch (Exception e) {
             e.printStackTrace();
@@ -584,13 +575,13 @@ public class admininfocontroller {
                 String id = node.path("id").asText("");
                 String typeStr = node.path("type").asText("");
                 String name = node.path("name").asText("");
-                // Đọc giá (phòng hờ json lưu 'price' hoặc 'prices')
+
                 double price = node.has("prices") ? node.path("prices").asDouble() : node.path("price").asDouble();
                 String info = node.path("info").asText("");
 
                 ItemType itemType = ItemType.valueOf(typeStr);
                 Item item = itemFactory.createItem(itemType, name, price, info);
-                item.setId(id); // Set lại đúng ID từ Server
+                item.setId(id);
 
                 items.add(item);
             } catch (Exception e) {
