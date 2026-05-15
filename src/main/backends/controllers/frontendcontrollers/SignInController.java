@@ -1,9 +1,12 @@
 package controllers.frontendcontrollers;
 
-import Database.UserStore;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import controllers.MessageBus;
 import controllers.UserSession;
 import controllers.ViewLoader;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,11 +19,14 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import models.Extra.messages.Common.Message;
-import models.Extra.messages.Common.LoginPayload;
+import models.Extra.messages.Common.SigninPayload;
+import models.Extra.messages.Common.SigninResponsePayload;
+import models.accounts.Admin;
+import models.accounts.User;
 import models.core.Account;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.function.Consumer;
 
 public class SignInController {
     @FXML
@@ -35,7 +41,21 @@ public class SignInController {
     @FXML
     public Button signupbtn;
 
-    private final UserStore userStore = new UserStore();
+
+    private final Gson gson = new Gson();
+    private final ObjectMapper mapper = new ObjectMapper();
+    private Consumer<String> signinResultHandler;
+    private Stage pendingStage;
+
+    @FXML
+    public void initialize() {
+        receive_signin_ok();
+
+        Platform.runLater(() -> {
+            Stage stage = (Stage) txtphonenumberfield.getScene().getWindow();
+            stage.setOnHidden(e -> cleanup());
+        });
+    }
 
     public void handle_signin(ActionEvent event) {
         String phoneNumber = txtphonenumberfield.getText() == null ? "" : txtphonenumberfield.getText().trim();
@@ -45,55 +65,69 @@ public class SignInController {
             showAlert(Alert.AlertType.WARNING, "Loi", null, "Vui long nhap day du so dien thoai va mat khau.");
             return;
         }
+        // lấy stage hiên tại để thay đổi mà hình khi sign in thành công
+        pendingStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 
-        try {
-            Optional<Account> accountOptional = userStore.authenticate(phoneNumber, password);
-            if (accountOptional.isEmpty()) {
-                showAlert(Alert.AlertType.ERROR, "Loi", "Dang nhap that bai", "Sai tai khoan hoac mat khau. Vui long thu lai.");
-                return;
+        Message msg = new Message();
+        msg.messageType = "signin";
+        msg.payloadJson = gson.toJson(new SigninPayload(phoneNumber, password));
+
+        UserSession.getConnection().send(msg);// còn tín hiệu gửi login cũ thì sẽ cho client xử lý luôn nếu đăng nhập thành công
+    }
+    private void receive_signin_ok() {
+        signinResultHandler = rawJson -> {
+            try {
+                JsonNode node = mapper.readTree(rawJson);
+                String type = node.path("type").asText("");
+
+                if ("SIGNIN_FAIL".equals(type)) {
+                    Platform.runLater(() ->
+                            showAlert(Alert.AlertType.ERROR, "Loi", "Dang nhap that bai",
+                                    "Sai tai khoan hoac mat khau. Vui long thu lai."));
+                    return;
+                }
+
+                if (!"SIGNIN_OK".equals(type) || !node.has("payloadJson")) {
+                    return;
+                }
+
+                SigninResponsePayload payload =
+                        gson.fromJson(node.get("payloadJson").asText(), SigninResponsePayload.class);
+
+                Account account = buildAccount(payload);
+                UserSession.setCurrentAccount(account);
+
+                String viewFileName;
+                String windowTitle;
+
+                if (Account.ADMIN.equalsIgnoreCase(account.getRole())) {
+                    viewFileName = "AdminInfo.fxml";
+                    windowTitle = "Thong tin admin";
+                } else {
+                    viewFileName = "UserInfo.fxml";
+                    windowTitle = "Thong tin nguoi dung";
+                }
+
+                FXMLLoader loader = ViewLoader.loader(viewFileName);
+                Parent root = loader.load();
+                Scene sceneMain = new Scene(root);
+
+                Platform.runLater(() -> {
+                    pendingStage.setScene(sceneMain);
+                    pendingStage.setTitle(windowTitle);
+                    pendingStage.centerOnScreen();
+                    pendingStage.show();
+                });
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                Platform.runLater(() ->
+                        showAlert(Alert.AlertType.ERROR, "Loi", "Dang nhap that bai",
+                                "Khong the xu ly phan hoi tu server."));
             }
+        };
 
-            Account account = accountOptional.get();
-            UserSession.setCurrentAccount(account);
-            System.out.println("sigin accout" +  account.getId());
-            String viewFileName;
-            String windowTitle;
-
-
-            //kiểm tra role để mở màn hình Info
-            System.out.println(account.getRole());
-            if (Account.ADMIN.equalsIgnoreCase(account.getRole())) {
-                viewFileName = "AdminInfo.fxml";
-                windowTitle = "Thong tin admin";
-            } else {
-                viewFileName = "UserInfo.fxml";
-                windowTitle = "Thong tin nguoi dung";
-            }
-
-            LoginPayload payload = new LoginPayload(account.getRole());
-            Gson gson = new  Gson();
-            String payloadjson = gson.toJson(payload);
-
-            Message msg = new Message();
-            msg.Id_user = account.getId();
-            msg.messageType = "login";
-            msg.payloadJson = payloadjson;
-
-            UserSession.getConnection().send(msg);
-
-            FXMLLoader loader = ViewLoader.loader(viewFileName);
-            Parent root = loader.load();
-            Scene sceneMain = new Scene(root);
-            Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            window.setScene(sceneMain);
-            window.setTitle(windowTitle);
-            window.centerOnScreen();
-            window.show();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Loi co so du lieu", "Khong the dang nhap", "Khong the doc du lieu nguoi dung tu SQLite.");
-        }
+        MessageBus.getInstance().subscribe(signinResultHandler);
     }
 
     public void handle_signup(ActionEvent event) throws IOException {
@@ -106,6 +140,30 @@ public class SignInController {
         window.centerOnScreen();
         window.show();
     }
+    private Account buildAccount(SigninResponsePayload payload) {
+        if (Account.ADMIN.equalsIgnoreCase(payload.getRole())) {
+            Admin admin = new Admin(
+                    payload.getId(),
+                    payload.getName(),
+                    payload.getEmail(),
+                    payload.getPhoneNumber(),
+                    payload.getPassword()
+            );
+            admin.setRole(payload.getRole());
+            return admin;
+        }
+
+        User user = new User(
+                payload.getId(),
+                payload.getName(),
+                payload.getEmail(),
+                payload.getPhoneNumber(),
+                payload.getPassword(),
+                payload.getBalance()
+        );
+        user.setRole(payload.getRole());
+        return user;
+    }
 
     private void showAlert(Alert.AlertType type, String title, String header, String content) {
         Alert alert = new Alert(type);
@@ -114,4 +172,10 @@ public class SignInController {
         alert.setContentText(content);
         alert.showAndWait();
     }
+    private void cleanup() {
+        if (signinResultHandler != null) {
+            MessageBus.getInstance().unsubscribe(signinResultHandler);
+        }
+    }
+
 }

@@ -15,6 +15,8 @@ import models.Extra.messages.MsgAuction.AuctionStatusMessage;
 import models.Extra.messages.MsgBid.ClientSendBid;
 import models.Extra.messages.MsgData.InventoryDataResponse;
 import models.Extra.messages.MsgData.RequestListDataResponse;
+import models.accounts.User;
+import models.core.Account;
 import models.items.ItemFactory;
 
 import java.io.BufferedReader;
@@ -22,13 +24,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Optional;
 
 
 public class ClientHandler implements Runnable {
 
     private final Socket socket;
     private PrintWriter out;                        // field — dùng lâu dài
-    private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);;;
+    private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     private String watchingAuctionId = null;        // client đang xem phiên nào
 
     public Gson gson = new Gson();
@@ -97,6 +100,56 @@ public class ClientHandler implements Runnable {
                     UserStore userStore = new UserStore();
                     double currentBalance = userStore.get_balance(msg.Id_user);
                     send(okJson(currentBalance));
+                }
+                case "signin" -> {
+                    SigninPayload payload = mapper.readValue(node.get("payloadJson").asText(), SigninPayload.class);
+                    UserStore userStore = new UserStore();
+                    Optional<Account> accountOptional =
+                            userStore.authenticate(payload.getPhoneNumber(), payload.getPassword());
+
+                    if (accountOptional.isEmpty()) {
+                        ObjectNode fail = mapper.createObjectNode();
+                        fail.put("type", "SIGNIN_FAIL");
+                        send(fail.toString());
+                        return;
+                    }
+
+                    Account account = accountOptional.get();
+                    this.userId = account.getId();
+                    this.role = account.getRole();
+                    AuctionRoom.getInstance().connectors.put(userId, this);// lưu thông tin clienthandler khi sign in thành công
+
+                    double balance = account instanceof User user ? user.getBalance() : 0.0;
+
+                    SigninResponsePayload responsePayload = new SigninResponsePayload(
+                            account.getId(),
+                            account.getName(),
+                            account.getEmail(),
+                            account.getPhoneNumber(),
+                            account.getPassword(),
+                            account.getRole(),
+                            balance
+                    );
+
+                    ObjectNode ok = mapper.createObjectNode();
+                    ok.put("type", "SIGNIN_OK");
+                    ok.put("payloadJson", gson.toJson(responsePayload));
+                    send(ok.toString());
+                }
+                case "signup" ->{
+                    SignupPayload payload = mapper.readValue(node.get("payloadJson").asText(), SignupPayload.class);
+                    UserStore userStore = new UserStore();
+                    if (userStore.phoneNumberExists(payload.getPhoneNumber())) {
+                        ObjectNode fail = mapper.createObjectNode();
+                        fail.put("type", "SIGNUP_FAIL");
+                        send(fail.toString());
+                        return;
+                    }
+                    userStore.saveUser(new User(payload.getName(),  payload.getEmail(), payload.getPhoneNumber(), payload.getPassword()));
+
+                    ObjectNode success = mapper.createObjectNode();
+                    success.put("type", "SIGNUP_OK");
+                    send(success.toString());// gửi lại tín hiệu sign up thành công
                 }
 
                 // ADMIN XIN DỮ LIỆU INVENTORY
@@ -174,7 +227,7 @@ public class ClientHandler implements Runnable {
                         ack.put("type", "ACTION_SUCCESS");
                         send(ack.toString());
                     }
-                    else if ("ACCEPT_REQUnEST".equals(cmd.action)) {
+                    else if ("ACCEPT_REQUEST".equals(cmd.action)) {
                         // Tìm request trong DB
                         Database.RequestLog.RequestRecord request = requestLogDB.findByRequestId(cmd.targetId);
                         if (request != null) {
@@ -306,7 +359,7 @@ public class ClientHandler implements Runnable {
                     AuctionRoom.sendadmin(responseNode.toString());
                 }
                 case "change_info" -> {
-                    String userId = node.get("Id_user").asText();
+//                    String userId = node.get("Id_user").asText();
                     String payloadJson = node.get("payloadJson").asText();
 
                     Change_infopayload payload = mapper.readValue(payloadJson,Change_infopayload.class);
@@ -317,24 +370,12 @@ public class ClientHandler implements Runnable {
 
                     send(responseNode.toString());
                 }
-                case "login" -> {// xử lý định danh cho từng clienthandler
-                    String userId = node.get("Id_user").asText();
-                    String payloadJson = node.get("payloadJson").asText();
-
-                    LoginPayload payload = mapper.readValue(payloadJson, LoginPayload.class);
-
-                    this.userId = userId;
-                    this.role = payload.getRole();
-
-                    AuctionRoom.getInstance().connectors.put(userId, this);
-                    System.out.println("User " + userId + " với role " + payload.getRole() + " đã kết nối thành công!");
-                }
                 case "removeitem" -> {
-                    String userId = node.get("Id_user").asText();
+//                    String userId = node.get("Id_user").asText();
                     String payloadJson = node.get("payloadJson").asText();
 
                     RemoveRequestpayload payload = mapper.readValue(payloadJson, RemoveRequestpayload.class);
-                    String request_id = payload.getRequest_id();
+//                    String request_id = payload.getRequest_id();
                     String status_item = payload.getStatus();
                     RequestLog requestlog = new RequestLog();
                     Inventory inventoryDB = new  Inventory();
