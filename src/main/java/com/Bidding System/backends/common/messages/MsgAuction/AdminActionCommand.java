@@ -1,6 +1,6 @@
 package backends.common.messages.MsgAuction;
 
-import backends.server.database.RequestLog;
+import backends.server.database.RequestLogDAO;
 
 import java.io.IOException;
 
@@ -22,7 +22,7 @@ public class AdminActionCommand {
         this.userId = userId;
     }
     public void SetuserId(String targetId) throws IOException {
-        RequestLog requestlog =  new RequestLog();
+        RequestLogDAO requestlog =  new RequestLogDAO();
         this.userId = requestlog.getUserbyRequestId(targetId);// dùng cho khi muốn lấy userid từ request id
     }
 }

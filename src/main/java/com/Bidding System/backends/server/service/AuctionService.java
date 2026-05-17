@@ -1,8 +1,8 @@
 package backends.server.service;
 
-import backends.server.database.Auctions;
-import backends.server.database.BidTransactions;
-import backends.server.database.Inventory;
+import backends.server.database.AuctionDAO;
+import backends.server.database.BidTransactionDAO;
+import backends.server.database.InventoryDAO;
 import backends.server.handler.ServerAuctionManager;
 import backends.common.models.accounts.Admin;
 import backends.common.models.accounts.User;
@@ -47,8 +47,8 @@ public final class AuctionService {
             throw new IllegalArgumentException("Thoi gian dau gia phai lon hon 0");
         }
 
-        Inventory inventory = new Inventory();
-        Item itemAuction = inventory.getItemtoAuction(Inventory.STATUS_IN_PROGRESS);
+        InventoryDAO inventoryDAO = new InventoryDAO();
+        Item itemAuction = inventoryDAO.getItemtoAuction(InventoryDAO.STATUS_IN_PROGRESS);
         if (itemAuction == null) {
             throw new IllegalStateException("Khong co san pham nao o trang thai STATUS_IN_PROGRESS");
         }
@@ -80,8 +80,8 @@ public final class AuctionService {
         if (duration.isZero() || duration.isNegative()) {
             throw new IllegalArgumentException("Thoi gian dau gia phai lon hon 0");
         }
-        Inventory inventory = new Inventory();
-        inventory.updateItemStatus(item.getId(), Inventory.STATUS_IN_PROGRESS);
+        InventoryDAO inventoryDAO = new InventoryDAO();
+        inventoryDAO.updateItemStatus(item.getId(), InventoryDAO.STATUS_IN_PROGRESS);
 
         Auction auction = new Auction(item);
         LocalDateTime now = LocalDateTime.now();
@@ -112,8 +112,8 @@ public final class AuctionService {
         }
 
         Auction managedAuction = resolveAuction(auction);
-        Inventory inventory = new Inventory();
-        String sellerId = inventory.getUserIdByItemId(managedAuction.getItem().getId());
+        InventoryDAO inventoryDAO = new InventoryDAO();
+        String sellerId = inventoryDAO.getUserIdByItemId(managedAuction.getItem().getId());
         if (user.getId().equals(sellerId)) {
             throw new IllegalArgumentException("Nguoi ban khong duoc dau gia san pham minh ban");
         }
@@ -121,15 +121,15 @@ public final class AuctionService {
         BidTransaction bid = new BidTransaction(user, managedAuction.getItem(), amount);
         managedAuction.addBid(bid);
 
-        Auctions auctionsRepository = new Auctions();
-        auctionsRepository.updateHighestBid(
+        AuctionDAO auctionDAORepository = new AuctionDAO();
+        auctionDAORepository.updateHighestBid(
                 managedAuction.getAuctionId(),
                 managedAuction.getCurrentHighestBid(),
                 managedAuction.getCurrentHighestBidderId()
         );
 
-        BidTransactions bidTransactions = new BidTransactions();
-        bidTransactions.saveBid(managedAuction.getAuctionId(), bid);
+        BidTransactionDAO bidTransactionDAO = new BidTransactionDAO();
+        bidTransactionDAO.saveBid(managedAuction.getAuctionId(), bid);
         return bid;
     }
 
@@ -165,8 +165,8 @@ public final class AuctionService {
             return;
         }
 
-        Auctions auctions = new Auctions();
-        List<Auction> activeAuctions = auctions.getActiveAuctions();
+        AuctionDAO auctionDAO = new AuctionDAO();
+        List<Auction> activeAuctions = auctionDAO.getActiveAuctions();
         LocalDateTime now = LocalDateTime.now();
 
         for (Auction auction : activeAuctions) {
@@ -209,9 +209,9 @@ public final class AuctionService {
 
     // Cap nhat trang thai dong phien, winner va trang thai item sau khi phien ket thuc.
     private static void syncAuctionClosure(Auction auction) throws IOException {
-        Auctions auctions = new Auctions();
-        Inventory inventory = new Inventory();
-        auctions.updateAuctionState(
+        AuctionDAO auctionDAO = new AuctionDAO();
+        InventoryDAO inventoryDAO = new InventoryDAO();
+        auctionDAO.updateAuctionState(
                 auction.getAuctionId(),
                 auction.getStatus(),
                 auction.getEndAt(),
@@ -220,23 +220,23 @@ public final class AuctionService {
         );
 
         String itemStatus = auction.getCurrentHighestBidderId() == null
-                ? Inventory.STATUS_UNSOLD
-                : Inventory.STATUS_SOLD;
-        inventory.updateItemStatus(auction.getItem().getId(), itemStatus);
+                ? InventoryDAO.STATUS_UNSOLD
+                : InventoryDAO.STATUS_SOLD;
+        inventoryDAO.updateItemStatus(auction.getItem().getId(), itemStatus);
     }
 
     // Cap nhat DB khi huy phien va dua item tro lai hang doi WAITING.
     private static void syncAuctionCancellation(Auction auction) throws IOException {
-        Auctions auctions = new Auctions();
-        Inventory inventory = new Inventory();
-        auctions.updateAuctionState(
+        AuctionDAO auctionDAO = new AuctionDAO();
+        InventoryDAO inventoryDAO = new InventoryDAO();
+        auctionDAO.updateAuctionState(
                 auction.getAuctionId(),
                 auction.getStatus(),
                 auction.getEndAt(),
                 auction.getCurrentHighestBid(),
                 null
         );
-        inventory.updateItemStatus(auction.getItem().getId(), Inventory.STATUS_WAITING);
+        inventoryDAO.updateItemStatus(auction.getItem().getId(), InventoryDAO.STATUS_WAITING);
     }
 
     // Lay instance Auction dang duoc service quan ly neu da ton tai,

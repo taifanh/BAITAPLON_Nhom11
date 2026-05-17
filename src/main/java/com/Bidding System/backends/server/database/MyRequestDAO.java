@@ -9,7 +9,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MyRequest {
+public class MyRequestDAO {
     public static final String STATUS_WAITING = "WAITING";
     public static final String STATUS_SCHEDULED = "SCHEDULED";
     public static final String STATUS_IN_PROGRESS = "IN_PROGRESS";
@@ -34,7 +34,7 @@ public class MyRequest {
             )
             """;
 
-    public MyRequest(){
+    public MyRequestDAO(){
         try{
             initializeRequest_Log();
 
@@ -59,7 +59,7 @@ public class MyRequest {
             throw new RuntimeException(e);
         } ;
     }
-    public MyRequest.RequestRecord findByRequestId(String requestId) throws IOException {
+    public MyRequestDAO.RequestRecord findByRequestId(String requestId) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
                      SELECT request_id, id_user, request_type, request_info ,send_at, status
@@ -71,7 +71,7 @@ public class MyRequest {
                 if (!resultSet.next()) {
                     return null;
                 }
-                return new MyRequest.RequestRecord(
+                return new MyRequestDAO.RequestRecord(
                         resultSet.getString("request_id"),
                         resultSet.getString("id_user"),
                         resultSet.getString("request_type"),

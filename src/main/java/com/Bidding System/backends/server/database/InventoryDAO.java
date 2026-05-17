@@ -17,7 +17,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Inventory {
+public class InventoryDAO {
     // Trạng thái Item
     public static final String STATUS_WAITING = "WAITING";
     public static final String STATUS_SCHEDULED = "SCHEDULED";
@@ -26,10 +26,10 @@ public class Inventory {
     public static final String STATUS_UNSOLD = "UNSOLD";
 
     private static final Path DATA_DIRECTORY = Path.of("data");
-    private static final Path DATABASE_FILE = DATA_DIRECTORY.resolve("inventory.db");
+    private static final Path DATABASE_FILE = DATA_DIRECTORY.resolve("inventoryDAO.db");
     private static final String DATABASE_URL = "jdbc:sqlite:" + DATABASE_FILE;
     private static final String CREATE_INVENTORY_TABLE_SQL = """
-            CREATE TABLE IF NOT EXISTS inventory (
+            CREATE TABLE IF NOT EXISTS inventoryDAO (
                 ItemId TEXT PRIMARY KEY,
                 type TEXT NOT NULL,
                 name TEXT NOT NULL,
@@ -43,11 +43,11 @@ public class Inventory {
             )
             """;
 
-    public Inventory() throws IOException {
+    public InventoryDAO() throws IOException {
         try {
             initializeStorage();
         } catch (SQLException e) {
-            throw new IOException("Khong the khoi tao bang inventory", e);
+            throw new IOException("Khong the khoi tao bang inventoryDAO", e);
         }
     }
 
@@ -55,7 +55,7 @@ public class Inventory {
     public synchronized void saveItem(Item item, String userId ,String request_id) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     INSERT INTO inventory(ItemId,type,name,price,bidIncrement,itemDescription,request_id,userId,status)
+                     INSERT INTO inventoryDAO(ItemId,type,name,price,bidIncrement,itemDescription,request_id,userId,status)
                      VALUES(?,?,?,?,?,?,?,?,?)
                      """)) {
             statement.setString(1, item.getId());
@@ -78,7 +78,7 @@ public class Inventory {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
                      SELECT ItemId, type, name, price, bidIncrement, itemDescription
-                     FROM inventory
+                     FROM inventoryDAO
                      WHERE ItemId = ?
                      """)) {
             statement.setString(1, itemId);
@@ -98,7 +98,7 @@ public class Inventory {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
                      SELECT ItemId, type, name, price, bidIncrement, itemDescription
-                     FROM inventory
+                     FROM inventoryDAO
                      WHERE status = ?
                      """)) {
             statement.setString(1, status);
@@ -115,7 +115,7 @@ public class Inventory {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
                  SELECT ItemId, type, name, price, bidIncrement, itemDescription
-                 FROM inventory
+                 FROM inventoryDAO
                  WHERE status = ?
                  ORDER BY created_at ASC
                  LIMIT 1
@@ -139,7 +139,7 @@ public class Inventory {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
                      SELECT ItemId, type, name, price, bidIncrement, itemDescription
-                     FROM inventory
+                     FROM inventoryDAO
                      WHERE userId = ?
                      """)) {
             statement.setString(1, userId);
@@ -152,7 +152,7 @@ public class Inventory {
     }
 
     public String getUserIdByItemId(String itemId) {
-        String sql = "SELECT userId FROM inventory WHERE ItemId = ?";
+        String sql = "SELECT userId FROM inventoryDAO WHERE ItemId = ?";
 
         try (Connection conn = openConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -172,7 +172,7 @@ public class Inventory {
     }
 
     public String getStatusById(String request_id) {
-        String sql = "SELECT status FROM inventory WHERE request_id = ?";
+        String sql = "SELECT status FROM inventoryDAO WHERE request_id = ?";
         try (Connection conn = openConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -198,7 +198,7 @@ public class Inventory {
 
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     UPDATE inventory
+                     UPDATE inventoryDAO
                      SET status = ?
                      WHERE ItemId = ?
                      """)) {
@@ -220,7 +220,7 @@ public class Inventory {
 
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     UPDATE inventory
+                     UPDATE inventoryDAO
                      SET status = ?
                      WHERE ItemId = ?
                      """)) {
@@ -238,7 +238,7 @@ public class Inventory {
              PreparedStatement statement = connection.prepareStatement("""
             SELECT EXISTS(
             SELECT 1
-            FROM inventory
+            FROM inventoryDAO
             WHERE request_id = ?)
             AS is_exists;
 """)){
@@ -254,7 +254,7 @@ public class Inventory {
     public synchronized void removeItem(String requestId) throws IOException {
         try(Connection connection = openConnection();
             PreparedStatement statement = connection.prepareStatement("""
-             DELETE FROM inventory
+             DELETE FROM inventoryDAO
              WHERE request_id = ?
 """)){
             statement.setString(1,requestId);

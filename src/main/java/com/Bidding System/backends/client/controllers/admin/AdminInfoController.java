@@ -1,6 +1,6 @@
 package backends.client.controllers.admin;
 
-import backends.server.database.RequestLog;
+import backends.server.database.RequestLogDAO;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -100,9 +100,9 @@ public class AdminInfoController {
     private TextField current_amount;
 
     @FXML
-    private ListView<RequestLog.RequestRecord> requestlist; // Đổi String thành RequestRecord
+    private ListView<RequestLogDAO.RequestRecord> requestlist; // Đổi String thành RequestRecord
 
-    private ObservableList<RequestLog.RequestRecord> item_wait_accepted = FXCollections.observableArrayList();
+    private ObservableList<RequestLogDAO.RequestRecord> item_wait_accepted = FXCollections.observableArrayList();
 
     public final java.util.Set<String> selectedRequestIds = new java.util.HashSet<>();
     private final java.util.Set<String> inProgressItemIds = new java.util.HashSet<>();
@@ -147,7 +147,7 @@ public class AdminInfoController {
 
     public Consumer<String> user_requesthandler;
 
-    private final RequestLog requestlog = new  RequestLog();
+    private final RequestLogDAO requestlog = new RequestLogDAO();
 
     private Item itemAuction = null;
 
@@ -587,7 +587,7 @@ public class AdminInfoController {
     }
     private  void loadRequestList(){
         try{
-            RequestLog requestLogDB = new RequestLog();
+            RequestLogDAO requestLogDAODB = new RequestLogDAO();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -811,7 +811,7 @@ public class AdminInfoController {
         return items;
     }
 }
-class CustomItemRequestCell extends ListCell<RequestLog.RequestRecord> {
+class CustomItemRequestCell extends ListCell<RequestLogDAO.RequestRecord> {
     private final HBox content;
     private final Button view;
     private final Label name_item;
@@ -833,7 +833,7 @@ class CustomItemRequestCell extends ListCell<RequestLog.RequestRecord> {
         content.setAlignment(Pos.CENTER_LEFT);
 
         view.setOnAction(event -> {
-            RequestLog.RequestRecord request = getItem();
+            RequestLogDAO.RequestRecord request = getItem();
             if (request == null) return;
 
             Createitempayload payload = gson.fromJson(request.requestInfo(), Createitempayload.class);
@@ -851,7 +851,7 @@ class CustomItemRequestCell extends ListCell<RequestLog.RequestRecord> {
         });
 
         selected.setOnAction(event -> {
-            RequestLog.RequestRecord request = getItem();
+            RequestLogDAO.RequestRecord request = getItem();
             if (request != null) {
                 if (selected.isSelected()) {
                     selectedIds.add(request.id()); // Lưu vào RAM
@@ -863,7 +863,7 @@ class CustomItemRequestCell extends ListCell<RequestLog.RequestRecord> {
     }
 
     @Override
-    protected void updateItem(RequestLog.RequestRecord request, boolean empty) {
+    protected void updateItem(RequestLogDAO.RequestRecord request, boolean empty) {
         super.updateItem(request, empty);
         if (request != null && !empty) {
             Createitempayload payload = gson.fromJson(request.requestInfo(), Createitempayload.class);

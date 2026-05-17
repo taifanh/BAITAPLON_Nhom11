@@ -4,8 +4,8 @@ import backends.client.controllers.ViewLoader;
 import backends.client.session.UserSession;
 import backends.common.messages.Common.Createitempayload;
 import backends.common.models.accounts.User;
-import backends.server.database.BidTransactions;
-import backends.server.database.MyRequest;
+import backends.server.database.BidTransactionDAO;
+import backends.server.database.MyRequestDAO;
 import com.google.gson.Gson;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -120,8 +120,8 @@ public class HistoryController {
     private void loadSellRequests(String userId) {
         try {
             Gson gson = new Gson();
-            MyRequest myRequest = new MyRequest();
-            for (MyRequest.RequestRecord record : myRequest.getMyRequestsByType("additem")) {
+            MyRequestDAO myRequestDAO = new MyRequestDAO();
+            for (MyRequestDAO.RequestRecord record : myRequestDAO.getMyRequestsByType("additem")) {
                 if (!userId.equals(record.userId())) {
                     continue;
                 }
@@ -137,8 +137,8 @@ public class HistoryController {
 
     private void loadBidRows(String userId) {
         try {
-            BidTransactions bidTransactions = new BidTransactions();
-            for (BidTransactions.BidHistoryRecord record : bidTransactions.getBidHistoryByBidder(userId)) {
+            BidTransactionDAO bidTransactionDAO = new BidTransactionDAO();
+            for (BidTransactionDAO.BidHistoryRecord record : bidTransactionDAO.getBidHistoryByBidder(userId)) {
                 rows.add(new HistoryRow(
                         "Bid",
                         record.itemId(),

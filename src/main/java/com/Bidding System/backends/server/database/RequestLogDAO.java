@@ -10,7 +10,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RequestLog {
+public class RequestLogDAO {
     public static final String STATUS_PENDING = "PENDING";
     public static final String STATUS_WAITING = "WAITING";
     public static final String STATUS_REJECTED = "REJECTED";
@@ -30,7 +30,7 @@ public class RequestLog {
             )
             """;
 
-    public RequestLog(){
+    public RequestLogDAO(){
         try{
             initializeRequest_Log();
 
@@ -181,7 +181,7 @@ public class RequestLog {
         }
 
     }
-    public List<RequestLog.RequestRecord> selected_requests() throws IOException{
+    public List<RequestLogDAO.RequestRecord> selected_requests() throws IOException{
         try(Connection connection = openConnection();
             PreparedStatement statement = connection.prepareStatement("""
                     SELECT request_id, id_user, request_type, request_info ,send_at, selected, status

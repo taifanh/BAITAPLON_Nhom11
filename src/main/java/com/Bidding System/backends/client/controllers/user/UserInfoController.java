@@ -1,8 +1,7 @@
 package backends.client.controllers.user;
 
-import backends.common.messages.MsgAuction.FetchAuctionStatusRequest;
-import backends.server.database.MyRequest;
-import backends.server.database.RequestLog;
+import backends.server.database.MyRequestDAO;
+import backends.server.database.RequestLogDAO;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javafx.animation.Animation;
@@ -103,7 +102,7 @@ public class UserInfoController {
     @FXML
     private Button autobid;
 
-    private final MyRequest myrequest = new MyRequest();
+    private final MyRequestDAO myrequest = new MyRequestDAO();
     @FXML
     private ListView<String> List_AcceptedItem;
 
@@ -617,7 +616,7 @@ public class UserInfoController {
 
                 String requestId = node.path("request_id").asText("");
                 String userId = node.path("user_id").asText("");
-                String status = node.path("status").asText(MyRequest.STATUS_WAITING);
+                String status = node.path("status").asText(MyRequestDAO.STATUS_WAITING);
 
                 User currentUser = UserSession.getCurrentUser();
                 if (currentUser == null || requestId.isBlank()) {
@@ -1038,10 +1037,10 @@ public class UserInfoController {
         if (List_AcceptedItem == null) {
             return;
         }
-        List<MyRequest.RequestRecord> requests = myrequest.getMyRequestsByType("additem");
+        List<MyRequestDAO.RequestRecord> requests = myrequest.getMyRequestsByType("additem");
 
         AcceptedItem_info.clear();
-        for (MyRequest.RequestRecord request : requests) {
+        for (MyRequestDAO.RequestRecord request : requests) {
             User currentUser = UserSession.getCurrentUser();
             if (currentUser != null && !currentUser.getId().equals(request.userId())) {
                 continue;
@@ -1090,8 +1089,8 @@ class CustomItemCell extends ListCell<String>{
     private Button View_info;
     private Button remove_item;
     private Pane spacer;
-    private final RequestLog requestLog = new RequestLog();
-    private final MyRequest myrequest = new MyRequest();
+    private final RequestLogDAO requestLogDAO = new RequestLogDAO();
+    private final MyRequestDAO myrequest = new MyRequestDAO();
     private final Gson gson = new Gson();
 
     public CustomItemCell(){
@@ -1115,7 +1114,7 @@ class CustomItemCell extends ListCell<String>{
                 return;
             }
             try {
-                MyRequest.RequestRecord request = myrequest.findByRequestId(requestId);
+                MyRequestDAO.RequestRecord request = myrequest.findByRequestId(requestId);
                 if (request == null) {
                     return;
                 }
@@ -1161,7 +1160,7 @@ class CustomItemCell extends ListCell<String>{
         super.updateItem(item, empty);
         if(item!=null && !empty){
             try {
-                RequestLog.RequestRecord request = requestLog.findByRequestId(item);
+                RequestLogDAO.RequestRecord request = requestLogDAO.findByRequestId(item);
                 if (request != null) {
                     Createitempayload payload = gson.fromJson(request.requestInfo(), Createitempayload.class);
                     name_item.setText(payload.getItem_name());
