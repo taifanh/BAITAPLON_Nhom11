@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class UserStore {
+public class UserDAOImpl {
     private static final Path DATA_DIRECTORY = Path.of("data");
     private static final Path DATABASE_FILE = DATA_DIRECTORY.resolve("users.db");
     private static final String DATABASE_URL = "jdbc:sqlite:" + DATABASE_FILE;
@@ -35,7 +35,7 @@ public class UserStore {
             )
             """;
 
-    public UserStore() {
+    public UserDAOImpl() {
         try {
             initializeStorage();
         } catch (IOException | SQLException e) {

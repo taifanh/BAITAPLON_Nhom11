@@ -8,6 +8,7 @@ import backends.common.models.core.Item;
 import backends.common.models.items.ItemFactory;
 import backends.common.models.items.ItemType;
 import backends.server.database.*;
+import backends.server.service.UserService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -36,10 +37,10 @@ public class ClientHandler implements Runnable {
     private final Socket socket;
     private PrintWriter out;                        // field — dùng lâu dài
     private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    private String watchingAuctionId = null;        // client đang xem phiên nào
-    private UserStore userStore = new UserStore();
+    private UserDAOImpl userDAOImpl = new UserDAOImpl();
     public Gson gson = new Gson();
 
+    private String watchingAuctionId = null;        // client đang xem phiên nào
     private String userId = null;
     private String role = null;
 
@@ -58,6 +59,9 @@ public class ClientHandler implements Runnable {
 
     public String getRole() { return role; }
     public String getUserId() { return userId; }
+
+    public void setUserId(String userId) { this.userId = userId; }
+    public void setRole(String role) { this.role = role; }
 
     @Override
     public void run() {
@@ -101,59 +105,15 @@ public class ClientHandler implements Runnable {
 
                 case "GET_BALANCE" -> {
                     Message msg = mapper.readValue(json, Message.class);
-                    UserStore userStore = new UserStore();
-                    double currentBalance = userStore.get_balance(msg.Id_user);
+                    UserDAOImpl userDAOImpl = new UserDAOImpl();
+                    double currentBalance = userDAOImpl.get_balance(msg.Id_user);
                     send(okJson(currentBalance));
                 }
                 case "signin" -> {
-                    SigninPayload payload = mapper.readValue(node.get("payloadJson").asText(), SigninPayload.class);
-                    UserStore userStore = new UserStore();
-                    Optional<Account> accountOptional =
-                            userStore.authenticate(payload.getPhoneNumber(), payload.getPassword());
-
-                    if (accountOptional.isEmpty()) {
-                        ObjectNode fail = mapper.createObjectNode();
-                        fail.put("type", "SIGNIN_FAIL");
-                        send(fail.toString());
-                        return;
-                    }
-
-                    Account account = accountOptional.get();
-                    this.userId = account.getId();
-                    this.role = account.getRole();
-                    AuctionRoom.getInstance().connectors.put(userId, this);// lưu thông tin clienthandler khi sign in thành công
-
-                    double balance = account instanceof User user ? user.getBalance() : 0.0;
-
-                    SigninResponsePayload responsePayload = new SigninResponsePayload(
-                            account.getId(),
-                            account.getName(),
-                            account.getEmail(),
-                            account.getPhoneNumber(),
-                            account.getPassword(),
-                            account.getRole(),
-                            balance
-                    );
-
-                    ObjectNode ok = mapper.createObjectNode();
-                    ok.put("type", "SIGNIN_OK");
-                    ok.put("payloadJson", gson.toJson(responsePayload));
-                    send(ok.toString());
+                    send(UserService.signin(this, node));
                 }
                 case "signup" ->{
-                    SignupPayload payload = mapper.readValue(node.get("payloadJson").asText(), SignupPayload.class);
-                    UserStore userStore = new UserStore();
-                    if (userStore.phoneNumberExists(payload.getPhoneNumber())) {
-                        ObjectNode fail = mapper.createObjectNode();
-                        fail.put("type", "SIGNUP_FAIL");
-                        send(fail.toString());
-                        return;
-                    }
-                    userStore.saveUser(new User(payload.getName(),  payload.getEmail(), payload.getPhoneNumber(), payload.getPassword()));
-
-                    ObjectNode success = mapper.createObjectNode();
-                    success.put("type", "SIGNUP_OK");
-                    send(success.toString());// gửi lại tín hiệu sign up thành công
+                    send(UserService.signup(this, node));
                 }
 
                 // ADMIN XIN DỮ LIỆU INVENTORY
@@ -190,7 +150,7 @@ public class ClientHandler implements Runnable {
                         ServerBidRespond maxBidder = bidDb.getMaxBidder(managedAuction.getAuctionId());
                         if (maxBidder != null && maxBidder.userId != null) {
                             statusMsg.maxBidderAmount = String.valueOf(maxBidder.amount);
-                            String name = userStore.getNameById(maxBidder.userId);
+                            String name = userDAOImpl.getNameById(maxBidder.userId);
                             statusMsg.maxBidderName = (name != null) ? name : "";
                         }
                     } else if (managedAuction == null) {
@@ -342,9 +302,9 @@ public class ClientHandler implements Runnable {
                     Depositpayload payload = mapper.readValue(payloadJson, Depositpayload.class);
                     System.out.println("[Server] DEPOSIT received | userId=" + userId + " | amount=" + payload.getAmount());
 
-                    UserStore userStore = new UserStore();
-                    userStore.update_balance(payload.getAmount(), userId);
-                    payload.setAmount(userStore.get_balance(userId));
+                    UserDAOImpl userDAOImpl = new UserDAOImpl();
+                    userDAOImpl.update_balance(payload.getAmount(), userId);
+                    payload.setAmount(userDAOImpl.get_balance(userId));
                     ObjectNode responseNode = mapper.createObjectNode();// tạo 1 kiểu payloadjson để có thể dùng chung cho các phương thức khác
                     responseNode.put("type", "deposit_OK");
                     responseNode.put("payloadJson", gson.toJson(payload));

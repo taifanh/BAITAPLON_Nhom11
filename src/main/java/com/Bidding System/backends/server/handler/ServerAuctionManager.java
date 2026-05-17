@@ -2,7 +2,7 @@ package backends.server.handler;
 
 import backends.server.database.BidTransactions;
 import backends.server.database.Inventory;
-import backends.server.database.UserStore;
+import backends.server.database.UserDAOImpl;
 import backends.server.service.AuctionService;
 import backends.common.messages.MsgAuction.AuctionResultMessage;
 import backends.common.messages.MsgBid.ServerBidRespond;
@@ -137,10 +137,10 @@ public class ServerAuctionManager {
                 result.winnerId = maxBidder.userId;
                 result.winningAmount = maxBidder.amount;
 
-                UserStore userStore = new UserStore();
-                User winner = userStore.getUser(maxBidder.userId);
+                UserDAOImpl userDAOImpl = new UserDAOImpl();
+                User winner = userDAOImpl.getUser(maxBidder.userId);
                 result.winnerName = (winner != null) ? winner.getName() : maxBidder.userId;
-                userStore.update_balance(-result.winningAmount, result.winnerId);
+                userDAOImpl.update_balance(-result.winningAmount, result.winnerId);
             } else {
                 result.hasBidder = false;
                 result.winnerName = "Không có người thắng";

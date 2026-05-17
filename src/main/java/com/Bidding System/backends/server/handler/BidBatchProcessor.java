@@ -1,7 +1,7 @@
 package backends.server.handler;
 
 import backends.server.database.BidTransactions;
-import backends.server.database.UserStore;
+import backends.server.database.UserDAOImpl;
 import com.google.gson.Gson;
 import backends.common.messages.MsgBid.ReceiveMaxBidder;
 import backends.common.messages.MsgBid.ServerBidRespond;
@@ -72,7 +72,7 @@ public class BidBatchProcessor {
 
         try {
             BidTransactions db = new BidTransactions();
-            UserStore userStore = new UserStore();
+            UserDAOImpl userDAOImpl = new UserDAOImpl();
 
             // Tìm max bid trong batch (nếu tie → ưu tiên bid đến sớm hơn)
             PendingBid winner = batch.stream()
@@ -99,12 +99,12 @@ public class BidBatchProcessor {
             }
 
             // Lưu tất cả bid hợp lệ trong batch vào DB
-            User winnerUser = userStore.getUser(winner.userId());
+            User winnerUser = userDAOImpl.getUser(winner.userId());
             Item dummyItem = ItemFactory.createItem(ItemType.Art, "auction-item", 0, "");
 
             for (PendingBid bid : batch) {
                 if (bid.amount() > currentMaxAmount) { // chỉ lưu bid hợp lệ
-                    User bidUser = userStore.getUser(bid.userId());
+                    User bidUser = userDAOImpl.getUser(bid.userId());
                     db.saveBid(auctionId,
                             new BidTransaction(bidUser, dummyItem, bid.amount()));
                 }

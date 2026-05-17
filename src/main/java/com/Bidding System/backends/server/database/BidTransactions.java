@@ -70,8 +70,8 @@ public class BidTransactions {
                 if (!resultSet.next()) {
                     return null;
                 }
-                String username = (new UserStore()).getUser(resultSet.getString("bidderId")).getName();
-                String userId = (new UserStore()).getUser(resultSet.getString("bidderId")).getId();
+                String username = (new UserDAOImpl()).getUser(resultSet.getString("bidderId")).getName();
+                String userId = (new UserDAOImpl()).getUser(resultSet.getString("bidderId")).getId();
                 return new ServerBidRespond(username, resultSet.getDouble("amount"), userId);
             } catch (SQLException e) {
                 throw new IOException("Chua co bidder", e);
