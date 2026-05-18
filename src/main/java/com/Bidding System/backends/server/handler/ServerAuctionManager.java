@@ -96,7 +96,7 @@ public class ServerAuctionManager {
             } else {
                 // Fix lỗi Orphan (Có trong DB nhưng mất trong RAM)
                 Inventory inventoryDB = new Inventory();
-            inventoryDB.updateItemStatus(itemId, Statuses.WAITING);
+                inventoryDB.updateItemStatus(itemId, Statuses.WAITING);
                 broadcastEnd(itemId, auction);
             }
         } catch (Exception e) {

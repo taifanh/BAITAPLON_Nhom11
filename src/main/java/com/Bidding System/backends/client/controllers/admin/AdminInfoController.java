@@ -418,7 +418,7 @@ public class AdminInfoController {
                                 for (Item i : upcomingitem.getItems()) {
                                     if (i.getId().equals(statusMsg.itemId)) {
                                         upcomingitem.getSelectionModel().select(i);
-                                        //handleAuctionClick(i);
+                                        handleAuctionClick(i);
                                         break;
                                     }
                                 }
@@ -475,13 +475,13 @@ public class AdminInfoController {
             if (epoch == null || epoch == 0) {
                 // Hỏi Server thay vì hỏi AuctionService local (vốn không có dữ liệu)
                 lblTimer.setText("--:--:--");
+                ObjectNode req = new ObjectMapper().createObjectNode();
+                req.put("type", "FETCH_AUCTION_STATUS");
+                req.put("itemId", item.getId());
+                UserSession.getConnection().send(req);
+                // Khi server trả về AUCTION_STATUS với status=STARTED,
+                // case "AUCTION_STATUS" sẽ tự cập nhật currentEndTimeEpochs
             }
-            ObjectNode req = new ObjectMapper().createObjectNode();
-            req.put("type", "FETCH_AUCTION_STATUS");
-            req.put("itemId", item.getId());
-            UserSession.getConnection().send(req);
-            // Khi server trả về AUCTION_STATUS với status=STARTED,
-            // case "AUCTION_STATUS" sẽ tự cập nhật currentEndTimeEpochs
         } else {
             // Phiên chưa chạy
             start_end_auction.setText("START AUCTION");
