@@ -153,6 +153,21 @@ public class Auctions {
             throw new IOException("Khong the doc auction theo id", e);
         }
     }
+    // cập nhật đếm giờ mới ===>> dùng cho anti sniping
+    public synchronized void updateEndTime(String auctionId, LocalDateTime endAt) throws IOException {
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement("""
+                 UPDATE auctions
+                 SET endAt = ?
+                 WHERE auctionId = ?
+                 """)) {
+            statement.setString(1, endAt.toString());
+            statement.setString(2, auctionId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IOException("Khong the cap nhat end time", e);
+        }
+    }
 
     private synchronized void initializeStorage() throws IOException, SQLException {
         ensureDataDirectoryExists();

@@ -151,4 +151,37 @@ public class ServerAuctionManager {
             e.printStackTrace();
         }
     }
+    // thông báo cho user đang xem phiên hệ thống cập nhật đếm giờ mới
+    public void broadcastAuctionExtended(Auction auction) {
+        try {
+            AuctionStatusMessage statusMsg = new AuctionStatusMessage();
+            statusMsg.status = "STARTED";
+            statusMsg.itemId = auction.getItem().getId();
+            statusMsg.auctionId = auction.getAuctionId();
+
+            long remainingMillis = java.time.Duration.between(
+                    LocalDateTime.now(),
+                    auction.getEndAt()
+            ).toMillis();
+            statusMsg.endTimeEpoch = System.currentTimeMillis() + Math.max(remainingMillis, 0);
+
+            Inventory inventoryDB = new Inventory();
+            statusMsg.sellerId = inventoryDB.getUserIdByItemId(auction.getItem().getId());
+            statusMsg.startingPrice = String.valueOf(auction.getItem().getPrices());
+
+            BidTransactions bidDb = new BidTransactions();
+            ServerBidRespond maxBidder = bidDb.getMaxBidder(auction.getAuctionId());
+            if (maxBidder != null && maxBidder.userId != null) {
+                statusMsg.maxBidderAmount = String.valueOf(maxBidder.amount);
+
+                UserStore userStore = new UserStore();
+                User winner = userStore.getUser(maxBidder.userId);
+                statusMsg.maxBidderName = (winner != null) ? winner.getName() : maxBidder.userId;
+            }
+
+            AuctionRoom.getInstance().broadcast(mapper.writeValueAsString(statusMsg));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

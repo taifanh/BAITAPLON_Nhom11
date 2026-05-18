@@ -33,6 +33,8 @@ public final class AuctionService {
     private static final Map<String, ScheduledFuture<?>> AUTO_CLOSE_TASKS = new ConcurrentHashMap<>();
     private static volatile boolean restoredOnStartup = false;
 
+    private static final long SNIPE_WINDOW_SECONDS = 5;
+    private static final long SNIPE_EXTENSION_SECONDS = 10;
     private AuctionService() {
     }
 
@@ -182,6 +184,40 @@ public final class AuctionService {
         }
 
         restoredOnStartup = true;
+    }
+    // service sẽ tăng thêm thời gian
+    public static boolean extendAuctionIfNeeded(String itemId) throws IOException {
+        Auction auction = ACTIVE_AUCTIONS.get(itemId);
+        if (auction == null || auction.getEndAt() == null || !auction.isActive()) {
+            return false;
+        }// check whehter auction is still available
+
+        Duration remaining = Duration.between(LocalDateTime.now(), auction.getEndAt());
+        if (remaining.isNegative() || remaining.isZero()) {
+            return false;
+        }// check whether auction is ended or not
+
+        if (remaining.getSeconds() < SNIPE_WINDOW_SECONDS) {// check whether time coutndown is within 5 seconds
+            auction.extendEndAt(Duration.ofSeconds(SNIPE_EXTENSION_SECONDS));
+
+            Auctions auctions = new Auctions();
+            auctions.updateEndTime(auction.getAuctionId(), auction.getEndAt());
+
+            Duration newRemaining = Duration.between(LocalDateTime.now(), auction.getEndAt());
+            scheduleAutoClose(auction, newRemaining);
+            return true;// báo lại server là cần tăng đếm giờ
+        }
+
+        return false;
+    }
+
+    public static Auction getManagedActiveAuctionByAuctionId(String auctionId) {
+        for (Auction auction : ACTIVE_AUCTIONS.values()) {
+            if (auction.getAuctionId().equals(auctionId)) {
+                return auction;
+            }
+        }
+        return null;
     }
 
     // Tra ve mot snapshot danh sach phien active dang duoc service quan ly trong RAM.

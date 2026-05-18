@@ -152,6 +152,12 @@ public class Auction {
             this.endAt = LocalDateTime.now();
         }
     }
+    // tăng đếm giờ nếu cần (anti sniping)
+    public synchronized void extendEndAt(Duration extra) {
+        if (status != Status.ACTIVE) return;// kiểm tra phien còn active không
+        if (endAt == null || extra == null || extra.isZero() || extra.isNegative()) return;
+        endAt = endAt.plus(extra);// cộng thêm thời gian
+    }
 
     // Kiem tra xem phien co dang ACTIVE hay khong.
     public boolean isActive() {

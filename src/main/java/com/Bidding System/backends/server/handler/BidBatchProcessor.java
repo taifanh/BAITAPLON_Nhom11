@@ -1,7 +1,9 @@
 package backends.server.handler;
 
+import backends.common.models.bidding.Auction;
 import backends.server.database.BidTransactions;
 import backends.server.database.UserStore;
+import backends.server.service.AuctionService;
 import com.google.gson.Gson;
 import backends.common.messages.MsgBid.ReceiveMaxBidder;
 import backends.common.messages.MsgBid.ServerBidRespond;
@@ -113,6 +115,13 @@ public class BidBatchProcessor {
             // Broadcast kết quả batch
             ServerBidRespond result = db.getMaxBidder(auctionId);
             broadcastMaxBidder(auctionId, result);
+            Auction managedAuction = AuctionService.getManagedActiveAuctionByAuctionId(auctionId);
+            if (managedAuction != null) {
+                boolean extended = AuctionService.extendAuctionIfNeeded(managedAuction.getItem().getId());
+                if (extended) {
+                    ServerAuctionManager.getInstance().broadcastAuctionExtended(managedAuction);
+                }
+            }
 
         } catch (Exception e) {
             System.err.println("[BidBatchProcessor] Error processing batch: " + e.getMessage());
