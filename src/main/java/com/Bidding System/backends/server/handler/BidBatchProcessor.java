@@ -48,7 +48,7 @@ public class BidBatchProcessor {
         pendingBids
                 .computeIfAbsent(auctionId, id -> Collections.synchronizedList(new ArrayList<>()))
                 .add(bid);
-
+        
     }
 
     private void flushAllBatches() {
@@ -99,7 +99,7 @@ public class BidBatchProcessor {
                 broadcastMaxBidder(auctionId, currentMax);
                 return;
             }
-
+            
             // Lưu tất cả bid hợp lệ trong batch vào DB
             User winnerUser = userStore.getUser(winner.userId());
             Item dummyItem = ItemFactory.createItem(ItemType.Art, "auction-item", 0, "");
@@ -143,3 +143,8 @@ public class BidBatchProcessor {
         scheduler.shutdown();
     }
 }
+
+
+
+
+

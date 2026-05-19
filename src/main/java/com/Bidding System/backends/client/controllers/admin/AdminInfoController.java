@@ -378,6 +378,8 @@ public class AdminInfoController {
                                 endAt = Instant.ofEpochMilli(statusMsg.endTimeEpoch)
                                         .atZone(ZoneId.systemDefault())
                                         .toLocalDateTime();
+                                start_end_auction.setText("END AUCTION");
+                                settime.setDisable(true);
                                 Item runningItem = findItemById(statusMsg.itemId);
                                 if (runningItem != null) {
                                     applyAuctionItemDetails(runningItem);
@@ -418,7 +420,7 @@ public class AdminInfoController {
                                 for (Item i : upcomingitem.getItems()) {
                                     if (i.getId().equals(statusMsg.itemId)) {
                                         upcomingitem.getSelectionModel().select(i);
-                                        handleAuctionClick(i);
+                                        //handleAuctionClick(i);
                                         break;
                                     }
                                 }

@@ -267,7 +267,6 @@ public class UserInfoController {
                 List<Item> items = new ArrayList<>();
                 items.addAll(scheduled);
                 items.addAll(inProgress);
-
                 Platform.runLater(() -> upcomingAuctions.setAll(items));
             }
         });
