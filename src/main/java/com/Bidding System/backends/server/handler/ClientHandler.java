@@ -118,6 +118,7 @@ public class ClientHandler implements Runnable {
                     ack.put("type", "AUTO_BID_REGISTERED");
                     send(ack.toString());
                 }
+
                 case "signin" -> {
                     SigninPayload payload = mapper.readValue(node.get("payloadJson").asText(), SigninPayload.class);
                     UserStore userStore = new UserStore();

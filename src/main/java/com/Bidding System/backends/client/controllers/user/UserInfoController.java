@@ -2,6 +2,7 @@ package backends.client.controllers.user;
 
 import backends.common.messages.MsgAuction.FetchAuctionStatusRequest;
 
+import backends.common.messages.MsgBid.RegisterAutoBidding;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javafx.animation.Animation;
@@ -112,7 +113,13 @@ public class UserInfoController {
     private TextField itemName;
 
     @FXML
-    private Button autobid;
+    private Button autoBidButton;
+
+    @FXML
+    private TextField autoIncrement;
+
+    @FXML
+    private TextField maxLimit;
 
     @FXML
     private ListView<RequestRecordDto> List_AcceptedItem;
@@ -359,6 +366,12 @@ public class UserInfoController {
                         placebid.setDisable(true);
                         bidprice.setDisable(true);
                     });
+                }
+                case "AUTO_BID_REGISTERED" -> {
+                    placebid.setDisable(true);
+                    maxLimit.setEditable(false);
+                    autoIncrement.setEditable(false);
+                    autoBidButton.setText("STOP");
                 }
             }
         });
@@ -796,6 +809,66 @@ public class UserInfoController {
         MessageBus.getInstance().subscribe(removeitemHandler);
     }
 
+    public void handleAutoBid(ActionEvent event) {
+        if (selectedAuctionItem == null) {
+            new Alert(
+                    Alert.AlertType.ERROR,
+                    "Please select an auction item",
+                    ButtonType.OK
+            ).show();
+            return;
+        }
+        if (endAt == null || currentAuctionId == null) {
+            new Alert(
+                    Alert.AlertType.ERROR,
+                    "No auction is currently running",
+                    ButtonType.OK
+            ).show();
+            return;
+        }
+        String incrementStr = autoIncrement.getText();
+        String maxLimitStr = maxLimit.getText();
+        double autoBidIncrement;
+        double autoBidMaxLimit;
+        try {
+            autoBidIncrement = Double.parseDouble(incrementStr);
+            autoBidMaxLimit = Double.parseDouble(maxLimitStr);
+            if (autoBidIncrement <= 0) {
+                throw new IllegalArgumentException("increment must be positive");
+            }
+            if (autoBidMaxLimit <= 0) {
+                throw new IllegalArgumentException("max limit must be positive");
+            }
+            if (currentSellerId != null && currentSellerId.equals(UserSession.getCurrentUser().getId())) {
+                throw new IllegalArgumentException("You cannot bid on your own item");
+            }
+            if (autoBidMaxLimit > currentBalance) {
+                throw new IllegalArgumentException(
+                        "Your balance is insufficient"
+                );
+            }
+        } catch (NumberFormatException e) {
+            new Alert(Alert.AlertType.ERROR, "Invalid number", ButtonType.OK).show();
+            return;
+        } catch (IllegalArgumentException e) {
+            new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.OK).show();
+            return;
+        }
+        java.time.Duration remaining =
+                java.time.Duration.between(LocalDateTime.now(), endAt);
+        if (remaining.isZero() || remaining.isNegative()) {
+            new Alert(
+                    Alert.AlertType.ERROR,
+                    "Auction expired",
+                    ButtonType.OK
+            ).show();
+            return;
+        }
+        String userId = UserSession.getCurrentUser().getId();
+        RegisterAutoBidding msg = new RegisterAutoBidding(currentAuctionId, userId, autoBidMaxLimit, autoBidIncrement);
+        UserSession.getConnection().send(msg);
+    }
+
     public void placebid(ActionEvent event) throws IOException {
         if (selectedAuctionItem == null) {
             new Alert(
@@ -854,7 +927,6 @@ public class UserInfoController {
             return;
         }
         UserSession.getConnection().send(new ClientSendBid(UserSession.getCurrentUser().getId(), amount, currentAuctionId));
-        System.out.println("BID: " + amount + " TO: " + currentAuctionId);
     }
 
     private void setClock0() {
