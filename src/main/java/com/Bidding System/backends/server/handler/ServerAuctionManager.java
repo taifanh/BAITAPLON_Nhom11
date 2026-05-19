@@ -89,13 +89,14 @@ public class ServerAuctionManager {
     public void endAuction(String itemId) {
         try {
             Auction auction = AuctionService.getManagedActiveAuction(itemId);
+            Inventory inventoryDB = new Inventory();
             if (auction != null) {
                 // Gọi AuctionService để End (Nó sẽ tự hủy Timer đang chạy dở, update DB sang SOLD/UNSOLD)
+                inventoryDB.updateItemStatus(itemId, Statuses.SOLD);
                 AuctionService.endAuction(auction, LocalDateTime.now());
                 broadcastEnd(itemId, auction);
             } else {
                 // Fix lỗi Orphan (Có trong DB nhưng mất trong RAM)
-                Inventory inventoryDB = new Inventory();
                 inventoryDB.updateItemStatus(itemId, Statuses.WAITING);
                 broadcastEnd(itemId, auction);
             }
@@ -120,6 +121,7 @@ public class ServerAuctionManager {
 
             if (auctionId != null) {
                 BidBatchProcessor.getInstance().flushAuction(auctionId);
+                AutoBidEngine.getInstance().removeAll(auctionId);
             }
 
             AuctionStatusMessage statusMsg = new AuctionStatusMessage();

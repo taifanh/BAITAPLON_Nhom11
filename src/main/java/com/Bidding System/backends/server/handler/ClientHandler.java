@@ -1,6 +1,7 @@
 package backends.server.handler;
 
 import backends.common.constants.Statuses;
+import backends.common.messages.MsgBid.RegisterAutoBidding;
 import backends.common.messages.MsgBid.ServerBidRespond;
 import backends.common.models.accounts.User;
 import backends.common.models.bidding.Auction;
@@ -102,12 +103,20 @@ public class ClientHandler implements Runnable {
                 case "AUCTION_ITEMS_RESPONSE" -> {
                     AuctionRoom.getInstance().broadcast(json);
                 }
-
                 case "GET_BALANCE" -> {
                     Message msg = mapper.readValue(json, Message.class);
                     UserStore userStore = new UserStore();
                     double currentBalance = userStore.get_balance(msg.Id_user);
                     send(okJson(currentBalance));
+                }
+                case "REGISTER_AUTO_BIDDING" -> {
+                    RegisterAutoBidding msg = mapper.readValue(json,RegisterAutoBidding.class);
+                    AutoBidEngine.getInstance().register(
+                            new AutoBidEngine.AutoBidEntry(msg.userId, msg.auctionId, msg.maxBid, msg.increment, System.currentTimeMillis())
+                    );
+                    ObjectNode ack = mapper.createObjectNode();
+                    ack.put("type", "AUTO_BID_REGISTERED");
+                    send(ack.toString());
                 }
                 case "signin" -> {
                     SigninPayload payload = mapper.readValue(node.get("payloadJson").asText(), SigninPayload.class);
