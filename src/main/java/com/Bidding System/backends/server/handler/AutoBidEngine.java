@@ -8,8 +8,9 @@ import backends.common.models.bidding.BidTransaction;
 import backends.common.models.core.Item;
 import backends.common.models.items.ItemFactory;
 import backends.common.models.items.ItemType;
-import backends.server.database.BidTransactions;
-import backends.server.database.UserStore;
+import backends.server.database.BidTransactionDAO;
+import backends.server.database.BidTransactionDAO;
+import backends.server.database.UserDAO;
 import backends.server.service.AuctionService;
 import com.google.gson.Gson;
 
@@ -56,7 +57,7 @@ public class AutoBidEngine {
 
     public synchronized void resolveAuction(String auctionId) {
         try {
-            BidTransactions db = new BidTransactions();
+            BidTransactionDAO db = new BidTransactionDAO();
             ServerBidRespond currentMax = db.getMaxBidder(auctionId);
             List<AutoBidEntry> entries = autoBids.get(auctionId);
 
@@ -116,7 +117,7 @@ public class AutoBidEngine {
                     && currentMax.userId.equals(winner.userId())
                     && currentMax.amount >= finalAmount; // >= thay vì == để tránh rebid không cần thiết
             if (alreadyResolved) return;
-            UserStore userStore = new UserStore();
+            UserDAO userStore = new UserDAO();
 
             User winnerUser =
                     userStore.getUser(winner.userId());

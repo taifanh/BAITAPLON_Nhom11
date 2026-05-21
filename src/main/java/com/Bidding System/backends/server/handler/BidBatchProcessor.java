@@ -1,7 +1,9 @@
 package backends.server.handler;
 
+import backends.common.models.bidding.Auction;
 import backends.server.database.BidTransactionDAO;
 import backends.server.database.UserDAO;
+import backends.server.service.AuctionService;
 import com.google.gson.Gson;
 import backends.common.messages.MsgBid.ReceiveMaxBidder;
 import backends.common.messages.MsgBid.ServerBidRespond;
@@ -106,7 +108,7 @@ public class BidBatchProcessor {
 
             for (PendingBid bid : batch) {
                 if (bid.amount() > currentMaxAmount) { // chỉ lưu bid hợp lệ
-                    User bidUser = userStore.getUser(bid.userId());
+                    User bidUser = userDAO.getUser(bid.userId());
                     db.saveBid(auctionId,
                             new BidTransaction(bidUser, dummyItem, bid.amount()));
                 }
