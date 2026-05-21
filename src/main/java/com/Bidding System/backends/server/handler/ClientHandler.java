@@ -1,6 +1,7 @@
 package backends.server.handler;
 
 import backends.common.constants.Statuses;
+import backends.common.messages.MsgBid.CancelAutoBidding;
 import backends.common.messages.MsgBid.RegisterAutoBidding;
 import backends.common.messages.MsgBid.ServerBidRespond;
 import backends.common.models.accounts.User;
@@ -118,7 +119,14 @@ public class ClientHandler implements Runnable {
                     ack.put("type", "AUTO_BID_REGISTERED");
                     send(ack.toString());
                 }
+                case "CANCEL_AUTO_BIDDING" -> {
+                    CancelAutoBidding msg = mapper.readValue(json, CancelAutoBidding.class);
+                    AutoBidEngine.getInstance().remove(msg.auctionId, msg.userId);
 
+                    ObjectNode ack = mapper.createObjectNode();
+                    ack.put("type", "AUTO_BID_CANCELLED");
+                    send(ack.toString());
+                }
                 case "signin" -> {
                     SigninPayload payload = mapper.readValue(node.get("payloadJson").asText(), SigninPayload.class);
                     UserStore userStore = new UserStore();

@@ -1,13 +1,20 @@
 package backends.server.handler;
 
+import backends.common.messages.MsgBid.ReceiveMaxBidder;
+import backends.common.messages.MsgBid.ServerBidRespond;
 import backends.common.models.accounts.User;
+import backends.common.models.bidding.Auction;
 import backends.common.models.bidding.BidTransaction;
 import backends.common.models.core.Item;
 import backends.common.models.items.ItemFactory;
 import backends.common.models.items.ItemType;
 import backends.server.database.BidTransactions;
 import backends.server.database.UserStore;
+import backends.server.service.AuctionService;
+import com.google.gson.Gson;
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -17,7 +24,7 @@ public class AutoBidEngine {
         if (instance == null) instance = new AutoBidEngine();
         return instance;
     }
-    private AutoBidEngine(){};
+    private AutoBidEngine(){}
     public record AutoBidEntry(
             String userId,
             String auctionId,
@@ -25,63 +32,130 @@ public class AutoBidEngine {
             double increment,
             long registeredAt   // ưu tiên ai đăng ký trước khi tie
     ) {}
+    record Candidate(
+            String userId,
+            double maxBid,
+            double increment,
+            long priority
+    ) {}
     private final ConcurrentHashMap<String, List<AutoBidEntry>> autoBids = new ConcurrentHashMap<>();
     public void register(AutoBidEntry entry) {
         autoBids.computeIfAbsent(entry.auctionId(), id -> Collections.synchronizedList(new ArrayList<>())).add(entry);
-        System.out.printf("[AutoBid] Registered | user=%s auction=%s max=%.0f inc=%.0f%n",
-                entry.userId(), entry.auctionId(), entry.maxBid(), entry.increment());
+        resolveAuction(entry.auctionId());
     }
     public void removeAll(String auctionId) {
         autoBids.remove(auctionId);
     }
-    public void triggerSync(String auctionId, double currentPrice, String currentWinnerId) {
+    public void remove(String auctionId, String userId) {
         List<AutoBidEntry> entries = autoBids.get(auctionId);
-        if (entries == null || entries.isEmpty()) return;
+        if (entries == null) return;
+        entries.removeIf(e -> e.userId().equals(userId));
+        resolveAuction(auctionId);
+        System.out.printf("[AutoBid] Cancelled | user=%s auction=%s%n", userId, auctionId);
+    }
 
-        Optional<AutoBidEntry> candidate = resolveBestCandidate(
-                entries, currentPrice, currentWinnerId);
-
-        if (candidate.isEmpty()) return;
-
-        AutoBidEntry entry = candidate.get();
-        double newBidAmount = currentPrice + entry.increment();
-
-        // Giới hạn không vượt maxBid
-        if (newBidAmount > entry.maxBid()) {
-            newBidAmount = entry.maxBid();
-        }
-
-        // Double-check sau khi clamp
-        if (newBidAmount <= currentPrice) return;
-
-        // Lưu bid trực tiếp vào DB (không qua queue)
+    public synchronized void resolveAuction(String auctionId) {
         try {
             BidTransactions db = new BidTransactions();
+            ServerBidRespond currentMax = db.getMaxBidder(auctionId);
+            List<AutoBidEntry> entries = autoBids.get(auctionId);
+
+            List<Candidate> candidates = new ArrayList<>();
+            boolean currentWinnerAlreadyAuto = false;
+
+            if (entries != null && currentMax != null) {
+                synchronized (entries) {
+                    currentWinnerAlreadyAuto = entries.stream()
+                            .anyMatch(e -> e.userId().equals(currentMax.userId));
+                }
+            }
+
+            // Thêm người đang dẫn đầu thủ công nếu họ không phải auto-bidder
+            if (currentMax != null && !currentWinnerAlreadyAuto) {
+                candidates.add(new Candidate(currentMax.userId, currentMax.amount, 0, Long.MIN_VALUE));
+            }
+
+            if (entries != null) {
+                synchronized (entries) {
+                    for (AutoBidEntry e : entries) {
+                        candidates.add(new Candidate(e.userId(), e.maxBid(), e.increment(), e.registeredAt()));
+                    }
+                }
+            }
+
+            if (candidates.isEmpty()) return;
+
+            candidates.sort(Comparator.comparingDouble(Candidate::maxBid)
+                    .reversed()
+                    .thenComparingLong(Candidate::priority));
+
+            Candidate winner = candidates.get(0);
+            Candidate second = candidates.size() > 1 ? candidates.get(1) : null;
+
+            Auction auction = AuctionService.getManagedActiveAuctionByAuctionId(auctionId);
+            if (auction == null) {
+                System.err.printf("[AutoBid] Auction %s not managed yet, skipping%n", auctionId);
+                return;
+            }
+
+            double startingPrice = auction.getItem().getPrices();
+            double currentMaxAmount = (currentMax != null) ? currentMax.amount : startingPrice;
+            double finalAmount;
+
+            if (second == null) {
+                // Chỉ 1 bidder: bid ở mức baseline (không thấp hơn giá hiện tại)
+                finalAmount = Math.min(winner.maxBid(), Math.max(startingPrice, currentMaxAmount));
+            } else {
+                // 2+ bidder: winner bid vừa đủ vượt second, nhưng không thấp hơn giá hiện tại
+                double neededToBeat = Math.max(currentMaxAmount, second.maxBid() + winner.increment());
+                finalAmount = Math.min(winner.maxBid(), neededToBeat);
+            }
+
+            // Kiểm tra xem đã resolved chưa
+            boolean alreadyResolved = currentMax != null
+                    && currentMax.userId.equals(winner.userId())
+                    && currentMax.amount >= finalAmount; // >= thay vì == để tránh rebid không cần thiết
+            if (alreadyResolved) return;
             UserStore userStore = new UserStore();
 
-            User bidUser = userStore.getUser(entry.userId());
-            Item dummyItem = ItemFactory.createItem(ItemType.Art, "auction-item", 0, "");
-            db.saveBid(auctionId, new BidTransaction(bidUser, dummyItem, newBidAmount));
+            User winnerUser =
+                    userStore.getUser(winner.userId());
 
-            System.out.printf("[AutoBid] Triggered | user=%s amount=%.0f auction=%s%n",
-                    entry.userId(), newBidAmount, auctionId);
+            Item dummyItem =
+                    ItemFactory.createItem(
+                            ItemType.Art,
+                            "auction-item",
+                            0,
+                            ""
+                    );
 
+            db.saveBid(
+                    auctionId,
+                    new BidTransaction(
+                            winnerUser,
+                            dummyItem,
+                            finalAmount
+                    )
+            );
+            ServerBidRespond finalMax =
+                    db.getMaxBidder(auctionId);
 
-        } catch (Exception e) {
-            System.err.println("[AutoBidEngine] triggerSync error: " + e.getMessage());
-            return;
+            if (finalMax == null) {
+                return;
+            }
+
+            finalMax.auctionId = auctionId;
+
+            String json =
+                    new Gson().toJson(
+                            new ReceiveMaxBidder(finalMax)
+                    );
+
+            AuctionRoom.getInstance().broadcast(json);
+
+        } catch (SQLException | IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    // ── Helper ────────────────────────────────────────────────────
-    private Optional<AutoBidEntry> resolveBestCandidate(
-            List<AutoBidEntry> entries,
-            double currentPrice,
-            String currentWinnerId) {
-
-        return entries.stream()
-                .filter(e -> !e.userId().equals(currentWinnerId))   // không tự bid lại chính mình
-                .filter(e -> e.maxBid() > currentPrice)             // còn đủ tiền
-                .min(Comparator.comparingLong(AutoBidEntry::registeredAt)); // đăng ký sớm → ưu tiên
-    }
 }

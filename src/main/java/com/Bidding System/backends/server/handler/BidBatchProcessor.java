@@ -44,11 +44,14 @@ public class BidBatchProcessor {
     public void submitBid(String userId, String auctionId, double amount) {
         PendingBid bid = new PendingBid(userId, auctionId, amount,
                 System.currentTimeMillis());
+        pendingBids.computeIfAbsent(auctionId, id -> Collections.synchronizedList(new ArrayList<>())).add(bid);
+    }
 
-        pendingBids
-                .computeIfAbsent(auctionId, id -> Collections.synchronizedList(new ArrayList<>()))
-                .add(bid);
-
+    public synchronized void flushAuction(String auctionId) {
+        List<PendingBid> batch = pendingBids.remove(auctionId);
+        if (batch != null && !batch.isEmpty()) {
+            flushManualBids(auctionId, batch);
+        }
     }
 
     private void flushAllBatches() {
@@ -58,19 +61,12 @@ public class BidBatchProcessor {
         for (String auctionId : new HashSet<>(pendingBids.keySet())) {
             List<PendingBid> batch = pendingBids.remove(auctionId);
             if (batch == null || batch.isEmpty()) continue;
-            processBatch(auctionId, batch);
-        }
-    }
-
-    public synchronized void flushAuction(String auctionId) {
-        List<PendingBid> batch = pendingBids.remove(auctionId);
-        if (batch != null && !batch.isEmpty()) {
-            processBatch(auctionId, batch);
+            flushManualBids(auctionId, batch);
         }
     }
 
     // ── Xử lý 1 batch của 1 auctionId ────────────────────────────
-    private void processBatch(String auctionId, List<PendingBid> batch) {
+    private void flushManualBids(String auctionId, List<PendingBid> batch) {
 
         try {
             BidTransactions db = new BidTransactions();
@@ -108,8 +104,8 @@ public class BidBatchProcessor {
 
             // Broadcast kết quả batch
             ServerBidRespond result = db.getMaxBidder(auctionId);
-            AutoBidEngine.getInstance().triggerSync(auctionId, result.amount, result.userId);
             result = db.getMaxBidder(auctionId);
+            AutoBidEngine.getInstance().resolveAuction(auctionId);
             broadcastMaxBidder(auctionId, result);
             Auction managedAuction = AuctionService.getManagedActiveAuctionByAuctionId(auctionId);
             if (managedAuction != null) {

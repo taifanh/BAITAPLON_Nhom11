@@ -2,6 +2,7 @@ package backends.client.controllers.user;
 
 import backends.common.messages.MsgAuction.FetchAuctionStatusRequest;
 
+import backends.common.messages.MsgBid.CancelAutoBidding;
 import backends.common.messages.MsgBid.RegisterAutoBidding;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -150,6 +151,7 @@ public class UserInfoController {
     private Item selectedAuctionItem;
     private final java.util.Map<String, Long> currentEndTimeEpochs = new java.util.HashMap<>();
     private final java.util.Map<String, String> itemToAuctionId = new java.util.HashMap<>();
+    private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     @FXML
     public void initialize() throws Exception {
@@ -371,7 +373,28 @@ public class UserInfoController {
                     placebid.setDisable(true);
                     maxLimit.setEditable(false);
                     autoIncrement.setEditable(false);
+                    bidprice.setDisable(true);
                     autoBidButton.setText("STOP");
+                    autoBidButton.setStyle("""
+    -fx-background-color: #dc2626;
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-font: bold;
+""");
+                }
+                case "AUTO_BID_CANCELLED" -> {
+                    placebid.setDisable(false);
+                    maxLimit.setEditable(true);
+                    autoIncrement.setEditable(true);
+                    bidprice.setDisable(false);
+                    autoBidButton.setText("AUTO");
+                    autoBidButton.setStyle("""
+    -fx-background-color: #ea580c;
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+""");
                 }
             }
         });
@@ -810,63 +833,77 @@ public class UserInfoController {
     }
 
     public void handleAutoBid(ActionEvent event) {
-        if (selectedAuctionItem == null) {
-            new Alert(
-                    Alert.AlertType.ERROR,
-                    "Please select an auction item",
-                    ButtonType.OK
-            ).show();
-            return;
-        }
-        if (endAt == null || currentAuctionId == null) {
-            new Alert(
-                    Alert.AlertType.ERROR,
-                    "No auction is currently running",
-                    ButtonType.OK
-            ).show();
-            return;
-        }
-        String incrementStr = autoIncrement.getText();
-        String maxLimitStr = maxLimit.getText();
-        double autoBidIncrement;
-        double autoBidMaxLimit;
-        try {
-            autoBidIncrement = Double.parseDouble(incrementStr);
-            autoBidMaxLimit = Double.parseDouble(maxLimitStr);
-            if (autoBidIncrement <= 0) {
-                throw new IllegalArgumentException("increment must be positive");
+        String autoBidText = autoBidButton.getText();
+        if (autoBidText.equals("AUTO")) {
+            if (selectedAuctionItem == null) {
+                new Alert(
+                        Alert.AlertType.ERROR,
+                        "Please select an auction item",
+                        ButtonType.OK
+                ).show();
+                return;
             }
-            if (autoBidMaxLimit <= 0) {
-                throw new IllegalArgumentException("max limit must be positive");
+            if (endAt == null || currentAuctionId == null) {
+                new Alert(
+                        Alert.AlertType.ERROR,
+                        "No auction is currently running",
+                        ButtonType.OK
+                ).show();
+                return;
             }
-            if (currentSellerId != null && currentSellerId.equals(UserSession.getCurrentUser().getId())) {
-                throw new IllegalArgumentException("You cannot bid on your own item");
+            String incrementStr = autoIncrement.getText();
+            String maxLimitStr = maxLimit.getText();
+            double autoBidIncrement;
+            double autoBidMaxLimit;
+            try {
+                autoBidIncrement = Double.parseDouble(incrementStr);
+                autoBidMaxLimit = Double.parseDouble(maxLimitStr);
+                if (autoBidIncrement <= 0) {
+                    throw new IllegalArgumentException("increment must be positive");
+                }
+                if (autoBidMaxLimit <= 0) {
+                    throw new IllegalArgumentException("max limit must be positive");
+                }
+                if (currentSellerId != null && currentSellerId.equals(UserSession.getCurrentUser().getId())) {
+                    throw new IllegalArgumentException("You cannot bid on your own item");
+                }
+                if (autoBidMaxLimit > currentBalance) {
+                    throw new IllegalArgumentException(
+                            "Your balance is insufficient"
+                    );
+                }
+                if(autoBidMaxLimit < currentBalance + currentBidIncrement) {
+                    throw new IllegalArgumentException(
+                            "Your max limit is insufficient"
+                    );
+                }
+            } catch (NumberFormatException e) {
+                new Alert(Alert.AlertType.ERROR, "Invalid number", ButtonType.OK).show();
+                return;
+            } catch (IllegalArgumentException e) {
+                new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.OK).show();
+                return;
             }
-            if (autoBidMaxLimit > currentBalance) {
-                throw new IllegalArgumentException(
-                        "Your balance is insufficient"
-                );
+            java.time.Duration remaining =
+                    java.time.Duration.between(LocalDateTime.now(), endAt);
+            if (remaining.isZero() || remaining.isNegative()) {
+                new Alert(
+                        Alert.AlertType.ERROR,
+                        "Auction expired",
+                        ButtonType.OK
+                ).show();
+                return;
             }
-        } catch (NumberFormatException e) {
-            new Alert(Alert.AlertType.ERROR, "Invalid number", ButtonType.OK).show();
-            return;
-        } catch (IllegalArgumentException e) {
-            new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.OK).show();
-            return;
+            String userId = UserSession.getCurrentUser().getId();
+            RegisterAutoBidding msg = new RegisterAutoBidding(currentAuctionId, userId, autoBidMaxLimit, autoBidIncrement);
+            UserSession.getConnection().send(msg);
         }
-        java.time.Duration remaining =
-                java.time.Duration.between(LocalDateTime.now(), endAt);
-        if (remaining.isZero() || remaining.isNegative()) {
-            new Alert(
-                    Alert.AlertType.ERROR,
-                    "Auction expired",
-                    ButtonType.OK
-            ).show();
-            return;
+        else {
+            CancelAutoBidding msg = new CancelAutoBidding();
+            msg.auctionId = currentAuctionId;
+            msg.userId = UserSession.getCurrentUser().getId();
+            UserSession.getConnection().send(msg);
         }
-        String userId = UserSession.getCurrentUser().getId();
-        RegisterAutoBidding msg = new RegisterAutoBidding(currentAuctionId, userId, autoBidMaxLimit, autoBidIncrement);
-        UserSession.getConnection().send(msg);
     }
 
     public void placebid(ActionEvent event) throws IOException {
