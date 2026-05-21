@@ -16,7 +16,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BidTransactions {
+public class BidTransactionDAO {
     private static final Path DATA_DIRECTORY = Path.of("data");
     private static final Path DATABASE_FILE = DATA_DIRECTORY.resolve("auctions.db");
     private static final String DATABASE_URL = "jdbc:sqlite:" + DATABASE_FILE;
@@ -31,7 +31,7 @@ public class BidTransactions {
             )
             """;
 
-    public BidTransactions() throws IOException {
+    public BidTransactionDAO() throws IOException {
         try {
             initializeStorage();
         } catch (SQLException e) {
@@ -70,8 +70,8 @@ public class BidTransactions {
                 if (!resultSet.next()) {
                     return null;
                 }
-                String username = (new UserStore()).getUser(resultSet.getString("bidderId")).getName();
-                String userId = (new UserStore()).getUser(resultSet.getString("bidderId")).getId();
+                String username = (new UserDAO()).getUser(resultSet.getString("bidderId")).getName();
+                String userId = (new UserDAO()).getUser(resultSet.getString("bidderId")).getId();
                 return new ServerBidRespond(username, resultSet.getDouble("amount"), userId);
             } catch (SQLException e) {
                 throw new IOException("Chua co bidder", e);

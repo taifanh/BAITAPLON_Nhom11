@@ -16,12 +16,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Auctions {
+public class AuctionDAO {
     private static final Path DATA_DIRECTORY = Path.of("data");
     private static final Path DATABASE_FILE = DATA_DIRECTORY.resolve("auctions.db");
     private static final String DATABASE_URL = "jdbc:sqlite:" + DATABASE_FILE;
     private static final String CREATE_AUCTIONS_TABLE_SQL = """
-            CREATE TABLE IF NOT EXISTS auctions (
+            CREATE TABLE IF NOT EXISTS auctionDAO (
                 auctionId TEXT PRIMARY KEY,
                 startAt TEXT NOT NULL,
                 endAt TEXT NOT NULL,
@@ -32,18 +32,18 @@ public class Auctions {
             )
             """;
 
-    public Auctions() throws IOException {
+    public AuctionDAO() throws IOException {
         try {
             initializeStorage();
         } catch (SQLException e) {
-            throw new IOException("Khong the khoi tao bang auctions", e);
+            throw new IOException("Khong the khoi tao bang auctionDAO", e);
         }
     }
 
     public synchronized void saveAuction(Auction auction) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     INSERT INTO auctions(auctionId,startAt,endAt,status,ItemId,highestBid,highestBidderId)
+                     INSERT INTO auctionDAO(auctionId,startAt,endAt,status,ItemId,highestBid,highestBidderId)
                      VALUES(?,?,?,?,?,?,?)
                      """)) {
             statement.setString(1, auction.getAuctionId());
@@ -62,7 +62,7 @@ public class Auctions {
     public synchronized void updateHighestBid(String auctionId, double highestBid, String highestBidderId) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     UPDATE auctions
+                     UPDATE auctionDAO
                      SET highestBid = ?, highestBidderId = ?
                      WHERE auctionId = ?
                      """)) {
@@ -78,7 +78,7 @@ public class Auctions {
     public synchronized void updateAuctionState(String auctionId, Auction.Status status, LocalDateTime endAt, double highestBid, String highestBidderId) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     UPDATE auctions
+                     UPDATE auctionDAO
                      SET status = ?, endAt = ?, highestBid = ?, highestBidderId = ?
                      WHERE auctionId = ?
                      """)) {
@@ -97,7 +97,7 @@ public class Auctions {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
                      SELECT 1
-                     FROM auctions
+                     FROM auctionDAO
                      WHERE ItemId = ? AND status = ?
                      LIMIT 1
                      """)) {
@@ -115,18 +115,18 @@ public class Auctions {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
                      SELECT auctionId, startAt, endAt, status, ItemId, highestBid, highestBidderId
-                     FROM auctions
+                     FROM auctionDAO
                      WHERE status = ?
                      ORDER BY endAt ASC
                      """)) {
             statement.setString(1, Auction.Status.ACTIVE.name());
             try (ResultSet resultSet = statement.executeQuery()) {
-                List<Auction> auctions = new ArrayList<>();
-                Inventory inventory = new Inventory();
+                List<Auction> auctionDAO = new ArrayList<>();
+                InventoryDAO inventoryDAO = new InventoryDAO();
                 while (resultSet.next()) {
-                    auctions.add(mapAuction(resultSet, inventory));
+                    auctionDAO.add(mapAuction(resultSet, inventoryDAO));
                 }
-                return auctions;
+                return auctionDAO;
             }
         } catch (SQLException e) {
             throw new IOException("Khong the doc danh sach auction dang hoat dong", e);
@@ -137,7 +137,7 @@ public class Auctions {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
                      SELECT auctionId, startAt, endAt, status, ItemId, highestBid, highestBidderId
-                     FROM auctions
+                     FROM auctionDAO
                      WHERE auctionId = ?
                      LIMIT 1
                      """)) {
@@ -146,8 +146,8 @@ public class Auctions {
                 if (!resultSet.next()) {
                     return null;
                 }
-                Inventory inventory = new Inventory();
-                return mapAuction(resultSet, inventory);
+                InventoryDAO inventoryDAO = new InventoryDAO();
+                return mapAuction(resultSet, inventoryDAO);
             }
         } catch (SQLException e) {
             throw new IOException("Khong the doc auction theo id", e);
@@ -179,7 +179,7 @@ public class Auctions {
     }
 
     private void ensureColumnExists(Connection connection, String columnName, String columnDefinition) throws SQLException {
-        try (PreparedStatement statement = connection.prepareStatement("PRAGMA table_info(auctions)");
+        try (PreparedStatement statement = connection.prepareStatement("PRAGMA table_info(auctionDAO)");
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
                 if (columnName.equalsIgnoreCase(resultSet.getString("name"))) {
@@ -189,7 +189,7 @@ public class Auctions {
         }
 
         try (Statement statement = connection.createStatement()) {
-            statement.executeUpdate("ALTER TABLE auctions ADD COLUMN " + columnName + " " + columnDefinition);
+            statement.executeUpdate("ALTER TABLE auctionDAO ADD COLUMN " + columnName + " " + columnDefinition);
         }
     }
 
@@ -205,9 +205,9 @@ public class Auctions {
 
     //Chuyển SQL về thành object auction
 
-    private Auction mapAuction(ResultSet resultSet, Inventory inventory) throws SQLException, IOException {
+    private Auction mapAuction(ResultSet resultSet, InventoryDAO inventoryDAO) throws SQLException, IOException {
         String itemId = resultSet.getString("ItemId");
-        Item item = inventory.findById(itemId);
+        Item item = inventoryDAO.findById(itemId);
         if (item == null) {
             throw new IOException("Khong tim thay item cua auction: " + itemId);
         }

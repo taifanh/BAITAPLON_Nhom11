@@ -22,7 +22,7 @@ public class AuctionRoom {
     // nhưng ở đây subscriber là ClientHandler (giữ socket thật)
     private final Set<ClientHandler> observers = ConcurrentHashMap.newKeySet();
     // dùng cho gửi tin cho 1 số client nhất định
-    final Map<String , ClientHandler> connectors = new ConcurrentHashMap<>();
+    public final Map<String , ClientHandler> connectors = new ConcurrentHashMap<>();
     // --- Biết client nào đang xem phiên nào ---
     // key: clientHandler, value: auctionId họ đang xem
     private final Map<ClientHandler, String> watchingMap = new ConcurrentHashMap<>();

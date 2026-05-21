@@ -1,9 +1,8 @@
 package backends.server.handler;
 
-import backends.common.constants.Statuses;
-import backends.server.database.BidTransactions;
-import backends.server.database.Inventory;
-import backends.server.database.UserStore;
+import backends.server.database.BidTransactionDAO;
+import backends.server.database.InventoryDAO;
+import backends.server.database.UserDAO;
 import backends.server.service.AuctionService;
 import backends.common.messages.MsgAuction.AuctionResultMessage;
 import backends.common.messages.MsgBid.ServerBidRespond;
@@ -53,8 +52,8 @@ public class ServerAuctionManager {
     // Xử lý khi Admin gửi lệnh START
     public void startAuction(String itemId, int durationMinutes) {
         try {
-            Inventory inventoryDB = new Inventory();
-            Item item = inventoryDB.findById(itemId);
+            InventoryDAO inventoryDAODB = new InventoryDAO();
+            Item item = inventoryDAODB.findById(itemId);
             if (item == null) {
                 System.out.println("[Server] Loi: Khong tim thay item " + itemId);
                 return;
@@ -70,7 +69,7 @@ public class ServerAuctionManager {
             statusMsg.endTimeEpoch = System.currentTimeMillis() + (durationMinutes * 60000L);
 
             AuctionRoom.getInstance().broadcast(mapper.writeValueAsString(statusMsg));
-            String sellerId = inventoryDB.getUserIdByItemId(auction.getItem().getId());
+            String sellerId = inventoryDAODB.getUserIdByItemId(auction.getItem().getId());
             StartAuctionMessage start_msg = new StartAuctionMessage(
                     statusMsg.endTimeEpoch,
                     auction.getItem().getName(),
@@ -95,8 +94,8 @@ public class ServerAuctionManager {
                 broadcastEnd(itemId, auction);
             } else {
                 // Fix lỗi Orphan (Có trong DB nhưng mất trong RAM)
-                Inventory inventoryDB = new Inventory();
-                inventoryDB.updateItemStatus(itemId, Statuses.WAITING);
+                InventoryDAO inventoryDAODB = new InventoryDAO();
+                inventoryDAODB.updateItemStatus(itemId, InventoryDAO.STATUS_WAITING);
                 broadcastEnd(itemId, auction);
             }
         } catch (Exception e) {
@@ -120,6 +119,7 @@ public class ServerAuctionManager {
 
             if (auctionId != null) {
                 BidBatchProcessor.getInstance().flushAuction(auctionId);
+                AutoBidEngine.getInstance().removeAll(auctionId);
             }
 
             AuctionStatusMessage statusMsg = new AuctionStatusMessage();
@@ -131,17 +131,17 @@ public class ServerAuctionManager {
             AuctionResultMessage result = new AuctionResultMessage();
             result.itemId = itemId;
             result.itemName = auction.getItem().getName();
-            BidTransactions bidDb = new BidTransactions();
+            BidTransactionDAO bidDb = new BidTransactionDAO();
             ServerBidRespond maxBidder = bidDb.getMaxBidder(auction.getAuctionId());
             if (maxBidder != null && maxBidder.userId != null) {
                 result.hasBidder = true;
                 result.winnerId = maxBidder.userId;
                 result.winningAmount = maxBidder.amount;
 
-                UserStore userStore = new UserStore();
-                User winner = userStore.getUser(maxBidder.userId);
+                UserDAO userDAO = new UserDAO();
+                User winner = userDAO.getUser(maxBidder.userId);
                 result.winnerName = (winner != null) ? winner.getName() : maxBidder.userId;
-                userStore.update_balance(-result.winningAmount, result.winnerId);
+                userDAO.update_balance(-result.winningAmount, result.winnerId);
             } else {
                 result.hasBidder = false;
                 result.winnerName = "Không có người thắng";
@@ -165,16 +165,16 @@ public class ServerAuctionManager {
             ).toMillis();
             statusMsg.endTimeEpoch = System.currentTimeMillis() + Math.max(remainingMillis, 0);
 
-            Inventory inventoryDB = new Inventory();
+            InventoryDAO inventoryDB = new InventoryDAO();
             statusMsg.sellerId = inventoryDB.getUserIdByItemId(auction.getItem().getId());
             statusMsg.startingPrice = String.valueOf(auction.getItem().getPrices());
 
-            BidTransactions bidDb = new BidTransactions();
+            BidTransactionDAO bidDb = new BidTransactionDAO();
             ServerBidRespond maxBidder = bidDb.getMaxBidder(auction.getAuctionId());
             if (maxBidder != null && maxBidder.userId != null) {
                 statusMsg.maxBidderAmount = String.valueOf(maxBidder.amount);
 
-                UserStore userStore = new UserStore();
+                UserDAO userStore = new UserDAO();
                 User winner = userStore.getUser(maxBidder.userId);
                 statusMsg.maxBidderName = (winner != null) ? winner.getName() : maxBidder.userId;
             }

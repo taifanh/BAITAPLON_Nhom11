@@ -1,8 +1,8 @@
 package backends.server.handler;
 
 import backends.common.models.bidding.Auction;
-import backends.server.database.BidTransactions;
-import backends.server.database.UserStore;
+import backends.server.database.BidTransactionDAO;
+import backends.server.database.UserDAO;
 import backends.server.service.AuctionService;
 import com.google.gson.Gson;
 import backends.common.messages.MsgBid.ReceiveMaxBidder;
@@ -44,11 +44,14 @@ public class BidBatchProcessor {
     public void submitBid(String userId, String auctionId, double amount) {
         PendingBid bid = new PendingBid(userId, auctionId, amount,
                 System.currentTimeMillis());
+        pendingBids.computeIfAbsent(auctionId, id -> Collections.synchronizedList(new ArrayList<>())).add(bid);
+    }
 
-        pendingBids
-                .computeIfAbsent(auctionId, id -> Collections.synchronizedList(new ArrayList<>()))
-                .add(bid);
-        
+    public synchronized void flushAuction(String auctionId) {
+        List<PendingBid> batch = pendingBids.remove(auctionId);
+        if (batch != null && !batch.isEmpty()) {
+            flushManualBids(auctionId, batch);
+        }
     }
 
     private void flushAllBatches() {
@@ -58,23 +61,16 @@ public class BidBatchProcessor {
         for (String auctionId : new HashSet<>(pendingBids.keySet())) {
             List<PendingBid> batch = pendingBids.remove(auctionId);
             if (batch == null || batch.isEmpty()) continue;
-            processBatch(auctionId, batch);
-        }
-    }
-
-    public synchronized void flushAuction(String auctionId) {
-        List<PendingBid> batch = pendingBids.remove(auctionId);
-        if (batch != null && !batch.isEmpty()) {
-            processBatch(auctionId, batch);
+            flushManualBids(auctionId, batch);
         }
     }
 
     // ── Xử lý 1 batch của 1 auctionId ────────────────────────────
-    private void processBatch(String auctionId, List<PendingBid> batch) {
+    private void flushManualBids(String auctionId, List<PendingBid> batch) {
 
         try {
-            BidTransactions db = new BidTransactions();
-            UserStore userStore = new UserStore();
+            BidTransactionDAO db = new BidTransactionDAO();
+            UserDAO userDAO = new UserDAO();
 
             // Tìm max bid trong batch (nếu tie → ưu tiên bid đến sớm hơn)
             PendingBid winner = batch.stream()
@@ -90,29 +86,36 @@ public class BidBatchProcessor {
             try {
                 currentMax = db.getMaxBidder(auctionId);
             } catch (Exception e) {
-                currentMax = null; // chưa có bid nào trong DB
+                currentMax = null;
             }
 
             double currentMaxAmount = (currentMax != null) ? currentMax.amount : 0;
+            // Tìm max bid trong batch (nếu tie → ưu tiên bid đến sớm hơn)
+            double batchMax = batch.stream()
+                    .mapToDouble(PendingBid::amount)
+                    .max()
+                    .orElse(0);
 
-            if (winner.amount() <= currentMaxAmount) {
+            // Không có bid nào trong batch vượt DB → broadcast giá hiện tại rồi thôi
+            if (batchMax <= currentMaxAmount) {
                 broadcastMaxBidder(auctionId, currentMax);
                 return;
             }
-            
+
             // Lưu tất cả bid hợp lệ trong batch vào DB
-            User winnerUser = userStore.getUser(winner.userId());
+            User winnerUser = userDAO.getUser(winner.userId());
             Item dummyItem = ItemFactory.createItem(ItemType.Art, "auction-item", 0, "");
 
             for (PendingBid bid : batch) {
                 if (bid.amount() > currentMaxAmount) { // chỉ lưu bid hợp lệ
-                    User bidUser = userStore.getUser(bid.userId());
+                    User bidUser = userDAO.getUser(bid.userId());
                     db.saveBid(auctionId,
                             new BidTransaction(bidUser, dummyItem, bid.amount()));
                 }
             }
 
             // Broadcast kết quả batch
+            AutoBidEngine.getInstance().resolveAuction(auctionId);
             ServerBidRespond result = db.getMaxBidder(auctionId);
             broadcastMaxBidder(auctionId, result);
             Auction managedAuction = AuctionService.getManagedActiveAuctionByAuctionId(auctionId);
@@ -143,8 +146,3 @@ public class BidBatchProcessor {
         scheduler.shutdown();
     }
 }
-
-
-
-
-

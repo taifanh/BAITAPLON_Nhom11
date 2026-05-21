@@ -1,29 +1,13 @@
 package backends.client.controllers.admin;
 
-import backends.server.database.RequestLog;
+import backends.common.messages.MsgData.RequestRecordDto;
+import backends.server.database.RequestLogDAO;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import backends.client.controllers.ViewLoader;
-import backends.client.network.MessageBus;
-import backends.client.session.UserSession;
-import backends.common.messages.Common.Createitempayload;
-import backends.common.messages.MsgAuction.AdminActionCommand;
-import backends.common.messages.MsgAuction.AuctionCommandMessage;
-import backends.common.messages.MsgAuction.AuctionStatusMessage;
-import backends.common.messages.MsgAuction.StartAuctionMessage;
-import backends.common.messages.MsgBid.ReceiveMaxBidder;
-import backends.common.messages.MsgData.FetchDataRequest;
-import backends.common.messages.MsgData.RequestListDataResponse;
-import backends.common.messages.MsgData.RequestRecordDto;
-import backends.common.models.core.Account;
-import backends.common.models.core.Item;
-import backends.common.models.items.ItemFactory;
-import backends.common.models.items.ItemType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
 import backends.client.network.MessageBus;
 import backends.client.session.UserSession;
@@ -46,6 +30,18 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import backends.common.messages.Common.Createitempayload;
+import backends.common.messages.MsgAuction.AdminActionCommand;
+import backends.common.messages.MsgAuction.AuctionCommandMessage;
+import backends.common.messages.MsgAuction.AuctionStatusMessage;
+import backends.common.messages.MsgAuction.StartAuctionMessage;
+import backends.common.messages.MsgBid.ReceiveMaxBidder;
+import backends.common.messages.MsgData.FetchDataRequest;
+import backends.common.messages.MsgData.RequestListDataResponse;
+import backends.common.models.core.Account;
+import backends.common.models.core.Item;
+import backends.common.models.items.ItemType;
+import backends.common.models.items.ItemFactory;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -54,7 +50,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
 
 public class AdminInfoController {
@@ -107,12 +102,14 @@ public class AdminInfoController {
     private TextField current_amount;
 
     @FXML
-    private ListView<RequestRecordDto> requestlist;
+    private ListView<RequestRecordDto> requestlist; // Đổi String thành RequestRecord
 
-    private final ObservableList<RequestRecordDto> item_wait_accepted = FXCollections.observableArrayList();
-    private final Set<String> selectedRequestIds = new java.util.HashSet<>();
-    private final Set<String> inProgressItemIds = new java.util.HashSet<>();
+    private ObservableList<RequestRecordDto> item_wait_accepted = FXCollections.observableArrayList();
+
+    public final java.util.Set<String> selectedRequestIds = new java.util.HashSet<>();
+    private final java.util.Set<String> inProgressItemIds = new java.util.HashSet<>();
     private final Map<String, RequestRecordDto> requestCache = new java.util.HashMap<>();
+
 
     @FXML
     private ListView<Item> inventory;
@@ -151,7 +148,13 @@ public class AdminInfoController {
     private ListView<Item> runningitem;
 
     private Account adminAccount;
+
     public Consumer<String> user_requesthandler;
+
+    private final RequestLogDAO requestlog = new RequestLogDAO();
+
+    private Timeline uiTimeline;
+
     private Item itemAuction = null;
 
     private static final String ACTIVE_NAV_STYLE =
@@ -166,7 +169,6 @@ public class AdminInfoController {
     private double startingPrice;
     private volatile LocalDateTime endAt;
     private volatile boolean isRestoringSelection = false;
-    private Timeline uiTimeline;
 
     @FXML
     public void initialize() {
@@ -253,7 +255,6 @@ public class AdminInfoController {
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
-
             String type = resolveMessageType(node);
             System.out.println("[AdminInfoController] Message type: " + type);
             switch (type) {
@@ -332,27 +333,42 @@ public class AdminInfoController {
                 // Nhận danh sách Request mới nhất
                 case "REQUEST_LIST_DATA" -> {
                     try {
-                        RequestListDataResponse resp = mapper.readValue(json, RequestListDataResponse.class);
+                        JsonNode rootNode = mapper.readTree(json);
+                        JsonNode requestsNode = rootNode.path("requests");
+
+                        List<RequestRecordDto> parsed = new ArrayList<>();
+                        for (JsonNode r : requestsNode) {
+                            RequestRecordDto dto = new RequestRecordDto();
+                            dto.requestId   = r.path("id").asText("");        // RequestRecord serialize là "id"
+                            dto.userId      = r.path("userId").asText("");
+                            dto.requestType = r.path("requestType").asText("");
+                            dto.requestInfo = r.path("requestInfo").asText("");
+                            dto.time        = r.path("time").asText("");
+                            dto.status      = r.path("status").asText("");
+                            parsed.add(dto);
+                        }
+
                         Platform.runLater(() -> {
                             requestCache.clear();
                             item_wait_accepted.clear();
-
-                            if (resp.requests != null) {
-                                for (RequestRecordDto request : resp.requests) {
-                                    requestCache.put(request.requestId, request);
-                                    item_wait_accepted.add(request);
-                                }
+                            for (RequestRecordDto dto : parsed) {
+                                requestCache.put(dto.requestId, dto);
+                                item_wait_accepted.add(dto);
                             }
                         });
                     } catch (Exception e) {
-                        System.err.println("Không the readValue của REQUEST_LIST_DATA của admincontroller");
+                        System.err.println("Lỗi parse REQUEST_LIST_DATA");
                         e.printStackTrace();
                     }
                 }
-                case "ACTION_SUCCESS" -> Platform.runLater(() -> {
-                    loadInventoryData();
-                    loadrequest();
-                });
+
+                // Nhận báo cáo thao tác thành công (ví dụ duyệt item xong)
+                case "ACTION_SUCCESS" -> {
+                    Platform.runLater(() -> {
+                        loadInventoryData();
+                        loadrequest();
+                    });
+                }
                 case "AUCTION_STATUS" -> {
                     try {
                         AuctionStatusMessage statusMsg = mapper.readValue(json, AuctionStatusMessage.class);
@@ -360,7 +376,6 @@ public class AdminInfoController {
                         Platform.runLater(() -> {
                             System.out.println("[Admin] Nhan duoc trang thai phien: " + statusMsg.status);
                             start_end_auction.setDisable(false);
-
                             if ("STARTED".equals(statusMsg.status)) {
                                 inProgressItemIds.add(statusMsg.itemId);
                                 currentEndTimeEpochs.put(statusMsg.itemId, statusMsg.endTimeEpoch);
@@ -477,13 +492,13 @@ public class AdminInfoController {
             if (epoch == null || epoch == 0) {
                 // Hỏi Server thay vì hỏi AuctionService local (vốn không có dữ liệu)
                 lblTimer.setText("--:--:--");
-                ObjectNode req = new ObjectMapper().createObjectNode();
-                req.put("type", "FETCH_AUCTION_STATUS");
-                req.put("itemId", item.getId());
-                UserSession.getConnection().send(req);
-                // Khi server trả về AUCTION_STATUS với status=STARTED,
-                // case "AUCTION_STATUS" sẽ tự cập nhật currentEndTimeEpochs
             }
+            ObjectNode req = new ObjectMapper().createObjectNode();
+            req.put("type", "FETCH_AUCTION_STATUS");
+            req.put("itemId", item.getId());
+            UserSession.getConnection().send(req);
+            // Khi server trả về AUCTION_STATUS với status=STARTED,
+            // case "AUCTION_STATUS" sẽ tự cập nhật currentEndTimeEpochs
         } else {
             // Phiên chưa chạy
             start_end_auction.setText("START AUCTION");
@@ -598,7 +613,7 @@ public class AdminInfoController {
     }
     private  void loadRequestList(){
         try{
-            RequestLog requestLogDB = new RequestLog();
+            RequestLogDAO requestLogDAODB = new RequestLogDAO();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -821,55 +836,52 @@ public class AdminInfoController {
         return items;
     }
 }
-
 class CustomItemRequestCell extends ListCell<RequestRecordDto> {
     private final HBox content;
     private final Button view;
-    private final Label nameItem;
+    private final Label name_item;
     private final CheckBox selected;
     private final Gson gson = new Gson();
-    private final Set<String> selectedIds;
+    private final java.util.Set<String> selectedIds; // Tham chiếu đến RAM của Controller
 
-    protected CustomItemRequestCell(Set<String> selectedIds) {
+    protected CustomItemRequestCell(java.util.Set<String> selectedIds) {
         super();
         this.selectedIds = selectedIds;
-
         Pane spacer = new Pane();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        nameItem = new Label();
+        name_item = new Label();
         selected = new CheckBox();
         view = new Button("view");
 
-        content = new HBox(10, nameItem, spacer, view, selected);
+        content = new HBox(10, name_item, spacer, view, selected);
         content.setAlignment(Pos.CENTER_LEFT);
 
         view.setOnAction(event -> {
             RequestRecordDto request = getItem();
             if (request == null) return;
-
             Createitempayload payload = gson.fromJson(request.requestInfo, Createitempayload.class);
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Thong tin item");
             alert.setHeaderText(payload.getItem_name());
             alert.setContentText(
                     "Request ID: " + request.requestId + "\n" +
-                            "User ID: " + request.userId + "\n" +
-                            "Type: " + payload.getItemType() + "\n" +
+                            "User ID: "    + request.userId    + "\n" +
+                            "Type: "       + payload.getItemType()  + "\n" +
                             "Base price: " + payload.getBasePrice() + "\n" +
-                            "Info: " + payload.getItemInfo()
+                            "Info: "       + payload.getItemInfo()
             );
             alert.showAndWait();
         });
 
         selected.setOnAction(event -> {
             RequestRecordDto request = getItem();
-            if (request == null) return;
-
-            if (selected.isSelected()) {
-                selectedIds.add(request.requestId);
-            } else {
-                selectedIds.remove(request.requestId);
+            if (request != null) {
+                if (selected.isSelected()) {
+                    selectedIds.add(request.requestId); // Lưu vào RAM
+                } else {
+                    selectedIds.remove(request.requestId);
+                }
             }
         });
     }
@@ -878,9 +890,9 @@ class CustomItemRequestCell extends ListCell<RequestRecordDto> {
     protected void updateItem(RequestRecordDto request, boolean empty) {
         super.updateItem(request, empty);
         if (request != null && !empty) {
-            Createitempayload payload = gson.fromJson(request.requestInfo, Createitempayload.class);
-            nameItem.setText(payload.getItem_name());
-            selected.setSelected(selectedIds.contains(request.requestId));
+            Createitempayload payload = gson.fromJson(request.requestInfo, Createitempayload.class); // ← thêm dòng này
+            name_item.setText(payload.getItem_name());
+            selected.setSelected(selectedIds.contains(request.requestId)); // ← thêm dòng này
             setGraphic(content);
         } else {
             setGraphic(null);
