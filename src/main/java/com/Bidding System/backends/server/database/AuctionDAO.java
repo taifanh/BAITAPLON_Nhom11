@@ -18,7 +18,7 @@ import java.util.List;
 
 public class AuctionDAO {
     private static final Path DATA_DIRECTORY = Path.of("data");
-    private static final Path DATABASE_FILE = DATA_DIRECTORY.resolve("auctionDAO.db");
+    private static final Path DATABASE_FILE = DATA_DIRECTORY.resolve("auctions.db");
     private static final String DATABASE_URL = "jdbc:sqlite:" + DATABASE_FILE;
     private static final String CREATE_AUCTIONS_TABLE_SQL = """
             CREATE TABLE IF NOT EXISTS auctionDAO (
