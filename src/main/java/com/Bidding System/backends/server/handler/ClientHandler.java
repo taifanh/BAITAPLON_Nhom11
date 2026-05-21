@@ -1,5 +1,6 @@
 package backends.server.handler;
 
+import backends.common.models.bidding.Auction;
 import backends.server.service.AccountService;
 import backends.server.service.AdminService;
 import backends.server.service.AuctionProcessors;
@@ -44,6 +45,8 @@ public class ClientHandler implements Runnable {
         processors.put("AUCTION_ITEMS_RESPONSE", AuctionProcessors::auctionItemsResponse);
         processors.put("GET_BALANCE", AccountService::getBalance);
         processors.put("signin", UserService::signin);
+        processors.put("REGISTER_AUTO_BIDDING", AuctionProcessors::registerAutoBid);
+        processors.put("CANCEL_AUTO_BIDDING", AuctionProcessors::cancelAutoBid);
         processors.put("signup", UserService::signup);
         processors.put("FETCH_INVENTORY", AdminService::fetchInventory);
         processors.put("FETCH_AUCTION_STATUS", AuctionProcessors::fetchAuctionStatus);

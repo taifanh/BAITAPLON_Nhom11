@@ -165,16 +165,16 @@ public class ServerAuctionManager {
             ).toMillis();
             statusMsg.endTimeEpoch = System.currentTimeMillis() + Math.max(remainingMillis, 0);
 
-            Inventory inventoryDB = new Inventory();
+            InventoryDAO inventoryDB = new InventoryDAO();
             statusMsg.sellerId = inventoryDB.getUserIdByItemId(auction.getItem().getId());
             statusMsg.startingPrice = String.valueOf(auction.getItem().getPrices());
 
-            BidTransactions bidDb = new BidTransactions();
+            BidTransactionDAO bidDb = new BidTransactionDAO();
             ServerBidRespond maxBidder = bidDb.getMaxBidder(auction.getAuctionId());
             if (maxBidder != null && maxBidder.userId != null) {
                 statusMsg.maxBidderAmount = String.valueOf(maxBidder.amount);
 
-                UserStore userStore = new UserStore();
+                UserDAO userStore = new UserDAO();
                 User winner = userStore.getUser(maxBidder.userId);
                 statusMsg.maxBidderName = (winner != null) ? winner.getName() : maxBidder.userId;
             }

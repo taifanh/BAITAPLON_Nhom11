@@ -9,7 +9,6 @@ import backends.common.models.core.Item;
 import backends.common.models.items.ItemFactory;
 import backends.common.models.items.ItemType;
 import backends.server.database.BidTransactionDAO;
-import backends.server.database.BidTransactionDAO;
 import backends.server.database.UserDAO;
 import backends.server.service.AuctionService;
 import com.google.gson.Gson;
@@ -41,7 +40,7 @@ public class AutoBidEngine {
     ) {}
     private final ConcurrentHashMap<String, List<AutoBidEntry>> autoBids = new ConcurrentHashMap<>();
     public void register(AutoBidEntry entry) {
-        autoBids.computeIfAbsent(entry.auctionId(), id -> Collections.synchronizedList(new ArrayList<>())).add(entry);
+        autoBids.computeIfAbsent(entry.auctionId(), _ -> Collections.synchronizedList(new ArrayList<>())).add(entry);
         resolveAuction(entry.auctionId());
     }
     public void removeAll(String auctionId) {

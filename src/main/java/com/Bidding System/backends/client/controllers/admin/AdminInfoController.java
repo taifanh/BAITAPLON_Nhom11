@@ -1,5 +1,6 @@
 package backends.client.controllers.admin;
 
+import backends.common.messages.MsgData.RequestRecordDto;
 import backends.server.database.RequestLogDAO;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -48,6 +49,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class AdminInfoController {
@@ -100,12 +102,14 @@ public class AdminInfoController {
     private TextField current_amount;
 
     @FXML
-    private ListView<RequestLogDAO.RequestRecord> requestlist; // Đổi String thành RequestRecord
+    private ListView<RequestRecordDto> requestlist; // Đổi String thành RequestRecord
 
-    private ObservableList<RequestLogDAO.RequestRecord> item_wait_accepted = FXCollections.observableArrayList();
+    private ObservableList<RequestRecordDto> item_wait_accepted = FXCollections.observableArrayList();
 
     public final java.util.Set<String> selectedRequestIds = new java.util.HashSet<>();
     private final java.util.Set<String> inProgressItemIds = new java.util.HashSet<>();
+    private final Map<String, RequestRecordDto> requestCache = new java.util.HashMap<>();
+
 
     @FXML
     private ListView<Item> inventory;
@@ -148,6 +152,8 @@ public class AdminInfoController {
     public Consumer<String> user_requesthandler;
 
     private final RequestLogDAO requestlog = new RequestLogDAO();
+
+    private Timeline uiTimeline;
 
     private Item itemAuction = null;
 
@@ -327,20 +333,31 @@ public class AdminInfoController {
                 // Nhận danh sách Request mới nhất
                 case "REQUEST_LIST_DATA" -> {
                     try {
-                        RequestListDataResponse resp = mapper.readValue(json, RequestListDataResponse.class);
+                        JsonNode rootNode = mapper.readTree(json);
+                        JsonNode requestsNode = rootNode.path("requests");
+
+                        List<RequestRecordDto> parsed = new ArrayList<>();
+                        for (JsonNode r : requestsNode) {
+                            RequestRecordDto dto = new RequestRecordDto();
+                            dto.requestId   = r.path("id").asText("");        // RequestRecord serialize là "id"
+                            dto.userId      = r.path("userId").asText("");
+                            dto.requestType = r.path("requestType").asText("");
+                            dto.requestInfo = r.path("requestInfo").asText("");
+                            dto.time        = r.path("time").asText("");
+                            dto.status      = r.path("status").asText("");
+                            parsed.add(dto);
+                        }
+
                         Platform.runLater(() -> {
                             requestCache.clear();
                             item_wait_accepted.clear();
-
-                            if (resp.requests != null) {
-                                for (RequestRecordDto request : resp.requests) {
-                                    requestCache.put(request.requestId, request);
-                                    item_wait_accepted.add(request);
-                                }
+                            for (RequestRecordDto dto : parsed) {
+                                requestCache.put(dto.requestId, dto);
+                                item_wait_accepted.add(dto);
                             }
                         });
                     } catch (Exception e) {
-                        System.err.println("Không the readValue của REQUEST_LIST_DATA của admincontroller");
+                        System.err.println("Lỗi parse REQUEST_LIST_DATA");
                         e.printStackTrace();
                     }
                 }
@@ -819,7 +836,7 @@ public class AdminInfoController {
         return items;
     }
 }
-class CustomItemRequestCell extends ListCell<RequestLogDAO.RequestRecord> {
+class CustomItemRequestCell extends ListCell<RequestRecordDto> {
     private final HBox content;
     private final Button view;
     private final Label name_item;
@@ -841,45 +858,41 @@ class CustomItemRequestCell extends ListCell<RequestLogDAO.RequestRecord> {
         content.setAlignment(Pos.CENTER_LEFT);
 
         view.setOnAction(event -> {
-            RequestLogDAO.RequestRecord request = getItem();
+            RequestRecordDto request = getItem();
             if (request == null) return;
-
-            Createitempayload payload = gson.fromJson(request.requestInfo(), Createitempayload.class);
+            Createitempayload payload = gson.fromJson(request.requestInfo, Createitempayload.class);
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Thong tin item");
             alert.setHeaderText(payload.getItem_name());
             alert.setContentText(
-                    "Request ID: " + request.id() + "\n" +
-                            "User ID: " + request.userId() + "\n" +
-                            "Type: " + payload.getItemType() + "\n" +
+                    "Request ID: " + request.requestId + "\n" +
+                            "User ID: "    + request.userId    + "\n" +
+                            "Type: "       + payload.getItemType()  + "\n" +
                             "Base price: " + payload.getBasePrice() + "\n" +
-                            "Info: " + payload.getItemInfo()
+                            "Info: "       + payload.getItemInfo()
             );
             alert.showAndWait();
         });
 
         selected.setOnAction(event -> {
-            RequestLogDAO.RequestRecord request = getItem();
+            RequestRecordDto request = getItem();
             if (request != null) {
                 if (selected.isSelected()) {
-                    selectedIds.add(request.id()); // Lưu vào RAM
+                    selectedIds.add(request.requestId); // Lưu vào RAM
                 } else {
-                    selectedIds.remove(request.id());
+                    selectedIds.remove(request.requestId);
                 }
             }
         });
     }
 
     @Override
-    protected void updateItem(RequestLogDAO.RequestRecord request, boolean empty) {
+    protected void updateItem(RequestRecordDto request, boolean empty) {
         super.updateItem(request, empty);
         if (request != null && !empty) {
-            Createitempayload payload = gson.fromJson(request.requestInfo(), Createitempayload.class);
+            Createitempayload payload = gson.fromJson(request.requestInfo, Createitempayload.class); // ← thêm dòng này
             name_item.setText(payload.getItem_name());
-
-            // Phục hồi trạng thái check dựa vào bộ nhớ RAM
-            selected.setSelected(selectedIds.contains(request.id()));
-
+            selected.setSelected(selectedIds.contains(request.requestId)); // ← thêm dòng này
             setGraphic(content);
         } else {
             setGraphic(null);

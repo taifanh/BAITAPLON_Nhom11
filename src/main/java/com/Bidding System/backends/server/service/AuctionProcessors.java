@@ -2,16 +2,15 @@ package backends.server.service;
 
 import backends.common.messages.MsgAuction.AuctionCommandMessage;
 import backends.common.messages.MsgAuction.AuctionStatusMessage;
+import backends.common.messages.MsgBid.CancelAutoBidding;
 import backends.common.messages.MsgBid.ClientSendBid;
+import backends.common.messages.MsgBid.RegisterAutoBidding;
 import backends.common.messages.MsgBid.ServerBidRespond;
 import backends.common.models.bidding.Auction;
 import backends.server.database.BidTransactionDAO;
 import backends.server.database.InventoryDAO;
 import backends.server.database.UserDAO;
-import backends.server.handler.AuctionRoom;
-import backends.server.handler.BidBatchProcessor;
-import backends.server.handler.ClientHandler;
-import backends.server.handler.ServerAuctionManager;
+import backends.server.handler.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -86,6 +85,42 @@ public class AuctionProcessors {
         AuctionRoom.getInstance().unwatch(handler);
         handler.watchingAuctionId = null;
         return null;
+    }
+
+    public static String registerAutoBid(ClientHandler handler, JsonNode node) throws Exception {
+        RegisterAutoBidding msg = mapper.treeToValue(node, RegisterAutoBidding.class);
+        String auctionId = (msg.auctionId != null && !msg.auctionId.isBlank())
+                ? msg.auctionId
+                : handler.watchingAuctionId;
+
+        if (auctionId == null || auctionId.isBlank()) {
+            ObjectNode error = mapper.createObjectNode();
+            error.put("type", "ERROR");
+            error.put("message", "Không xác định được phiên đấu giá");
+            return error.toString();
+        }
+        AutoBidEngine.getInstance().register(new AutoBidEngine.AutoBidEntry(msg.userId, msg.auctionId, msg.maxBid, msg.increment, System.currentTimeMillis()));
+        ObjectNode ack = mapper.createObjectNode();
+        ack.put("type", "AUTO_BID_REGISTERED");
+        return ack.toString();
+    }
+
+    public static String cancelAutoBid(ClientHandler handler, JsonNode node) throws Exception {
+        CancelAutoBidding msg = mapper.treeToValue(node, CancelAutoBidding.class);
+        String auctionId = (msg.auctionId != null && !msg.auctionId.isBlank())
+                ? msg.auctionId
+                : handler.watchingAuctionId;
+
+        if (auctionId == null || auctionId.isBlank()) {
+            ObjectNode error = mapper.createObjectNode();
+            error.put("type", "ERROR");
+            error.put("message", "Không xác định được phiên đấu giá");
+            return error.toString();
+        }
+        AutoBidEngine.getInstance().remove(msg.auctionId, msg.userId);
+        ObjectNode ack = mapper.createObjectNode();
+        ack.put("type", "AUTO_BID_CANCELLED");
+        return ack.toString();
     }
 
     public static String placeBid(ClientHandler handler, JsonNode node) throws Exception {

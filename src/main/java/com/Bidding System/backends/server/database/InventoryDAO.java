@@ -20,6 +20,14 @@ import java.util.List;
 
 public class InventoryDAO {
     // Trạng thái Item
+    public static final String STATUS_WAITING = "WAITING";
+    public static final String STATUS_SCHEDULED = "SCHEDULED";
+    public static final String STATUS_IN_PROGRESS = "IN_PROGRESS";
+    public static final String STATUS_SOLD = "SOLD";
+    public static final String STATUS_UNSOLD = "UNSOLD";
+    public static final String STATUS_PENDING = "PENDING";
+    public static final String STATUS_ACCEPTED = "ACCEPTED";
+    public static final String STATUS_REJECTED = "REJECTED";
 
     private static final Path DATA_DIRECTORY = Path.of("data");
     private static final Path DATABASE_FILE = DATA_DIRECTORY.resolve("inventoryDAO.db");

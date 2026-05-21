@@ -1,5 +1,7 @@
 package backends.client.controllers.user;
 
+import backends.common.messages.MsgBid.CancelAutoBidding;
+import backends.common.messages.MsgBid.RegisterAutoBidding;
 import backends.server.database.MyRequestDAO;
 import backends.server.database.RequestLogDAO;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -137,6 +139,7 @@ public class UserInfoController {
     private double currentBiddingAmount;
     private String currentSellerId;
     private Item selectedAuctionItem;
+    private boolean autoBidMode = false;
     private final java.util.Map<String, Long> currentEndTimeEpochs = new java.util.HashMap<>();
     private final java.util.Map<String, String> itemToAuctionId = new java.util.HashMap<>();
     private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -365,6 +368,7 @@ public class UserInfoController {
                     autoIncrement.setEditable(false);
                     bidprice.setDisable(true);
                     autoBidButton.setText("STOP");
+                    autoBidMode = true;
                     autoBidButton.setStyle("""
     -fx-background-color: #dc2626;
     -fx-text-fill: white;
@@ -379,6 +383,7 @@ public class UserInfoController {
                     autoIncrement.setEditable(true);
                     bidprice.setDisable(false);
                     autoBidButton.setText("AUTO");
+                    autoBidMode = false;
                     autoBidButton.setStyle("""
     -fx-background-color: #ea580c;
     -fx-text-fill: white;
@@ -866,7 +871,7 @@ public class UserInfoController {
                             "Your balance is insufficient"
                     );
                 }
-                if(autoBidMaxLimit < currentBalance + currentBidIncrement) {
+                if(autoBidMaxLimit < currentBiddingAmount + currentBidIncrement) {
                     throw new IllegalArgumentException(
                             "Your max limit is insufficient"
                     );
@@ -923,6 +928,9 @@ public class UserInfoController {
             amount = Double.parseDouble(amountStr);
             if (amount <= 0) {
                 throw new IllegalArgumentException("Amount must be positive");
+            }
+            if(autoBidMode) {
+                throw new IllegalArgumentException("You can not bid while turning on auto bid");
             }
             if (currentSellerId != null && currentSellerId.equals(UserSession.getCurrentUser().getId())) {
                 throw new IllegalArgumentException("You cannot bid on your own item");

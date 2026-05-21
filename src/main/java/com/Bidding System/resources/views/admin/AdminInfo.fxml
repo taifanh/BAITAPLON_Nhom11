@@ -221,7 +221,7 @@
                                             </font>
                                         </Label>
                                         <Label text="Choose one approved item to push into the auction workflow." textFill="#64748b" />
-                                        <ListView fx:id="inventoryDAO" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: #f8fafc; -fx-background-radius: 18; -fx-border-radius: 18; -fx-border-color: #dbe4f0;" VBox.vgrow="ALWAYS" />
+                                        <ListView fx:id="inventory" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: #f8fafc; -fx-background-radius: 18; -fx-border-radius: 18; -fx-border-color: #dbe4f0;" VBox.vgrow="ALWAYS" />
                                     </children>
                                 </VBox>
                                 <HBox alignment="CENTER_LEFT" spacing="18.0" style="-fx-background-color: white; -fx-background-radius: 22; -fx-padding: 14 24 14 24; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 18, 0.10, 0, 6);">

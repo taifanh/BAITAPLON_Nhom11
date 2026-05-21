@@ -199,7 +199,7 @@ public final class AuctionService {
         if (remaining.getSeconds() < SNIPE_WINDOW_SECONDS) {// check whether time coutndown is within 5 seconds
             auction.extendEndAt(Duration.ofSeconds(SNIPE_EXTENSION_SECONDS));
 
-            Auctions auctions = new Auctions();
+            AuctionDAO auctions = new AuctionDAO();
             auctions.updateEndTime(auction.getAuctionId(), auction.getEndAt());
 
             Duration newRemaining = Duration.between(LocalDateTime.now(), auction.getEndAt());
@@ -209,6 +209,7 @@ public final class AuctionService {
 
         return false;
     }
+
 
     public static Auction getManagedActiveAuctionByAuctionId(String auctionId) {
         for (Auction auction : ACTIVE_AUCTIONS.values()) {

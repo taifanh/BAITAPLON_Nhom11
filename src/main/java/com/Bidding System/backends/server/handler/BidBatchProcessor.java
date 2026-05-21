@@ -115,9 +115,8 @@ public class BidBatchProcessor {
             }
 
             // Broadcast kết quả batch
-            ServerBidRespond result = db.getMaxBidder(auctionId);
-            result = db.getMaxBidder(auctionId);
             AutoBidEngine.getInstance().resolveAuction(auctionId);
+            ServerBidRespond result = db.getMaxBidder(auctionId);
             broadcastMaxBidder(auctionId, result);
             Auction managedAuction = AuctionService.getManagedActiveAuctionByAuctionId(auctionId);
             if (managedAuction != null) {
