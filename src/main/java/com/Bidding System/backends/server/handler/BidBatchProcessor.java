@@ -1,9 +1,7 @@
 package backends.server.handler;
 
-import backends.common.models.bidding.Auction;
-import backends.server.database.BidTransactions;
-import backends.server.database.UserStore;
-import backends.server.service.AuctionService;
+import backends.server.database.BidTransactionDAO;
+import backends.server.database.UserDAO;
 import com.google.gson.Gson;
 import backends.common.messages.MsgBid.ReceiveMaxBidder;
 import backends.common.messages.MsgBid.ServerBidRespond;
@@ -69,8 +67,18 @@ public class BidBatchProcessor {
     private void flushManualBids(String auctionId, List<PendingBid> batch) {
 
         try {
-            BidTransactions db = new BidTransactions();
-            UserStore userStore = new UserStore();
+            BidTransactionDAO db = new BidTransactionDAO();
+            UserDAO userDAO = new UserDAO();
+
+            // Tìm max bid trong batch (nếu tie → ưu tiên bid đến sớm hơn)
+            PendingBid winner = batch.stream()
+                    .max(Comparator
+                            .comparingDouble(PendingBid::amount)
+                            .thenComparingLong(b -> -b.receivedAt())) // receivedAt nhỏ hơn = sớm hơn
+                    .orElse(null);
+
+            if (winner == null) return;
+
             // Lấy max bid hiện tại trong DB để kiểm tra hợp lệ
             ServerBidRespond currentMax;
             try {
@@ -78,6 +86,7 @@ public class BidBatchProcessor {
             } catch (Exception e) {
                 currentMax = null;
             }
+
             double currentMaxAmount = (currentMax != null) ? currentMax.amount : 0;
             // Tìm max bid trong batch (nếu tie → ưu tiên bid đến sớm hơn)
             double batchMax = batch.stream()
@@ -90,8 +99,9 @@ public class BidBatchProcessor {
                 broadcastMaxBidder(auctionId, currentMax);
                 return;
             }
+
             // Lưu tất cả bid hợp lệ trong batch vào DB
-            //User winnerUser = userStore.getUser(winner.userId());
+            User winnerUser = userDAO.getUser(winner.userId());
             Item dummyItem = ItemFactory.createItem(ItemType.Art, "auction-item", 0, "");
 
             for (PendingBid bid : batch) {
@@ -135,8 +145,3 @@ public class BidBatchProcessor {
         scheduler.shutdown();
     }
 }
-
-
-
-
-

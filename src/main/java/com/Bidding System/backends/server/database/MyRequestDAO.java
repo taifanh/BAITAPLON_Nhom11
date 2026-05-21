@@ -1,6 +1,5 @@
 package backends.server.database;
 
-import backends.common.constants.Statuses;
 import backends.common.messages.Common.Message;
 
 import java.io.IOException;
@@ -10,7 +9,16 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MyRequest {
+public class MyRequestDAO {
+    public static final String STATUS_WAITING = "WAITING";
+    public static final String STATUS_SCHEDULED = "SCHEDULED";
+    public static final String STATUS_IN_PROGRESS = "IN_PROGRESS";
+    public static final String STATUS_SOLD = "SOLD";
+    public static final String STATUS_UNSOLD = "UNSOLD";
+
+    public static final String STATUS_PENDING = "PENDING";
+    public static final String STATUS_ACCEPTED = "ACCEPTED";
+    public static final String STATUS_REJECTED = "REJECTED";
     //                STT INTEGER PRIMARY KEY AUTOINCREMENT,
     private static final Path DATA_DIRECTORY = Path.of("data");
     static final Path DATABASE_FILE = DATA_DIRECTORY.resolve("my_request.db");
@@ -26,7 +34,7 @@ public class MyRequest {
             )
             """;
 
-    public MyRequest(){
+    public MyRequestDAO(){
         try{
             initializeRequest_Log();
 
@@ -44,14 +52,14 @@ public class MyRequest {
             statement.setString(2,message.Id_user);
             statement.setString(3,message.messageType);
             statement.setString(4, message.payloadJson);
-            statement.setString(5,Statuses.PENDING);
+            statement.setString(5,STATUS_PENDING);
 
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } ;
     }
-    public MyRequest.RequestRecord findByRequestId(String requestId) throws IOException {
+    public MyRequestDAO.RequestRecord findByRequestId(String requestId) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
                      SELECT request_id, id_user, request_type, request_info ,send_at, status
@@ -63,7 +71,7 @@ public class MyRequest {
                 if (!resultSet.next()) {
                     return null;
                 }
-                return new MyRequest.RequestRecord(
+                return new MyRequestDAO.RequestRecord(
                         resultSet.getString("request_id"),
                         resultSet.getString("id_user"),
                         resultSet.getString("request_type"),
