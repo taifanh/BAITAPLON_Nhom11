@@ -1,4 +1,29 @@
-name: maven.yml
+name: Java CI with Maven
+
+# Luồng này sẽ tự động chạy mỗi khi có Pull Request hoặc Push vào nhánh main/master
 on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
 
 jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Bước 1: Clone mã nguồn từ GitHub về máy ảo của GitHub
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Bước 2: Cài đặt môi trường Java (JDK 17 - bạn thay đổi version phù hợp với dự án của mình)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      # Bước 3: Biên dịch dự án và chạy toàn bộ các bài test JUnit tự động
+      - name: Build and Run Tests with Maven
+        run: mvn clean test
