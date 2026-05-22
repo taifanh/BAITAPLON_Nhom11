@@ -137,7 +137,7 @@
                                                 <Label text="Name" textFill="#0f172a" GridPane.columnIndex="0" GridPane.rowIndex="0" />
                                                 <TextField fx:id="changable_infoname" alignment="CENTER" editable="false" maxWidth="1.7976931348623157E308" prefHeight="48.0" style="-fx-background-color: white; -fx-text-fill: #0f172a; -fx-border-color: #ea580c; -fx-background-radius: 10; -fx-border-radius: 14;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
                                                 <Label text="Phone number" textFill="#0f172a" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                                                <Label fx:id="labelPhone" alignment="CENTER" maxWidth="1.7976931348623157E308" prefHeight="48.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #ea580c; -fx-border-radius: 14;" textFill="#0f172a" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                <Label fx:id="labelPhoneNumber" alignment="CENTER" maxWidth="1.7976931348623157E308" prefHeight="48.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #ea580c; -fx-border-radius: 14;" textFill="#0f172a" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                                 <Label text="Password" textFill="#0f172a" GridPane.columnIndex="0" GridPane.rowIndex="2" />
                                                 <HBox alignment="CENTER_LEFT" spacing="16.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                                                     <children>

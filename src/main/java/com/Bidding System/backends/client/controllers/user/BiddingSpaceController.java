@@ -1,6 +1,7 @@
 package backends.client.controllers.user;
 
 import backends.client.controllers.base.BaseController;
+import backends.client.controllers.util.ItemJsonParser;
 import backends.client.network.MessageBus;
 import backends.client.session.UserSession;
 import backends.common.messages.MsgBid.*;
@@ -20,6 +21,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 import java.time.Instant;
@@ -195,8 +197,8 @@ public class BiddingSpaceController extends BaseController {
 
     private void handleInventoryData(JsonNode node) {
         List<Item> items = new ArrayList<>();
-        items.addAll(parseItems(node.path("scheduledItems")));
-        items.addAll(parseItems(node.path("inProgressItems")));
+        items.addAll(ItemJsonParser.parse(node.path("scheduledItems")));
+        items.addAll(ItemJsonParser.parse(node.path("inProgressItems")));
         Platform.runLater(() -> auctionItems.setAll(items));
     }
 
@@ -266,7 +268,7 @@ public class BiddingSpaceController extends BaseController {
     private void handleAuctionResult(String raw) throws Exception {
         AuctionResultMessage result = MAPPER.readValue(raw, AuctionResultMessage.class);
         Platform.runLater(() -> {
-            String userId = UserSession.getCurrentUser().getId();
+            String userId = UserSession.getCurrentUser() != null ? UserSession.getCurrentUser().getId() : null;
             if (!result.hasBidder) {
                 showAlert(Alert.AlertType.INFORMATION, "Auction ended with no bids.");
                 return;
@@ -358,8 +360,15 @@ public class BiddingSpaceController extends BaseController {
             validateAuctionActive();
             double amount = parseAndValidateBidAmount(fieldBidPrice.getText());
             validateBidAmount(amount);
+            String userId = null;
+            if (UserSession.getCurrentUser() != null) {
+                userId = UserSession.getCurrentUser().getId();
+            }
+            else {
+                throw new RuntimeException("This user is not exist");
+            }
             UserSession.getConnection().send(
-                    new ClientSendBid(UserSession.getCurrentUser().getId(),
+                    new ClientSendBid( userId,
                             amount, currentAuctionId));
         } catch (IllegalArgumentException e) {
             showAlert(Alert.AlertType.ERROR, e.getMessage());
@@ -380,8 +389,13 @@ public class BiddingSpaceController extends BaseController {
             validateAuctionActive();
             double increment = parsePositive(fieldAutoIncrement.getText(), "increment");
             double maxLimit  = parsePositive(fieldMaxLimit.getText(), "max limit");
-            double balance   = UserSession.getCurrentUser().getBalance();
-
+            double balance   = 0;
+            if (UserSession.getCurrentUser() != null) {
+                balance = UserSession.getCurrentUser().getBalance();
+            }
+            else {
+                throw new RuntimeException("This user is not exist");
+            }
             if (maxLimit > balance)
                 throw new IllegalArgumentException("Balance insufficient");
             if (maxLimit < currentHighestBid + currentBidIncrement)
@@ -393,16 +407,26 @@ public class BiddingSpaceController extends BaseController {
                     currentAuctionId,
                     UserSession.getCurrentUser().getId(),
                     maxLimit, increment));
-        } catch (IllegalArgumentException e) {
+        } catch (RuntimeException e) {
             showAlert(Alert.AlertType.ERROR, e.getMessage());
         }
     }
 
     private void cancelAutoBid() {
-        var msg = new CancelAutoBidding();
-        msg.auctionId = currentAuctionId;
-        msg.userId    = UserSession.getCurrentUser().getId();
-        UserSession.getConnection().send(msg);
+        try {
+            var msg = new CancelAutoBidding();
+            msg.auctionId = currentAuctionId;
+            if (UserSession.getCurrentUser() != null) {
+                msg.userId    = UserSession.getCurrentUser().getId();
+            }
+            else {
+                throw new RuntimeException("This user is not exist");
+            }
+            UserSession.getConnection().send(msg);
+        }
+        catch (RuntimeException e) {
+            showAlert(Alert.AlertType.ERROR, e.getMessage());
+        }
     }
 
     // ── Validation ────────────────────────────────────────────────
@@ -456,14 +480,14 @@ public class BiddingSpaceController extends BaseController {
         long h = remaining.toHours(), m = remaining.toMinutesPart(), s = remaining.toSecondsPart();
         Platform.runLater(() -> {
             labelTimer.setText(String.format("%02d:%02d:%02d", h, m, s));
-            labelTimer.setTextFill(javafx.scene.paint.Color.web("#fbbf24"));
+            labelTimer.setTextFill(Color.web("#fbbf24"));
         });
     }
 
     private void resetClock() {
         Platform.runLater(() -> {
             labelTimer.setText("00:00:00");
-            labelTimer.setTextFill(javafx.scene.paint.Color.RED);
+            labelTimer.setTextFill(Color.RED);
         });
     }
 
@@ -484,31 +508,6 @@ public class BiddingSpaceController extends BaseController {
     private String resolveType(JsonNode node) {
         String t = node.path("messageType").asText("");
         return t.isBlank() ? node.path("type").asText("") : t;
-    }
-
-    private List<Item> parseItems(JsonNode array) {
-        List<Item> result = new ArrayList<>();
-        if (array == null || !array.isArray()) return result;
-        for (JsonNode n : array) {
-            try {
-                String   id           = n.path("id").asText();
-                String   name         = n.path("name").asText();
-                String   typeStr      = n.path("type").asText();
-                double   price        = n.has("prices") ? n.path("prices").asDouble()
-                        : n.path("price").asDouble();
-                double   bidIncrement = n.path("bidIncrement").asDouble(
-                        n.path("bid_increment").asDouble(0));
-                String   info         = n.path("info").asText();
-                ItemType itemType     = ItemType.valueOf(typeStr);
-                Item     item         = ItemFactory.createItem(itemType, name, price, info);
-                item.setId(id);
-                item.setBidIncrement(bidIncrement);
-                result.add(item);
-            } catch (Exception e) {
-                System.err.println("Failed to parse item: " + e.getMessage());
-            }
-        }
-        return result;
     }
 
     private void showAlert(Alert.AlertType type, String message) {

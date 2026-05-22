@@ -1,6 +1,7 @@
 package backends.client.controllers.base;
 
 import backends.client.controllers.ViewLoader;
+import backends.client.network.MessageBus;
 import backends.client.session.UserSession;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -16,10 +17,29 @@ import java.io.IOException;
 public abstract class BaseController {
 
     /**
-     * Subclass override để unsubscribe MessageBus handlers,
-     * stop timelines, v.v. trước khi chuyển màn hình.
+     * Mỗi subclass tự unsubscribe MessageBus handlers,
+     * stop Timeline, giải phóng tài nguyên.
      */
     public abstract void cleanup();
+
+    // ── Sign out ──────────────────────────────────────────────────
+
+    @FXML
+    public void handleSignOut(ActionEvent event) throws IOException {
+        cleanup();
+        MessageBus.getInstance().clearAllSubscribers();
+        UserSession.clear();
+
+        Stage window = getStage(event);
+        Parent root  = ViewLoader.load("SignIn.fxml");
+        resetToLoginSize(window);
+        window.setScene(new Scene(root));
+        window.setTitle("Sign In");
+        window.centerOnScreen();
+        window.show();
+    }
+
+    // ── Navigation (User screens) ─────────────────────────────────
 
     @FXML
     public void handleHome(ActionEvent event) throws IOException {
@@ -46,31 +66,24 @@ public abstract class BaseController {
         switchScene(event, "History.fxml", "Transaction History");
     }
 
-    @FXML
-    public void handleSignOut(ActionEvent event) throws IOException {
-        cleanup();
-        UserSession.clear();
-        Parent root = ViewLoader.load("SignIn.fxml");
-        Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        resetToLoginSize(window);
-        window.setScene(new Scene(root));
-        window.setTitle("Sign In");
-        window.centerOnScreen();
-        window.show();
-    }
+    // ── Shared utilities ──────────────────────────────────────────
 
     protected void switchScene(ActionEvent event, String fxml, String title)
             throws IOException {
         cleanup();
-        Parent root = ViewLoader.load(fxml);
-        Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        Parent root   = ViewLoader.load(fxml);
+        Stage  window = getStage(event);
         window.setScene(new Scene(root));
         window.setTitle(title);
         fitToScreen(window);
         window.show();
     }
 
-    private void fitToScreen(Stage stage) {
+    protected Stage getStage(ActionEvent event) {
+        return (Stage) ((Node) event.getSource()).getScene().getWindow();
+    }
+
+    protected void fitToScreen(Stage stage) {
         Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
         stage.setMinWidth(1000);
         stage.setMinHeight(620);
@@ -80,7 +93,7 @@ public abstract class BaseController {
         stage.setHeight(bounds.getHeight());
     }
 
-    private void resetToLoginSize(Stage window) {
+    protected void resetToLoginSize(Stage window) {
         window.setFullScreen(false);
         window.setMaximized(false);
         window.setMinWidth(0);

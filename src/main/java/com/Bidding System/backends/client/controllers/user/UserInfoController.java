@@ -25,7 +25,7 @@ public class UserInfoController extends BaseController {
     @FXML private Label labelName;
     @FXML private Label labelEmail;
     @FXML private Label labelPassword;
-    @FXML private Label labelPhone;
+    @FXML private Label labelPhoneNumber;
     @FXML private Label labelBalance;
     @FXML private CheckBox checkShowPassword;
 
@@ -63,7 +63,7 @@ public class UserInfoController extends BaseController {
     private void displayUserInfo(User user) {
         labelName.setText(user.getName());
         labelEmail.setText(user.getEmail());
-        labelPhone.setText(user.getPhoneNumber());
+        labelPhoneNumber.setText(user.getPhoneNumber());
         labelBalance.setText(String.valueOf(user.getBalance()));
         refreshPasswordLabel(checkShowPassword.isSelected());
     }
