@@ -12,7 +12,7 @@ public class AdminApplication extends Application {
     public void start(Stage stage) throws Exception {
         try {
             UserSession.initConnection(Launcher.serverIp, 9999);
-            Scene scene = new Scene(ViewLoader.load("AdminInfo.fxml"));
+            Scene scene = new Scene(ViewLoader.load("AdminProfile.fxml"));
             stage.setTitle("Thong tin admin");
             stage.setScene(scene);
             stage.centerOnScreen();

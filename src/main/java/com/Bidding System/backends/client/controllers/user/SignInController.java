@@ -32,36 +32,36 @@ import java.util.function.Consumer;
 
 public class SignInController {
     @FXML
-    public TextField txtphonenumberfield;
+    public TextField phoneNumberField;
 
     @FXML
-    public PasswordField txtpassfield;
+    public PasswordField passwordField;
 
     @FXML
-    public Button signinbtn;
+    public Button signInButton;
 
     @FXML
-    public Button signupbtn;
+    public Button signUpButton;
 
 
     private final Gson gson = new Gson();
     private final ObjectMapper mapper = new ObjectMapper();
-    private Consumer<String> signinResultHandler;
+    private Consumer<String> signInResultHandler;
     private Stage pendingStage;
 
     @FXML
     public void initialize() {
-        receive_signin_ok();
+        receiveSuccessfulSignIn();
 
         Platform.runLater(() -> {
-            Stage stage = (Stage) txtphonenumberfield.getScene().getWindow();
+            Stage stage = (Stage) phoneNumberField.getScene().getWindow();
             stage.setOnHidden(e -> cleanup());
         });
     }
 
-    public void handle_signin(ActionEvent event) {
-        String phoneNumber = txtphonenumberfield.getText() == null ? "" : txtphonenumberfield.getText().trim();
-        String password = txtpassfield.getText() == null ? "" : txtpassfield.getText().trim();
+    public void handleSignIn(ActionEvent event) {
+        String phoneNumber = phoneNumberField.getText() == null ? "" : phoneNumberField.getText().trim();
+        String password = passwordField.getText() == null ? "" : passwordField.getText().trim();
 
         if (phoneNumber.isBlank() || password.isBlank()) {
             showAlert(Alert.AlertType.WARNING, "Loi", null, "Vui long nhap day du so dien thoai va mat khau.");
@@ -76,63 +76,62 @@ public class SignInController {
 
         UserSession.getConnection().send(msg);// còn tín hiệu gửi login cũ thì sẽ cho client xử lý luôn nếu đăng nhập thành công
     }
-    private void receive_signin_ok() {
-        signinResultHandler = rawJson -> {
+    private void receiveSuccessfulSignIn() {
+        signInResultHandler = rawJson -> {
             try {
                 JsonNode node = mapper.readTree(rawJson);
                 String type = node.path("type").asText("");
 
                 if ("SIGNIN_FAIL".equals(type)) {
                     Platform.runLater(() ->
-                            showAlert(Alert.AlertType.ERROR, "Loi", "Dang nhap that bai",
-                                    "Sai tai khoan hoac mat khau. Vui long thu lai."));
+                            showAlert(Alert.AlertType.ERROR, "Loi",
+                                    "Dang nhap that bai",
+                                    "Sai tai khoan hoac mat khau."));
                     return;
                 }
 
-                if (!"SIGNIN_OK".equals(type) || !node.has("payloadJson")) {
-                    return;
-                }
+                if (!"SIGNIN_OK".equals(type) || !node.has("payloadJson")) return;
 
                 SigninResponsePayload payload =
-                        gson.fromJson(node.get("payloadJson").asText(), SigninResponsePayload.class);
-
+                        gson.fromJson(node.get("payloadJson").asText(),
+                                SigninResponsePayload.class);
                 Account account = buildAccount(payload);
                 UserSession.setCurrentAccount(account);
 
-                String viewFileName;
-                String windowTitle;
-
-                if (Account.ADMIN.equalsIgnoreCase(account.getRole())) {
-                    viewFileName = "AdminInfo.fxml";
-                    windowTitle = "Thong tin admin";
-                } else {
-                    viewFileName = "HomePage.fxml";
-                    windowTitle = "Home";
-                }
-
-                FXMLLoader loader = ViewLoader.loader(viewFileName);
-                Parent root = loader.load();
-                Scene sceneMain = new Scene(root);
+                String fxml  = Account.ADMIN.equalsIgnoreCase(account.getRole())
+                        ? "AdminProfile.fxml" : "HomePage.fxml";
+                String title = Account.ADMIN.equalsIgnoreCase(account.getRole())
+                        ? "Admin Dashboard" : "Home";
 
                 Platform.runLater(() -> {
-                    pendingStage.setScene(sceneMain);
-                    pendingStage.setTitle(windowTitle);
-                    fitToVisibleScreen(pendingStage);
-                    pendingStage.show();
+                    try {
+                        FXMLLoader loader = ViewLoader.loader(fxml);
+                        Parent root       = loader.load();
+                        pendingStage.setScene(new Scene(root));
+                        pendingStage.setTitle(title);
+                        fitToVisibleScreen(pendingStage);
+                        pendingStage.show();
+                    } catch (IOException e) {
+                        e.printStackTrace(); // xem stack trace trong console
+                        showAlert(Alert.AlertType.ERROR, "Loi",
+                                "Khong the tai giao dien",
+                                "FXML error: " + e.getMessage());
+                    }
                 });
 
             } catch (Exception e) {
                 e.printStackTrace();
                 Platform.runLater(() ->
-                        showAlert(Alert.AlertType.ERROR, "Loi", "Dang nhap that bai",
-                                "Khong the xu ly phan hoi tu server."));
+                        showAlert(Alert.AlertType.ERROR, "Loi",
+                                "Loi xu ly phan hoi",
+                                e.getMessage()));
             }
         };
 
-        MessageBus.getInstance().subscribe(signinResultHandler);
+        MessageBus.getInstance().subscribe(signInResultHandler);
     }
 
-    public void handle_signup(ActionEvent event) throws IOException {
+    public void handleSignUp(ActionEvent event) throws IOException {
         Parent signupRoot = ViewLoader.load("SignUp.fxml");
         Scene sceneSignup = new Scene(signupRoot);
 
@@ -175,8 +174,8 @@ public class SignInController {
         alert.showAndWait();
     }
     private void cleanup() {
-        if (signinResultHandler != null) {
-            MessageBus.getInstance().unsubscribe(signinResultHandler);
+        if (signInResultHandler != null) {
+            MessageBus.getInstance().unsubscribe(signInResultHandler);
         }
     }
 

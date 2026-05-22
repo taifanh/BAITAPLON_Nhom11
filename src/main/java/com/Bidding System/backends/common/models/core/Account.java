@@ -11,6 +11,10 @@ public class Account extends Entity {
         this.Email=Email;
         this.password=password;
     }
+
+    public Account() {
+    }
+
     public String getName(){
         return name;
     }

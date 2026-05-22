@@ -1,5 +1,6 @@
 package backends.client.controllers.user;
 
+import backends.common.models.accounts.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -16,37 +17,38 @@ import backends.common.messages.Common.Message;
 import java.util.function.Consumer;
 
 public class DepositController {
-    @FXML public TextField deposit_amount;
-    @FXML public TextField name_deposit_input;
-    @FXML public TextField phonenumber_deposit_input;
-    @FXML public Label money_display;
-    @FXML public Button verify_btn;
+    @FXML public TextField depositAmount;
+    @FXML public TextField depositorNameInput;
+    @FXML public TextField depositorPhoneNumberInput;
+    @FXML public Label newBalance;
+    @FXML public Button verifyButton;
 
+    private User currentUser;
     private Consumer<String> depositHandler;
     private final Gson gson = new Gson();
 
     @FXML
     public void initialize() {
         subscribeDepositResult();
-
+        currentUser = UserSession.getCurrentUser();
+        if (currentUser == null) return;
         Platform.runLater(() -> {
-            Stage stage = (Stage) deposit_amount.getScene().getWindow();
+            Stage stage = (Stage) depositAmount.getScene().getWindow();
             stage.setOnHidden(e -> cleanup());
         });
     }
 
     @FXML
-    public void handle_verify(ActionEvent event) {
+    public void handleVerify(ActionEvent event) {
         try {
-            double moneyIn = Double.parseDouble(deposit_amount.getText());
-        double currentBalance = UserInfoController.get_Balance();
+            double moneyIn = Double.parseDouble(depositAmount.getText());
+            double currentBalance = currentUser.getBalance(); //
             double expected = currentBalance + moneyIn;
 
-            // Hiển thị số dư dự kiến vào label Tổng
-            money_display.setText(String.format("%.2f", expected));
+            newBalance.setText(String.format("%.2f", expected));
 
         } catch (NumberFormatException e) {
-            money_display.setText("Số tiền không hợp lệ");
+            newBalance.setText("Số tiền không hợp lệ");
         }
     }
 
@@ -67,17 +69,7 @@ public class DepositController {
                         );
                         closeWindow();
                     });
-                    return;
                 }
-                Platform.runLater(() -> {
-                    if (type.equals("deposit_OK")) {
-                        showAlert(Alert.AlertType.INFORMATION, "Thành công", "Nạp tiền thành công!");
-                        closeWindow();
-                    } else {
-                        return;
-                        //showAlert(Alert.AlertType.ERROR, "Thất bại", "Nạp tiền thất bại!");
-                    }
-                });
         } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
@@ -92,14 +84,14 @@ public class DepositController {
         }
     }
 
-    public void ok_deposit(ActionEvent event) {
+    public void CompleteDeposit(ActionEvent event) {
         try {
-            double moneyIn = Double.parseDouble(deposit_amount.getText());
+            double moneyIn = Double.parseDouble(depositAmount.getText());
             if(moneyIn <= 0) {
                 throw new Exception();
             }
             Message msg = new Message();
-            msg.Id_user = UserSession.getCurrentUser().getId();
+            msg.Id_user = currentUser.getId();
             msg.messageType = "DEPOSIT";
             msg.payloadJson = gson.toJson(new Depositpayload(moneyIn));
 
@@ -112,7 +104,7 @@ public class DepositController {
 
 
     private void closeWindow() {
-        Stage stage = (Stage) deposit_amount.getScene().getWindow();
+        Stage stage = (Stage) depositAmount.getScene().getWindow();
         stage.close();
     }
 
