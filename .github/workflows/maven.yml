@@ -27,3 +27,14 @@ jobs:
       # Bước 3: Biên dịch dự án và chạy toàn bộ các bài test JUnit tự động
       - name: Build and Run Tests with Maven
         run: mvn clean test
+
+      # [BƯỚC CD 1] - Nếu test pass, tiến hành đóng gói ra file .jar
+      - name: Package Application (CD)
+        run: mvn package -DskipTests # Bỏ qua bước test vì đã chạy ở trên rồi, giúp build nhanh hơn
+
+      # [BƯỚC CD 2] - Đẩy file .jar vừa build xong lên mục Artifacts của GitHub
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Bidding-System-Executable # Tên của file khi tải về trên web
+          path: target/*.jar # Đường dẫn tới file .jar mà Maven vừa tạo ra
