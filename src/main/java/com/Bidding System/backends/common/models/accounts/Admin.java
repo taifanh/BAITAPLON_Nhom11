@@ -20,12 +20,16 @@ public class Admin extends Account {
     private Admin(String name, String email, String phoneNumber, String password) {
         this(buildGeneratedId(phoneNumber), name, email ,phoneNumber, password);
     }
+    private Admin(){}
 
     private static String buildGeneratedId(String phoneNumber) {
         return "ADMIN" + phoneNumber;
     }
 
     public static Admin getInstance() {
+        if (instance==null){
+            instance = new Admin();
+        }
         return instance;
     }
 

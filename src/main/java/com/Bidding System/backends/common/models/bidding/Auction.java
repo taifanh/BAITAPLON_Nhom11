@@ -183,6 +183,9 @@ public class Auction {
     public LocalDateTime getEndAt() {
         return endAt;
     }
+    public void setEndAt(LocalDateTime endtime){
+        this.endAt = endtime;
+    }
 
     // Tra ve muc gia cao nhat hien tai.
     public double getCurrentHighestBid() {

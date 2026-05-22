@@ -435,7 +435,7 @@ public class AdminInfoController {
                                 for (Item i : upcomingitem.getItems()) {
                                     if (i.getId().equals(statusMsg.itemId)) {
                                         upcomingitem.getSelectionModel().select(i);
-                                        //handleAuctionClick(i);
+                                        handleAuctionClick(i);
                                         break;
                                     }
                                 }
