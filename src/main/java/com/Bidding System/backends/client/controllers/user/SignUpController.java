@@ -27,35 +27,35 @@ import java.util.function.Consumer;
 
 public class SignUpController {
     @FXML
-    public TextField txtnameup;
+    public TextField signUpName;
 
     @FXML
-    public TextField txtemailup;
+    public TextField signUpEmail;
 
     @FXML
-    public PasswordField txtpassup;
+    public PasswordField signUpPassword;
 
     @FXML
-    public TextField txtphonenumberup;
+    public TextField signUpPhoneNumber;
 
     @FXML
-    public Button signup_ok;
+    public Button signUpComplete;
 
-    private Consumer<String> signupResultHandler;
+    private Consumer<String> signUpResultHandler;
     private Gson gson = new Gson();
     private final ObjectMapper mapper = new ObjectMapper();
     private Stage pendingStage;
 
     @FXML
     public void initialize() {
-        receive_signup_ok();
+        receiveSuccessfulSignUp();
 
         Platform.runLater(() -> {
-            Stage stage = (Stage) signup_ok.getScene().getWindow();
+            Stage stage = (Stage) signUpComplete.getScene().getWindow();
             stage.setOnHidden(e -> cleanup());
         });
     }
-    public void handle_signin(ActionEvent event) throws IOException {
+    public void handleSignIn(ActionEvent event) throws IOException {
         Parent signinRoot = ViewLoader.load("SignIn.fxml");
         Scene sceneSignin = new Scene(signinRoot);
 
@@ -66,11 +66,11 @@ public class SignUpController {
         window.show();
     }
 
-    public void handle_signup_ok(ActionEvent event) {
-        String name = txtnameup.getText() == null ? "" : txtnameup.getText().trim();
-        String email = txtemailup.getText() == null ? "" : txtemailup.getText().trim();
-        String phoneNumber = txtphonenumberup.getText() == null ? "" : txtphonenumberup.getText().trim();
-        String password = txtpassup.getText() == null ? "" : txtpassup.getText().trim();
+    public void handleSuccessfulSignUp(ActionEvent event) {
+        String name = signUpName.getText() == null ? "" : signUpName.getText().trim();
+        String email = signUpEmail.getText() == null ? "" : signUpEmail.getText().trim();
+        String phoneNumber = signUpPhoneNumber.getText() == null ? "" : signUpPhoneNumber.getText().trim();
+        String password = signUpPassword.getText() == null ? "" : signUpPassword.getText().trim();
 
         if (name.isEmpty() || email.isEmpty() || phoneNumber.isEmpty() || password.isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "Loi", null, "Vui long nhap day du thong tin.");
@@ -86,8 +86,8 @@ public class SignUpController {
         UserSession.getConnection().send(msg);
     }
 
-    public void receive_signup_ok(){
-        signupResultHandler = rawJson ->{
+    public void receiveSuccessfulSignUp(){
+        signUpResultHandler = rawJson ->{
             try{
                 JsonNode node = mapper.readTree(rawJson);
                 String type = node.path("type").asText("");
@@ -116,11 +116,11 @@ public class SignUpController {
                 throw new RuntimeException(e);
             }
         };
-        MessageBus.getInstance().subscribe(signupResultHandler);
+        MessageBus.getInstance().subscribe(signUpResultHandler);
     }
     private void cleanup() {
-        if (signupResultHandler != null) {
-            MessageBus.getInstance().unsubscribe(signupResultHandler);
+        if (signUpResultHandler != null) {
+            MessageBus.getInstance().unsubscribe(signUpResultHandler);
         }
     }
 

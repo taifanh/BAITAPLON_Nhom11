@@ -38,12 +38,12 @@
 
             <VBox spacing="20.0">
                <children>
-                  <TextField fx:id="txtphonenumberfield" prefHeight="45.0" promptText="Số điện thoại" style="-fx-background-color: transparent; -fx-border-color: #DCDDE1; -fx-border-width: 0 0 1 0; -fx-padding: 5 0 5 0;">
+                  <TextField fx:id="phoneNumberField" prefHeight="45.0" promptText="Số điện thoại" style="-fx-background-color: transparent; -fx-border-color: #DCDDE1; -fx-border-width: 0 0 1 0; -fx-padding: 5 0 5 0;">
                      <font>
                         <Font size="15.0" />
                      </font>
                   </TextField>
-                  <PasswordField fx:id="txtpassfield" prefHeight="45.0" promptText="Mật khẩu" style="-fx-background-color: transparent; -fx-border-color: #DCDDE1; -fx-border-width: 0 0 1 0; -fx-padding: 5 0 5 0;">
+                  <PasswordField fx:id="passwordField" prefHeight="45.0" promptText="Mật khẩu" style="-fx-background-color: transparent; -fx-border-color: #DCDDE1; -fx-border-width: 0 0 1 0; -fx-padding: 5 0 5 0;">
                      <font>
                         <Font size="15.0" />
                      </font>
@@ -53,7 +53,7 @@
 
             <VBox spacing="15.0">
                <children>
-                  <Button fx:id="signinbtn" defaultButton="true" maxWidth="1.7976931348623157E308" onAction="#handle_signin" prefHeight="50.0" style="-fx-background-color: #E67E22; -fx-background-radius: 30; -fx-cursor: hand;" text="ĐĂNG NHẬP" textFill="WHITE">
+                  <Button fx:id="signInButton" defaultButton="true" maxWidth="1.7976931348623157E308" onAction="#handleSignIn" prefHeight="50.0" style="-fx-background-color: #E67E22; -fx-background-radius: 30; -fx-cursor: hand;" text="ĐĂNG NHẬP" textFill="WHITE">
                      <font>
                         <Font name="System Bold" size="14.0" />
                      </font>
@@ -69,7 +69,7 @@
                   <HBox alignment="CENTER" spacing="5.0">
                      <children>
                         <Label text="Chưa có tài khoản?" textFill="#7F8C8D" />
-                        <Button fx:id="signupbtn" mnemonicParsing="false" onAction="#handle_signup" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;" text="Đăng ký ngay" textFill="#EA580C">
+                        <Button fx:id="signUpButton" mnemonicParsing="false" onAction="#handleSignUp" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0;" text="Đăng ký ngay" textFill="#EA580C">
                            <font>
                               <Font name="System Bold" size="13.0" />
                            </font>
