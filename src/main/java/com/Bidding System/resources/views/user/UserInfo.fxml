@@ -11,7 +11,6 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -26,7 +25,7 @@
                     </font>
                 </Label>
                 <Region HBox.hgrow="ALWAYS" />
-                <Button mnemonicParsing="false" onAction="#handle_home" prefHeight="38.0" prefWidth="92.0" style="-fx-background-color: transparent; -fx-border-color: #0f172a; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #0f172a; -fx-font-weight: bold;" text="Home" />
+                <Button mnemonicParsing="false" onAction="#handleHome" prefHeight="38.0" prefWidth="92.0" style="-fx-background-color: transparent; -fx-border-color: #0f172a; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #0f172a; -fx-font-weight: bold;" text="Home" />
                 <Button mnemonicParsing="false" onAction="#openProfile" prefHeight="38.0" prefWidth="106.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-weight: bold;" text="Profile" />
                 <Button mnemonicParsing="false" onAction="#openBiddingSpace" prefHeight="38.0" prefWidth="132.0" style="-fx-background-color: transparent; -fx-border-color: #ea580c; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #ea580c; -fx-font-weight: bold;" text="Bidding space" />
                 <Button mnemonicParsing="false" onAction="#openSellItem" prefHeight="38.0" prefWidth="104.0" style="-fx-background-color: transparent; -fx-border-color: #ea580c; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #ea580c; -fx-font-weight: bold;" text="Sell item" />
@@ -70,12 +69,12 @@
                                 </Pane>
                                 <Button alignment="CENTER" mnemonicParsing="false" prefHeight="28.0" prefWidth="128.0" style="-fx-background-color: #20cc6b; -fx-background-radius: 20; -fx-border-radius: 20;" text="UPLOAD IMAGE" textFill="WHITE" />
                                 <Region prefHeight="16.0" />
-                                <Label fx:id="infoname" alignment="CENTER" maxWidth="1.7976931348623157E308" text="Full Name" textAlignment="CENTER" textFill="WHITE">
+                                <Label fx:id="labelName" alignment="CENTER" maxWidth="1.7976931348623157E308" text="Full Name" textAlignment="CENTER" textFill="WHITE">
                                     <font>
                                         <Font size="22.0" />
                                     </font>
                                 </Label>
-                                <Label fx:id="infoemail" alignment="CENTER" maxWidth="1.7976931348623157E308" text="email@example.com" textAlignment="CENTER" textFill="#cbd5e1" wrapText="true">
+                                <Label fx:id="labelEmail" alignment="CENTER" maxWidth="1.7976931348623157E308" text="email@example.com" textAlignment="CENTER" textFill="#cbd5e1" wrapText="true">
                                     <font>
                                         <Font size="14.0" />
                                     </font>
@@ -96,7 +95,7 @@
                                     </children>
                                 </VBox>
                                 <Region VBox.vgrow="ALWAYS" />
-                                <Button alignment="CENTER" mnemonicParsing="false" onAction="#handle_sign_out" prefHeight="38.0" prefWidth="118.0" style="-fx-background-color: #f72b2b; -fx-background-radius: 18;" text="SIGN OUT" textFill="WHITE">
+                                <Button alignment="CENTER" mnemonicParsing="false" onAction="#handleSignOut" prefHeight="38.0" prefWidth="118.0" style="-fx-background-color: #f72b2b; -fx-background-radius: 18;" text="SIGN OUT" textFill="WHITE">
                                     <font>
                                         <Font name="System Bold" size="14.0" />
                                     </font>
@@ -115,14 +114,14 @@
                                                         <Font size="15.0" />
                                                     </font>
                                                 </Label>
-                                                <Label fx:id="balance" text="0.0" textFill="#9a3412">
+                                                <Label fx:id="labelBalance" text="0.0" textFill="#9a3412">
                                                     <font>
                                                         <Font size="38.0" />
                                                     </font>
                                                 </Label>
                                             </children>
                                         </VBox>
-                                        <Button fx:id="btndeposit" alignment="CENTER" mnemonicParsing="false" onAction="#handle_deposit" prefHeight="42.0" prefWidth="108.0" style="-fx-background-color: #ea580c; -fx-background-radius: 16; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Deposit" />
+                                        <Button fx:id="btndeposit" alignment="CENTER" mnemonicParsing="false" onAction="#handleDeposit" prefHeight="42.0" prefWidth="108.0" style="-fx-background-color: #ea580c; -fx-background-radius: 16; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Deposit" />
                                     </children>
                                 </HBox>
 
@@ -138,12 +137,12 @@
                                                 <Label text="Name" textFill="#0f172a" GridPane.columnIndex="0" GridPane.rowIndex="0" />
                                                 <TextField fx:id="changable_infoname" alignment="CENTER" editable="false" maxWidth="1.7976931348623157E308" prefHeight="48.0" style="-fx-background-color: white; -fx-text-fill: #0f172a; -fx-border-color: #ea580c; -fx-background-radius: 10; -fx-border-radius: 14;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
                                                 <Label text="Phone number" textFill="#0f172a" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                                                <Label fx:id="infophonenumber" alignment="CENTER" maxWidth="1.7976931348623157E308" prefHeight="48.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #ea580c; -fx-border-radius: 14;" textFill="#0f172a" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                <Label fx:id="labelPhone" alignment="CENTER" maxWidth="1.7976931348623157E308" prefHeight="48.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #ea580c; -fx-border-radius: 14;" textFill="#0f172a" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                                 <Label text="Password" textFill="#0f172a" GridPane.columnIndex="0" GridPane.rowIndex="2" />
                                                 <HBox alignment="CENTER_LEFT" spacing="16.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                                                     <children>
-                                                        <Label fx:id="infopassword" alignment="CENTER" maxWidth="1.7976931348623157E308" prefHeight="48.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #ea580c; -fx-border-radius: 14; -fx-text-fill: #0f172a;" textFill="#0f172a" HBox.hgrow="ALWAYS" />
-                                                        <CheckBox fx:id="passshow" mnemonicParsing="false" text="show" textFill="#0f172a" />
+                                                        <Label fx:id="labelPassword" alignment="CENTER" maxWidth="1.7976931348623157E308" prefHeight="48.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #ea580c; -fx-border-radius: 14; -fx-text-fill: #0f172a;" textFill="#0f172a" HBox.hgrow="ALWAYS" />
+                                                <CheckBox fx:id="checkShowPassword" mnemonicParsing="false" text="show" textFill="#0f172a" />
                                                     </children>
                                                 </HBox>
                                             </children>

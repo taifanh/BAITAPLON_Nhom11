@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="768.0" prefWidth="1366.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="backends.client.controllers.user.UserInfoController">
+<AnchorPane prefHeight="768.0" prefWidth="1366.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="backends.client.controllers.user.BiddingSpaceController">
     <children>
         <HBox alignment="CENTER_LEFT" prefHeight="82.0" spacing="16.0" style="-fx-background-color: white; -fx-padding: 0 40 0 40; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.10), 18, 0.10, 0, 4);" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
@@ -25,7 +25,7 @@
                     </font>
                 </Label>
                 <Region HBox.hgrow="ALWAYS" />
-                <Button mnemonicParsing="false" onAction="#handle_home" prefHeight="38.0" prefWidth="92.0" style="-fx-background-color: transparent; -fx-border-color: #0f172a; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #0f172a; -fx-font-weight: bold;" text="Home" />
+                <Button mnemonicParsing="false" onAction="#handleHome" prefHeight="38.0" prefWidth="92.0" style="-fx-background-color: transparent; -fx-border-color: #0f172a; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #0f172a; -fx-font-weight: bold;" text="Home" />
                 <Button mnemonicParsing="false" onAction="#openProfile" prefHeight="38.0" prefWidth="106.0" style="-fx-background-color: transparent; -fx-border-color: #ea580c; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #ea580c; -fx-font-weight: bold;" text="Profile" />
                 <Button mnemonicParsing="false" onAction="#openBiddingSpace" prefHeight="38.0" prefWidth="132.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-weight: bold;" text="Bidding space" />
                 <Button mnemonicParsing="false" onAction="#openSellItem" prefHeight="38.0" prefWidth="104.0" style="-fx-background-color: transparent; -fx-border-color: #ea580c; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #ea580c; -fx-font-weight: bold;" text="Sell item" />
@@ -57,7 +57,7 @@
                                                 <Font size="13.0" />
                                             </font>
                                         </Label>
-                                        <ListView fx:id="ITEMLIST" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="420.0" style="-fx-background-radius: 18; -fx-border-radius: 18; -fx-border-color: #dbe4f0;" VBox.vgrow="ALWAYS" />
+                                        <ListView fx:id="listAuctionItems" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="420.0" style="-fx-background-radius: 18; -fx-border-radius: 18; -fx-border-color: #dbe4f0;" VBox.vgrow="ALWAYS" />
                                     </children>
                                 </VBox>
 
@@ -75,7 +75,7 @@
                                                         <Font size="13.0" />
                                                     </font>
                                                 </Label>
-                                                <Label fx:id="lblTimer" alignment="CENTER" maxWidth="1.7976931348623157E308" minHeight="66.0" style="-fx-background-color: #0f172a; -fx-background-radius: 15;" text="00:00:00" textFill="#fbbf24">
+                                                <Label fx:id="labelTimer" alignment="CENTER" maxWidth="1.7976931348623157E308" minHeight="66.0" style="-fx-background-color: #0f172a; -fx-background-radius: 15;" text="00:00:00" textFill="#fbbf24">
                                                     <font>
                                                         <Font name="System Bold" size="36.0" />
                                                     </font>
@@ -89,13 +89,13 @@
                                                         <Font size="17.0" />
                                                     </font>
                                                 </Label>
-                                                <TextField fx:id="high_bidder" maxWidth="1.7976931348623157E308" prefHeight="38.0" style="-fx-background-radius: 12;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                                <TextField fx:id="fieldHighBidder" maxWidth="1.7976931348623157E308" prefHeight="38.0" style="-fx-background-radius: 12;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
                                                 <Label alignment="CENTER" minHeight="36.0" prefWidth="150.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5); -fx-background-radius: 10;" text="Current Bid" textFill="#9a3412" GridPane.columnIndex="0" GridPane.rowIndex="1">
                                                     <font>
                                                         <Font size="17.0" />
                                                     </font>
                                                 </Label>
-                                                <TextField fx:id="current_amount" maxWidth="1.7976931348623157E308" prefHeight="38.0" style="-fx-background-radius: 12;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                <TextField fx:id="fieldCurrentAmount" maxWidth="1.7976931348623157E308" prefHeight="38.0" style="-fx-background-radius: 12;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                             </children>
                                             <columnConstraints>
                                                 <javafx.scene.layout.ColumnConstraints minWidth="150.0" prefWidth="150.0" />
@@ -115,11 +115,11 @@
                                         <VBox spacing="8.0" style="-fx-background-color: white; -fx-background-radius: 24; -fx-padding: 18 24 18 24; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 22, 0.12, 0, 8);">
                                             <children>
                                                 <Label text="Item Name" textFill="#64748b" />
-                                                <TextField fx:id="itemName" maxWidth="1.7976931348623157E308" prefHeight="34.0" style="-fx-background-radius: 10; -fx-border-radius: 14; -fx-border-color: #000000; -fx-background-color: white;" />
+                                                <TextField fx:id="fieldItemName" maxWidth="1.7976931348623157E308" prefHeight="34.0" style="-fx-background-radius: 10; -fx-border-radius: 14; -fx-border-color: #000000; -fx-background-color: white;" />
                                                 <Label text="Opening Bid" textFill="#64748b" />
-                                                <TextField fx:id="baseprice" maxWidth="1.7976931348623157E308" prefHeight="34.0" style="-fx-background-radius: 10; -fx-border-radius: 14; -fx-border-color: #000000; -fx-background-color: white;" />
+                                                <TextField fx:id="fieldBasePrice" maxWidth="1.7976931348623157E308" prefHeight="34.0" style="-fx-background-radius: 10; -fx-border-radius: 14; -fx-border-color: #000000; -fx-background-color: white;" />
                                                 <Label text="Bid Increment" textFill="#64748b" />
-                                                <TextField fx:id="increment" maxWidth="1.7976931348623157E308" prefHeight="34.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-radius: 14; -fx-border-color: #000000;" />
+                                                <TextField fx:id="fieldIncrement" maxWidth="1.7976931348623157E308" prefHeight="34.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-radius: 14; -fx-border-color: #000000;" />
                                             </children>
                                         </VBox>
                                         <VBox minHeight="270.0" spacing="9.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5); -fx-background-radius: 24; -fx-padding: 18 24 18 24; -fx-effect: dropshadow(gaussian, rgba(234,88,12,0.12), 22, 0.14, 0, 8);" VBox.vgrow="ALWAYS">
@@ -129,12 +129,12 @@
                                                         <Font size="20.0" />
                                                     </font>
                                                 </Label>
-                                                <TextField fx:id="autoIncrement" maxWidth="1.7976931348623157E308" prefHeight="38.0" promptText="Auto increment" style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #fdba74;" />
-                                                <TextField fx:id="maxLimit" maxWidth="1.7976931348623157E308" prefHeight="38.0" promptText="Max limit" style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #fdba74;" />
-                                                <Button fx:id="autoBidButton" alignment="CENTER" mnemonicParsing="false" onAction="#handleAutoBid" prefHeight="34.0" prefWidth="108.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="AUTO" />
+                                                <TextField fx:id="fieldAutoIncrement" maxWidth="1.7976931348623157E308" prefHeight="38.0" promptText="Auto increment" style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #fdba74;" />
+                                                <TextField fx:id="fieldMaxLimit" maxWidth="1.7976931348623157E308" prefHeight="38.0" promptText="Max limit" style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #fdba74;" />
+                                                <Button fx:id="buttonAutoBid" alignment="CENTER" mnemonicParsing="false" onAction="#handleAutoBid" prefHeight="34.0" prefWidth="108.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="AUTO" />
                                                 <Region VBox.vgrow="ALWAYS" />
-                                                <TextField fx:id="bidprice" maxWidth="1.7976931348623157E308" prefHeight="38.0" promptText="Your bid" style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #fdba74;" />
-                                                <Button fx:id="placebid" alignment="CENTER" mnemonicParsing="false" onAction="#placebid" prefHeight="34.0" prefWidth="116.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="PLACE" />
+                                                <TextField fx:id="fieldBidPrice" maxWidth="1.7976931348623157E308" prefHeight="38.0" promptText="Your bid" style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #fdba74;" />
+                                                <Button fx:id="buttonPlaceBid" alignment="CENTER" mnemonicParsing="false" onAction="#handlePlaceBid" prefHeight="34.0" prefWidth="116.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="PLACE" />
                                             </children>
                                         </VBox>
                                     </children>

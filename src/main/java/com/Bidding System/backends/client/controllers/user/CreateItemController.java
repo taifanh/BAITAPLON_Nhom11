@@ -27,33 +27,33 @@ import java.util.function.Consumer;
 
 public class CreateItemController {
     @FXML
-    public TextArea item_info;
+    public TextArea itemInfo;
 
     @FXML
-    public TextField base_price;
+    public TextField basePrice;
 
     @FXML
-    public TextField bid_increment;
+    public TextField bidIncrement;
 
     @FXML
-    public ComboBox<String> item_type;
+    public ComboBox<String> itemType;
 
     @FXML
-    public TextField item_name;
+    public TextField itemName;
 
-    private Consumer<String> createitemHandler;
+    private Consumer<String> createItemHandler;
 
     private final RequestLogDAO requestLogDAO = new RequestLogDAO();
 
     public void handle_create_ok(ActionEvent event) throws IOException {
-        String type = item_type.getSelectionModel().getSelectedItem().toString();
-        double bprice = Double.parseDouble(base_price.getText());
-        double bincrement = Double.parseDouble(bid_increment.getText());
-        String iteminfo = item_info.getText();
-        String itemname = item_name.getText();
+        String type = itemType.getSelectionModel().getSelectedItem().toString();
+        double bidPrice = Double.parseDouble(basePrice.getText());
+        double bidIncrement = Double.parseDouble(this.bidIncrement.getText());
+        String itemInfo = this.itemInfo.getText();
+        String itemName = this.itemName.getText();
 
         Gson gson = new Gson();
-        Createitempayload createitempayload = new Createitempayload(type, itemname, iteminfo, bprice, bincrement);
+        Createitempayload createitempayload = new Createitempayload(type, itemName, itemInfo, bidPrice, bidIncrement);
         String payload = gson.toJson(createitempayload);
 
         Message msg = new Message();
@@ -72,26 +72,26 @@ public class CreateItemController {
         ObservableList<String> categories = FXCollections.observableArrayList(
                 "Electronics", "Art", "Vehicle"
         );
-        item_type.setItems(categories);
+        itemType.setItems(categories);
 
         subscribeCreateResult();
-        if (createitemHandler != null) {
-            MessageBus.getInstance().subscribe(createitemHandler);
+        if (createItemHandler != null) {
+            MessageBus.getInstance().subscribe(createItemHandler);
         }
 
         Platform.runLater(() -> {
-            Stage stage = (Stage) item_info.getScene().getWindow();
+            Stage stage = (Stage) itemInfo.getScene().getWindow();
             stage.setOnHidden(e -> cleanup());
         });
     }
 
-    public void handle_come_back(ActionEvent event) throws IOException {
+    public void handleComeBack(ActionEvent event) throws IOException {
         Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
         window.close();
     }
 
     public void subscribeCreateResult() {
-        createitemHandler = rawJson -> {
+        createItemHandler = rawJson -> {
             ObjectMapper mapper = new ObjectMapper();
             try {
                 ObjectNode node = (ObjectNode) mapper.readTree(rawJson);
@@ -114,8 +114,8 @@ public class CreateItemController {
     }
 
     public void cleanup() {
-        if (createitemHandler != null) {
-            MessageBus.getInstance().unsubscribe(createitemHandler);
+        if (createItemHandler != null) {
+            MessageBus.getInstance().unsubscribe(createItemHandler);
         }
     }
 
@@ -128,7 +128,7 @@ public class CreateItemController {
     }
 
     private void closeWindow() {
-        Stage stage = (Stage) item_type.getScene().getWindow();
+        Stage stage = (Stage) itemType.getScene().getWindow();
         stage.close();
     }
 }
