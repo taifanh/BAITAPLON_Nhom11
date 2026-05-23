@@ -5,9 +5,6 @@ import backends.common.messages.MsgBid.ServerBidRespond;
 import backends.common.models.accounts.User;
 import backends.common.models.bidding.Auction;
 import backends.common.models.bidding.BidTransaction;
-import backends.common.models.core.Item;
-import backends.common.models.items.ItemFactory;
-import backends.common.models.items.ItemType;
 import backends.server.database.BidTransactionDAO;
 import backends.server.database.UserDAO;
 import backends.server.service.AuctionService;
@@ -121,19 +118,11 @@ public class AutoBidEngine {
             User winnerUser =
                     userStore.getUser(winner.userId());
 
-            Item dummyItem =
-                    ItemFactory.createItem(
-                            ItemType.Art,
-                            "auction-item",
-                            0,
-                            ""
-                    );
-
             db.saveBid(
                     auctionId,
                     new BidTransaction(
                             winnerUser,
-                            dummyItem,
+                            auction.getItem(),
                             finalAmount
                     )
             );

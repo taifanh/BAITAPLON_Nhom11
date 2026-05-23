@@ -4,6 +4,8 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.LineChart?>
 <ScrollPane fitToWidth="true" hbarPolicy="NEVER" pannable="true"
             style="-fx-background:transparent;-fx-background-color:transparent;"
             xmlns="http://javafx.com/javafx/25"
@@ -147,6 +149,45 @@
                             </children>
                         </VBox>
 
+                    </children>
+                </HBox>
+                <HBox minHeight="350.0" spacing="20.0">
+                    <children>
+                        <VBox spacing="16.0" style="-fx-background-color: white; -fx-background-radius: 24; -fx-padding: 24 28 24 28; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 22, 0.12, 0, 8);" HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label text="Price Trend Monitor" textFill="#0f172a"><font><Font name="System Bold" size="22.0" /></font></Label>
+                                <LineChart fx:id="priceChart"
+                                           stylesheets="@../style.css"
+                                           animated="false"
+                                           createSymbols="true"
+                                           horizontalGridLinesVisible="true"
+                                           legendVisible="false"
+                                           title="Live Bid Price Trend"
+                                           verticalGridLinesVisible="false"
+                                           VBox.vgrow="ALWAYS">
+                                    <xAxis><NumberAxis side="BOTTOM" tickLabelFill="#1e293b" /></xAxis>
+                                    <yAxis><NumberAxis side="LEFT" tickLabelFill="#1e293b" /></yAxis>
+                                </LineChart>
+                            </children>
+                        </VBox>
+
+                        <VBox minWidth="380.0" prefWidth="420.0" spacing="16.0" style="-fx-background-color: white; -fx-background-radius: 24; -fx-padding: 24 28 24 28; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 22, 0.12, 0, 8);">
+                            <children>
+                                <Label text="Full Bid Logs" textFill="#0f172a"><font><Font name="System Bold" size="22.0" /></font></Label>
+                                <VBox spacing="10.0" VBox.vgrow="ALWAYS">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" spacing="12.0" style="-fx-background-color: #f8fafc; -fx-background-radius: 14; -fx-padding: 12 14 12 14;">
+                                            <children>
+                                                <Label prefWidth="120.0" text="Bidder ID" textFill="#64748b" />
+                                                <Label prefWidth="100.0" text="Amount" textFill="#64748b" />
+                                                <Label text="Timestamp" textFill="#64748b" />
+                                            </children>
+                                        </HBox>
+                                        <ListView fx:id="bidHistoryList" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
                     </children>
                 </HBox>
             </children>

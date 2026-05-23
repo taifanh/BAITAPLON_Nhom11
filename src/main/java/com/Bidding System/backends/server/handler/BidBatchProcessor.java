@@ -103,14 +103,16 @@ public class BidBatchProcessor {
             }
 
             // Lưu tất cả bid hợp lệ trong batch vào DB
-            User winnerUser = userDAO.getUser(winner.userId());
-            Item dummyItem = ItemFactory.createItem(ItemType.Art, "auction-item", 0, "");
+            Auction managedAuction = AuctionService.getManagedActiveAuctionByAuctionId(auctionId);
+            Item auctionItem = managedAuction != null
+                    ? managedAuction.getItem()
+                    : ItemFactory.createItem(ItemType.Art, "auction-item", 0, "");
 
             for (PendingBid bid : batch) {
                 if (bid.amount() > currentMaxAmount) { // chỉ lưu bid hợp lệ
                     User bidUser = userDAO.getUser(bid.userId());
                     db.saveBid(auctionId,
-                            new BidTransaction(bidUser, dummyItem, bid.amount()));
+                            new BidTransaction(bidUser, auctionItem, bid.amount()));
                 }
             }
 
@@ -118,7 +120,6 @@ public class BidBatchProcessor {
             AutoBidEngine.getInstance().resolveAuction(auctionId);
             ServerBidRespond result = db.getMaxBidder(auctionId);
             broadcastMaxBidder(auctionId, result);
-            Auction managedAuction = AuctionService.getManagedActiveAuctionByAuctionId(auctionId);
             if (managedAuction != null) {
                 boolean extended = AuctionService.extendAuctionIfNeeded(managedAuction.getItem().getId());
                 if (extended) {

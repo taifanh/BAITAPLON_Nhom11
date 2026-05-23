@@ -9,6 +9,7 @@ import backends.common.messages.MsgAuction.*;
 import backends.common.messages.MsgData.FetchDataRequest;
 import backends.common.models.core.Item;
 import backends.common.models.items.*;
+import backends.server.database.BidTransactionDAO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -20,6 +21,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
@@ -27,6 +30,7 @@ import javafx.util.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +52,8 @@ public class BiddingSpaceController extends BaseController {
     @FXML private Label     labelTimer;
     @FXML private Button    buttonPlaceBid;
     @FXML private Button    buttonAutoBid;
+    @FXML private LineChart<Number, Number> priceChart;
+    @FXML private ListView<String> bidHistoryList;
 
     // ── Constants ─────────────────────────────────────────────────
     private static final String MSG_INVENTORY_DATA  = "INVENTORY_DATA";
@@ -78,11 +84,16 @@ public class BiddingSpaceController extends BaseController {
 
     private Timeline countdownTimeline;
     private Consumer<String> messageBusHandler;
+    private XYChart.Series<Number, Number> priceSeries;
+
+    private static final DateTimeFormatter TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault());
 
     // ── Lifecycle ─────────────────────────────────────────────────
     @FXML
     public void initialize() {
         configureReadOnlyFields();
+        setupBidVisuals();
         setupItemListView();
         startCountdownTimer();
         subscribeToMessages();
@@ -142,6 +153,7 @@ public class BiddingSpaceController extends BaseController {
         applyItemDetails(item);
         fieldHighBidder.setText("Loading...");
         fieldCurrentAmount.setText("Loading...");
+        clearBidVisuals("Select an active auction to view bid history.");
         buttonPlaceBid.setDisable(true);
         fieldBidPrice.setDisable(true);
 
@@ -249,6 +261,7 @@ public class BiddingSpaceController extends BaseController {
             fieldHighBidder.setText(msg.maxBidder.name);
             fieldCurrentAmount.setText(String.valueOf(msg.maxBidder.amount));
             currentHighestBid = msg.maxBidder.amount;
+            loadBidVisualsFromDb(currentAuctionId);
             buttonPlaceBid.setDisable(false);
             fieldBidPrice.setDisable(false);
             fieldBidPrice.clear();
@@ -306,6 +319,7 @@ public class BiddingSpaceController extends BaseController {
             fieldCurrentAmount.setText(String.valueOf(startingPrice));
             currentHighestBid = startingPrice;
         }
+        loadBidVisualsFromDb(currentAuctionId);
     }
 
     private void applyNotStartedStatus() {
@@ -314,6 +328,7 @@ public class BiddingSpaceController extends BaseController {
         resetClock();
         fieldHighBidder.setText("Not started");
         fieldCurrentAmount.setText(String.valueOf(startingPrice));
+        clearBidVisuals("Auction has not started.");
         buttonPlaceBid.setDisable(true);
         fieldBidPrice.setDisable(true);
     }
@@ -324,9 +339,60 @@ public class BiddingSpaceController extends BaseController {
         resetClock();
         fieldHighBidder.setText("Auction ended");
         fieldCurrentAmount.clear();
+        clearBidVisuals("Auction ended.");
         buttonPlaceBid.setDisable(true);
         fieldBidPrice.setDisable(true);
         UserSession.getConnection().send(new FetchDataRequest("FETCH_INVENTORY"));
+    }
+
+    private void setupBidVisuals() {
+        priceSeries = new XYChart.Series<>();
+        priceChart.getData().setAll(priceSeries);
+        priceChart.setAnimated(false);
+        priceChart.setCreateSymbols(true);
+        bidHistoryList.setItems(FXCollections.observableArrayList());
+    }
+
+    private void clearBidVisuals(String placeholder) {
+        if (priceSeries != null) {
+            priceSeries.getData().clear();
+        }
+        if (bidHistoryList != null) {
+            bidHistoryList.setItems(FXCollections.observableArrayList(placeholder));
+        }
+    }
+
+    private void loadBidVisualsFromDb(String auctionId) {
+        if (auctionId == null || auctionId.isBlank()) {
+            clearBidVisuals("No auction selected.");
+            return;
+        }
+        try {
+            List<BidTransactionDAO.BidHistoryDisplayRecord> history =
+                    new BidTransactionDAO().getBidHistoryForDisplay(auctionId);
+            priceSeries.getData().clear();
+            ObservableList<String> rows = FXCollections.observableArrayList();
+            int index = 1;
+            for (BidTransactionDAO.BidHistoryDisplayRecord record : history) {
+                priceSeries.getData().add(new XYChart.Data<>(index, record.amount()));
+                rows.add(formatBidHistoryRow(index, record));
+                index++;
+            }
+            if (rows.isEmpty()) {
+                rows.add("No bids yet.");
+            }
+            bidHistoryList.setItems(rows);
+        } catch (Exception e) {
+            bidHistoryList.setItems(FXCollections.observableArrayList("Cannot load bid history."));
+            e.printStackTrace();
+        }
+    }
+
+    private String formatBidHistoryRow(int index, BidTransactionDAO.BidHistoryDisplayRecord record) {
+        return "#" + index + "  " + record.bidderName()
+                + " (" + record.bidderId() + ")"
+                + "  |  " + record.amount()
+                + "  |  " + TIME_FORMATTER.format(record.bidTime());
     }
 
     private void applyAutoBidActive() {

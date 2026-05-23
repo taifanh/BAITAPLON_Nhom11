@@ -10,6 +10,7 @@ import backends.common.messages.MsgAuction.StartAuctionMessage;
 import backends.common.messages.MsgBid.ReceiveMaxBidder;
 import backends.common.messages.MsgData.FetchDataRequest;
 import backends.common.models.core.Item;
+import backends.server.database.BidTransactionDAO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -20,14 +21,17 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.util.Duration;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,6 +53,8 @@ public class AdminBiddingController extends BaseController {
     @FXML private Label          errorStartAuction;
     @FXML private Button         buttonStartEndAuction;
     @FXML private Label          labelTimer;
+    @FXML private LineChart<Number, Number> priceChart;
+    @FXML private ListView<String> bidHistoryList;
 
     // ── Constants ─────────────────────────────────────────────────
     private static final String MSG_INVENTORY     = "INVENTORY_DATA";
@@ -72,6 +78,10 @@ public class AdminBiddingController extends BaseController {
 
     private Timeline          countdownTimeline;
     private Consumer<String>  biddingHandler;
+    private XYChart.Series<Number, Number> priceSeries;
+
+    private static final DateTimeFormatter TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault());
 
     // ── Lifecycle ─────────────────────────────────────────────────
     @FXML
@@ -80,6 +90,7 @@ public class AdminBiddingController extends BaseController {
         fieldCurrentAmount.setEditable(false);
         basePrice.setEditable(false);
         bidIncrement.setEditable(false);
+        setupBidVisuals();
 
         upcomingItems.setCellFactory(lv -> createItemCell());
         upcomingItems.getSelectionModel()
@@ -109,6 +120,7 @@ public class AdminBiddingController extends BaseController {
 
         fieldHighBidder.setText("Loading...");
         fieldCurrentAmount.setText("Loading...");
+        clearBidVisuals("Select an active auction to view bid history.");
         applyItemDetails(item);
 
         if (inProgressItemIds.contains(item.getId())) {
@@ -120,6 +132,7 @@ public class AdminBiddingController extends BaseController {
             resetClock();
             fieldHighBidder.setText("No bids yet");
             fieldCurrentAmount.setText("-");
+            clearBidVisuals("Auction has not started.");
         }
 
         ObjectNode req = MAPPER.createObjectNode();
@@ -261,6 +274,7 @@ public class AdminBiddingController extends BaseController {
         Platform.runLater(() -> {
             fieldHighBidder.setText(msg.maxBidder.name);
             fieldCurrentAmount.setText(String.valueOf(msg.maxBidder.amount));
+            loadBidVisualsFromDb(currentAuctionId);
         });
     }
 
@@ -278,6 +292,7 @@ public class AdminBiddingController extends BaseController {
             fieldHighBidder.setText("No bids yet");
             fieldCurrentAmount.setText(String.valueOf(currentStartingPrice));
         }
+        loadBidVisualsFromDb(currentAuctionId);
     }
 
     private void applyNotStartedStatus() {
@@ -287,6 +302,7 @@ public class AdminBiddingController extends BaseController {
         setTime.setDisable(false);
         fieldHighBidder.setText("Not started yet");
         fieldCurrentAmount.setText(String.valueOf(currentStartingPrice));
+        clearBidVisuals("Auction has not started.");
     }
 
     private void applyEndedStatus() {
@@ -296,7 +312,58 @@ public class AdminBiddingController extends BaseController {
         setTime.setDisable(false);
         fieldHighBidder.setText("-");
         fieldCurrentAmount.setText("-");
+        clearBidVisuals("Auction ended.");
         UserSession.getConnection().send(new FetchDataRequest("FETCH_INVENTORY"));
+    }
+
+    private void setupBidVisuals() {
+        priceSeries = new XYChart.Series<>();
+        priceChart.getData().setAll(priceSeries);
+        priceChart.setAnimated(false);
+        priceChart.setCreateSymbols(true);
+        bidHistoryList.setItems(FXCollections.observableArrayList());
+    }
+
+    private void clearBidVisuals(String placeholder) {
+        if (priceSeries != null) {
+            priceSeries.getData().clear();
+        }
+        if (bidHistoryList != null) {
+            bidHistoryList.setItems(FXCollections.observableArrayList(placeholder));
+        }
+    }
+
+    private void loadBidVisualsFromDb(String auctionId) {
+        if (auctionId == null || auctionId.isBlank()) {
+            clearBidVisuals("No auction selected.");
+            return;
+        }
+        try {
+            List<BidTransactionDAO.BidHistoryDisplayRecord> history =
+                    new BidTransactionDAO().getBidHistoryForDisplay(auctionId);
+            priceSeries.getData().clear();
+            ObservableList<String> rows = FXCollections.observableArrayList();
+            int index = 1;
+            for (BidTransactionDAO.BidHistoryDisplayRecord record : history) {
+                priceSeries.getData().add(new XYChart.Data<>(index, record.amount()));
+                rows.add(formatBidHistoryRow(index, record));
+                index++;
+            }
+            if (rows.isEmpty()) {
+                rows.add("No bids yet.");
+            }
+            bidHistoryList.setItems(rows);
+        } catch (Exception e) {
+            bidHistoryList.setItems(FXCollections.observableArrayList("Cannot load bid history."));
+            e.printStackTrace();
+        }
+    }
+
+    private String formatBidHistoryRow(int index, BidTransactionDAO.BidHistoryDisplayRecord record) {
+        return "#" + index + "  " + record.bidderName()
+                + " (" + record.bidderId() + ")"
+                + "  |  " + record.amount()
+                + "  |  " + TIME_FORMATTER.format(record.bidTime());
     }
 
     // ── Countdown timer ───────────────────────────────────────────

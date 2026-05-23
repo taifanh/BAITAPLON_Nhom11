@@ -106,6 +106,42 @@ public class BidTransactionDAO {
         }
     }
 
+    public List<BidHistoryDisplayRecord> getBidHistoryForDisplay(String auctionId) throws IOException {
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement("""
+                     SELECT auctionId, bidderId, itemId, amount, bidTime
+                     FROM bid_transactions
+                     WHERE auctionId = ?
+                     ORDER BY bidTime ASC, id ASC
+                     """)) {
+            statement.setString(1, auctionId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                List<BidHistoryDisplayRecord> history = new ArrayList<>();
+                UserDAO userDAO = new UserDAO();
+                while (resultSet.next()) {
+                    String bidderId = resultSet.getString("bidderId");
+                    String bidderName = bidderId;
+                    try {
+                        bidderName = userDAO.getUser(bidderId).getName();
+                    } catch (IOException ignored) {
+                        // Fallback to bidder id if the user record is not available.
+                    }
+                    history.add(new BidHistoryDisplayRecord(
+                            resultSet.getString("auctionId"),
+                            bidderId,
+                            bidderName,
+                            resultSet.getString("itemId"),
+                            resultSet.getDouble("amount"),
+                            Instant.parse(resultSet.getString("bidTime"))
+                    ));
+                }
+                return history;
+            }
+        } catch (SQLException e) {
+            throw new IOException("Khong the doc lich su bid de hien thi", e);
+        }
+    }
+
     public List<BidHistoryRecord> getBidHistoryByBidder(String bidderId) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
@@ -154,6 +190,15 @@ public class BidTransactionDAO {
     public record BidHistoryRecord(
             String auctionId,
             String bidderId,
+            String itemId,
+            double amount,
+            Instant bidTime
+    ) {}
+
+    public record BidHistoryDisplayRecord(
+            String auctionId,
+            String bidderId,
+            String bidderName,
             String itemId,
             double amount,
             Instant bidTime

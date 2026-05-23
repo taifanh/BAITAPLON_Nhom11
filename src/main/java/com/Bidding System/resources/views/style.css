@@ -1,0 +1,45 @@
+/* ===== TIÊU ĐỀ BIỂU ĐỒ (Bid price trend) ===== */
+.chart-title {
+    -fx-text-fill: #1e293b !important;
+    -fx-font-size: 16px !important;
+    -fx-font-weight: bold !important;
+}
+
+/* ===== MÀU CHỮ CÁC CON SỐ TRÊN TRỤC (0, 20, 40...) ===== */
+.axis {
+    -fx-tick-label-fill: #1e293b;
+    -fx-font-family: "System"; /* Có thể đổi font tùy ý */
+}
+
+/* ===== MÀU ĐƯỜNG KẺ CHÍNH CỦA TRỤC X (Bên dưới) ===== */
+.axis:bottom {
+    -fx-border-color: #64748b; /* Màu xám đậm */
+    -fx-border-width: 1 0 0 0; /* Chỉ hiển thị đường viền phía trên */
+}
+
+/* ===== MÀU ĐƯỜNG KẺ CHÍNH CỦA TRỤC Y (Bên trái) ===== */
+.axis:left {
+    -fx-border-color: #64748b; /* Màu xám đậm */
+    -fx-border-width: 0 1 0 0; /* Chỉ hiển thị đường viền bên phải */
+}
+
+/* ===== CÁC VẠCH CHIA NHỎ LI TI TRÊN TRỤC X & Y ===== */
+.axis-tick-mark, .axis-minor-tick-mark {
+    -fx-stroke: #64748b;
+}
+
+/* ===== MÀU ĐƯỜNG LƯỚI NGANG BÊN TRONG BIỂU ĐỒ ===== */
+.chart-horizontal-grid-lines {
+    -fx-stroke: #cbd5e1; /* Xám nhạt cho đỡ rối mắt */
+    -fx-stroke-dash-array: 5 5; /* Tạo hiệu ứng nét đứt (dash) cho đẹp */
+}
+
+/* Xóa đường lưới dọc để giao diện thoáng hơn */
+.chart-vertical-grid-lines {
+    -fx-stroke: transparent;
+}
+
+/* ===== LÀM TRONG SUỐT NỀN ĐỂ LỘ NỀN TRẮNG BO GÓC Ở FXML ===== */
+.chart-plot-background, .chart-content {
+    -fx-background-color: transparent;
+}
