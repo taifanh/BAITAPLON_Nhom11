@@ -118,7 +118,6 @@ public class ServerAuctionManager {
             String auctionId = auction.getAuctionId();
 
             if (auctionId != null) {
-                BidBatchProcessor.getInstance().flushAuction(auctionId);
                 AutoBidEngine.getInstance().removeAll(auctionId);
             }
 

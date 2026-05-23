@@ -75,6 +75,7 @@ public class BiddingSpaceController extends BaseController {
     private double currentHighestBid;
     private volatile LocalDateTime auctionEndTime;
     private boolean isAutoBidActive = false;
+    private volatile long lastBidUpdateTime = 0;
 
     private Timeline countdownTimeline;
     private Consumer<String> messageBusHandler;
@@ -183,7 +184,6 @@ public class BiddingSpaceController extends BaseController {
                     case MSG_AUCTION_STATUS  -> handleAuctionStatus(raw);
                     case MSG_START_AUCTION   -> handleStartAuction(raw);
                     case MSG_RECEIVE_BID     -> handleReceiveBid(raw);
-                    case MSG_BID_QUEUED      -> handleBidQueued(node);
                     case MSG_AUCTION_RESULT  -> handleAuctionResult(raw);
                     case MSG_AUTO_REGISTERED -> Platform.runLater(this::applyAutoBidActive);
                     case MSG_AUTO_CANCELLED  -> Platform.runLater(this::applyAutoBidInactive);
@@ -245,23 +245,17 @@ public class BiddingSpaceController extends BaseController {
         ReceiveMaxBidder msg = MAPPER.readValue(raw, ReceiveMaxBidder.class);
         if (currentAuctionId == null ||
                 !currentAuctionId.equals(msg.maxBidder.auctionId)) return;
+        long receivedAt = System.currentTimeMillis();
         Platform.runLater(() -> {
+            lastBidUpdateTime = receivedAt;   // ← đánh dấu thời điểm
+            fieldBidPrice.setStyle("");
+            fieldBidPrice.clear();
             fieldHighBidder.setText(msg.maxBidder.name);
             fieldCurrentAmount.setText(String.valueOf(msg.maxBidder.amount));
             currentHighestBid = msg.maxBidder.amount;
             buttonPlaceBid.setDisable(false);
             fieldBidPrice.setDisable(false);
             fieldBidPrice.clear();
-        });
-    }
-
-    private void handleBidQueued(JsonNode node) {
-        double amount = node.get("amount").asDouble();
-        Platform.runLater(() -> {
-            fieldBidPrice.setStyle("-fx-border-color: orange;");
-            fieldBidPrice.setText("Queued: " + amount);
-            buttonPlaceBid.setDisable(true);
-            fieldBidPrice.setDisable(true);
         });
     }
 

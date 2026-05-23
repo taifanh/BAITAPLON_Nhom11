@@ -42,6 +42,18 @@ public class AutoBidEngine {
     public void register(AutoBidEntry entry) {
         autoBids.computeIfAbsent(entry.auctionId(), _ -> Collections.synchronizedList(new ArrayList<>())).add(entry);
         resolveAuction(entry.auctionId());
+        resolveAuction(entry.auctionId());
+        try {
+            BidTransactionDAO db = new BidTransactionDAO();
+            ServerBidRespond newMax = db.getMaxBidder(entry.auctionId());
+            if (newMax != null) {
+                newMax.auctionId = entry.auctionId();
+                String json = new Gson().toJson(new ReceiveMaxBidder(newMax));
+                AuctionRoom.getInstance().broadcast(json);
+            }
+        } catch (Exception e) {
+            System.err.println("[AutoBid] Broadcast failed: " + e.getMessage());
+        }
     }
     public void removeAll(String auctionId) {
         autoBids.remove(auctionId);
@@ -118,40 +130,10 @@ public class AutoBidEngine {
             if (alreadyResolved) return;
             UserDAO userStore = new UserDAO();
 
-            User winnerUser =
-                    userStore.getUser(winner.userId());
+            User winnerUser = userStore.getUser(winner.userId());
 
-            Item dummyItem =
-                    ItemFactory.createItem(
-                            ItemType.Art,
-                            "auction-item",
-                            0,
-                            ""
-                    );
-
-            db.saveBid(
-                    auctionId,
-                    new BidTransaction(
-                            winnerUser,
-                            dummyItem,
-                            finalAmount
-                    )
-            );
-            ServerBidRespond finalMax =
-                    db.getMaxBidder(auctionId);
-
-            if (finalMax == null) {
-                return;
-            }
-
-            finalMax.auctionId = auctionId;
-
-            String json =
-                    new Gson().toJson(
-                            new ReceiveMaxBidder(finalMax)
-                    );
-
-            AuctionRoom.getInstance().broadcast(json);
+            Item dummyItem = ItemFactory.createItem(ItemType.Art, "auction-item", 0, "");
+            db.saveBid(auctionId, new BidTransaction(winnerUser, dummyItem, finalAmount));
 
         } catch (SQLException | IOException e) {
             throw new RuntimeException(e);
