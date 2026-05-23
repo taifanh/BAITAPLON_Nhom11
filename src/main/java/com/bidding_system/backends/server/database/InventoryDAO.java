@@ -1,10 +1,10 @@
-package backends.server.database;
+package com.bidding_system.backends.server.database;
 
-import backends.common.constants.Statuses;
-import backends.common.models.core.Item;
-import backends.common.models.items.Art;
-import backends.common.models.items.Electronics;
-import backends.common.models.items.Vehicle;
+import com.bidding_system.backends.common.constants.Statuses;
+import com.bidding_system.backends.common.models.core.Item;
+import com.bidding_system.backends.common.models.items.Art;
+import com.bidding_system.backends.common.models.items.Electronics;
+import com.bidding_system.backends.common.models.items.Vehicle;
 
 import java.io.IOException;
 import java.nio.file.Files;

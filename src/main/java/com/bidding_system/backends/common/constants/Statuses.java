@@ -1,4 +1,4 @@
-package backends.common.constants;
+package com.bidding_system.backends.common.constants;
 
 public final class Statuses {
     private Statuses() {

@@ -1,13 +1,13 @@
-package backends.client.controllers.admin;
+package com.bidding_system.backends.client.controllers.admin;
 
-import backends.client.controllers.ViewLoader;
-import backends.client.controllers.base.BaseController;
-import backends.client.network.MessageBus;
-import backends.client.session.UserSession;
-import backends.client.controllers.util.ItemJsonParser;
-import backends.common.messages.MsgAuction.AdminActionCommand;
-import backends.common.messages.MsgData.FetchDataRequest;
-import backends.common.models.core.Item;
+import com.bidding_system.backends.client.controllers.ViewLoader;
+import com.bidding_system.backends.client.controllers.base.BaseController;
+import com.bidding_system.backends.client.network.MessageBus;
+import com.bidding_system.backends.client.session.UserSession;
+import com.bidding_system.backends.client.controllers.util.ItemJsonParser;
+import com.bidding_system.backends.common.messages.MsgAuction.AdminActionCommand;
+import com.bidding_system.backends.common.messages.MsgData.FetchDataRequest;
+import com.bidding_system.backends.common.models.core.Item;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;

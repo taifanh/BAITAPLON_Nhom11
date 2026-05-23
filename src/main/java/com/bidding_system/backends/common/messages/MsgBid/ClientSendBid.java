@@ -1,4 +1,4 @@
-package backends.common.messages.MsgBid;
+package com.bidding_system.backends.common.messages.MsgBid;
 
 public class ClientSendBid {
     public final String type = "PLACE_BID";

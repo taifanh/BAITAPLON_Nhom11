@@ -1,4 +1,4 @@
-package backends.common.models.core;
+package com.bidding_system.backends.common.models.core;
 
 public abstract class Entity {
     protected String id;

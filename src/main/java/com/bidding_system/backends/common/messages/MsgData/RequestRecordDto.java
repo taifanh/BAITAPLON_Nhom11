@@ -1,4 +1,4 @@
-package backends.common.messages.MsgData;
+package com.bidding_system.backends.common.messages.MsgData;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 

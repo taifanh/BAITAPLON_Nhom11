@@ -1,13 +1,13 @@
-package backends.client.controllers.user;
+package com.bidding_system.backends.client.controllers.user;
 
-import backends.server.database.RequestLogDAO;
+import com.bidding_system.backends.server.database.RequestLogDAO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
-import backends.client.network.MessageBus;
-import backends.client.session.UserSession;
+import com.bidding_system.backends.client.network.MessageBus;
+import com.bidding_system.backends.client.session.UserSession;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -19,8 +19,8 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import backends.common.messages.Common.Createitempayload;
-import backends.common.messages.Common.Message;
+import com.bidding_system.backends.common.messages.Common.Createitempayload;
+import com.bidding_system.backends.common.messages.Common.Message;
 
 import java.io.IOException;
 import java.util.function.Consumer;

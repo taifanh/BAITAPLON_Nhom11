@@ -1,8 +1,8 @@
-package backends.client.session;
+package com.bidding_system.backends.client.session;
 
-import backends.server.handler.ServerConnection;
-import backends.common.models.core.Account;
-import backends.common.models.accounts.User;
+import com.bidding_system.backends.server.handler.ServerConnection;
+import com.bidding_system.backends.common.models.core.Account;
+import com.bidding_system.backends.common.models.accounts.User;
 
 public final class UserSession {
     private static Account currentAccount;

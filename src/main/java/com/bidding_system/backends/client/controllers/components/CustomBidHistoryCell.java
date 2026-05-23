@@ -1,6 +1,6 @@
-package backends.client.controllers.components;
+package com.bidding_system.backends.client.controllers.components;
 
-import backends.common.messages.MsgData.BidHistoryRecordDto;
+import com.bidding_system.backends.common.messages.MsgData.BidHistoryRecordDto;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;

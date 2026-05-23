@@ -1,8 +1,7 @@
-package backends.common.models.core;
+package com.bidding_system.backends.common.models.core;
 
-import backends.common.Extra.IdGenerator;
-import backends.common.models.accounts.User;
-import backends.common.models.items.ItemType;
+import com.bidding_system.backends.common.Extra.IdGenerator;
+import com.bidding_system.backends.common.models.items.ItemType;
 
 public abstract class Item extends Entity {
     protected String name;

@@ -1,4 +1,4 @@
-package backends.common.messages.MsgBid;
+package com.bidding_system.backends.common.messages.MsgBid;
 
 public class RegisterAutoBidding {
     public String type = "REGISTER_AUTO_BIDDING";

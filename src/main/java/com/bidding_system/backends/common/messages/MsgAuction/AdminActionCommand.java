@@ -1,6 +1,6 @@
-package backends.common.messages.MsgAuction;
+package com.bidding_system.backends.common.messages.MsgAuction;
 
-import backends.server.database.RequestLogDAO;
+import com.bidding_system.backends.server.database.RequestLogDAO;
 
 import java.io.IOException;
 

@@ -1,4 +1,4 @@
-package backends.client.controllers.components;
+package com.bidding_system.backends.client.controllers.components;
 
 public class BidHistoryRow {
     private final String sequence;

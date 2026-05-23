@@ -1,11 +1,11 @@
-package backends.client.controllers.components;
+package com.bidding_system.backends.client.controllers.components;
 
-import backends.client.session.UserSession;
-import backends.common.messages.Common.Createitempayload;
-import backends.common.messages.Common.Message;
-import backends.common.messages.Common.RemoveRequestpayload;
-import backends.server.database.MyRequestDAO;
-import backends.server.database.RequestLogDAO;
+import com.bidding_system.backends.client.session.UserSession;
+import com.bidding_system.backends.common.messages.Common.Createitempayload;
+import com.bidding_system.backends.common.messages.Common.Message;
+import com.bidding_system.backends.common.messages.Common.RemoveRequestpayload;
+import com.bidding_system.backends.server.database.MyRequestDAO;
+import com.bidding_system.backends.server.database.RequestLogDAO;
 import com.google.gson.Gson;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;

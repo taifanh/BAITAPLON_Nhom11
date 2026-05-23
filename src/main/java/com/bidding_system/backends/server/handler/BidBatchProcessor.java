@@ -1,17 +1,17 @@
-package backends.server.handler;
+package com.bidding_system.backends.server.handler;
 
-import backends.common.models.bidding.Auction;
-import backends.server.database.BidTransactionDAO;
-import backends.server.database.UserDAO;
-import backends.server.service.AuctionService;
+import com.bidding_system.backends.common.models.bidding.Auction;
+import com.bidding_system.backends.server.database.BidTransactionDAO;
+import com.bidding_system.backends.server.database.UserDAO;
+import com.bidding_system.backends.server.service.AuctionService;
 import com.google.gson.Gson;
-import backends.common.messages.MsgBid.ReceiveMaxBidder;
-import backends.common.messages.MsgBid.ServerBidRespond;
-import backends.common.models.bidding.BidTransaction;
-import backends.common.models.core.Item;
-import backends.common.models.items.ItemType;
-import backends.common.models.items.ItemFactory;
-import backends.common.models.accounts.User;
+import com.bidding_system.backends.common.messages.MsgBid.ReceiveMaxBidder;
+import com.bidding_system.backends.common.messages.MsgBid.ServerBidRespond;
+import com.bidding_system.backends.common.models.bidding.BidTransaction;
+import com.bidding_system.backends.common.models.core.Item;
+import com.bidding_system.backends.common.models.items.ItemType;
+import com.bidding_system.backends.common.models.items.ItemFactory;
+import com.bidding_system.backends.common.models.accounts.User;
 
 import java.util.*;
 import java.util.concurrent.*;

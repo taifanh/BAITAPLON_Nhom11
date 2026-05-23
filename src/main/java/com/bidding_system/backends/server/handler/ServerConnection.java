@@ -1,9 +1,9 @@
-package backends.server.handler;
+package com.bidding_system.backends.server.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import backends.client.network.MessageBus;
+import com.bidding_system.backends.client.network.MessageBus;
 import javafx.application.Platform;
 
 import java.io.*;

@@ -1,6 +1,4 @@
-package backends.common.messages.MsgAuction;
-
-import backends.common.messages.MsgAuction.AuctionItemDto;
+package com.bidding_system.backends.common.messages.MsgAuction;
 
 import java.util.List;
 

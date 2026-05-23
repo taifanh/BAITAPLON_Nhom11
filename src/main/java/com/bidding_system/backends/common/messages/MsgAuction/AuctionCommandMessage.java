@@ -1,4 +1,4 @@
-package backends.common.messages.MsgAuction;
+package com.bidding_system.backends.common.messages.MsgAuction;
 
 public class AuctionCommandMessage {
     public String type = "AUCTION_COMMAND";

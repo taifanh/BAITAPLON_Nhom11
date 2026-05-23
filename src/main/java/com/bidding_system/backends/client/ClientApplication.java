@@ -1,11 +1,11 @@
-package backends.client;
+package com.bidding_system.backends.client;
 
-import backends.client.session.UserSession;
-import backends.client.controllers.ViewLoader;
+import com.bidding_system.backends.client.session.UserSession;
+import com.bidding_system.backends.client.controllers.ViewLoader;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import backends.launcher.Launcher;
+import com.bidding_system.backends.launcher.Launcher;
 
 public class ClientApplication extends Application {
     @Override

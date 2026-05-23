@@ -1,7 +1,7 @@
-package backends.client.controllers.components;
+package com.bidding_system.backends.client.controllers.components;
 
-import backends.common.messages.Common.Createitempayload;
-import backends.common.messages.MsgData.RequestRecordDto;
+import com.bidding_system.backends.common.messages.Common.Createitempayload;
+import com.bidding_system.backends.common.messages.MsgData.RequestRecordDto;
 import com.google.gson.Gson;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;

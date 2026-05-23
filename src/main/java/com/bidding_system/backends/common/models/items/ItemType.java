@@ -1,8 +1,8 @@
-package backends.common.models.items;
+package com.bidding_system.backends.common.models.items;
 
-import backends.common.Extra.IdGenerator;
-import backends.common.models.core.Entity;
-import backends.common.models.core.Item;
+import com.bidding_system.backends.common.Extra.IdGenerator;
+import com.bidding_system.backends.common.models.core.Entity;
+import com.bidding_system.backends.common.models.core.Item;
 
 public enum ItemType {
     Electronics("ELE", Electronics::new),

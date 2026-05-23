@@ -1,8 +1,8 @@
-package backends.launcher;
+package com.bidding_system.backends.launcher;
 
-import backends.client.AdminApplication;
-import backends.client.ClientApplication;
-import backends.server.ServerApplication;
+import com.bidding_system.backends.client.AdminApplication;
+import com.bidding_system.backends.client.ClientApplication;
+import com.bidding_system.backends.server.ServerApplication;
 import javafx.application.Application;
 
 import java.util.Scanner;

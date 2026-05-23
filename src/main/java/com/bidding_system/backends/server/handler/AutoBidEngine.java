@@ -1,13 +1,13 @@
-package backends.server.handler;
+package com.bidding_system.backends.server.handler;
 
-import backends.common.messages.MsgBid.ReceiveMaxBidder;
-import backends.common.messages.MsgBid.ServerBidRespond;
-import backends.common.models.accounts.User;
-import backends.common.models.bidding.Auction;
-import backends.common.models.bidding.BidTransaction;
-import backends.server.database.BidTransactionDAO;
-import backends.server.database.UserDAO;
-import backends.server.service.AuctionService;
+import com.bidding_system.backends.common.messages.MsgBid.ReceiveMaxBidder;
+import com.bidding_system.backends.common.messages.MsgBid.ServerBidRespond;
+import com.bidding_system.backends.common.models.accounts.User;
+import com.bidding_system.backends.common.models.bidding.Auction;
+import com.bidding_system.backends.common.models.bidding.BidTransaction;
+import com.bidding_system.backends.server.database.BidTransactionDAO;
+import com.bidding_system.backends.server.database.UserDAO;
+import com.bidding_system.backends.server.service.AuctionService;
 import com.google.gson.Gson;
 
 import java.io.IOException;

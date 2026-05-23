@@ -1,4 +1,4 @@
-package backends.common.models.core;
+package com.bidding_system.backends.common.models.core;
 
 public class Account extends Entity {
     protected String name,phoneNumber,Email,password,role;

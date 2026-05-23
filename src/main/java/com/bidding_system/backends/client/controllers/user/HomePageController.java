@@ -1,6 +1,6 @@
-package backends.client.controllers.user;
+package com.bidding_system.backends.client.controllers.user;
 
-import backends.client.controllers.ViewLoader;
+import com.bidding_system.backends.client.controllers.ViewLoader;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;

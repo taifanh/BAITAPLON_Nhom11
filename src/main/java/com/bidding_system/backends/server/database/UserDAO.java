@@ -1,8 +1,8 @@
-package backends.server.database;
+package com.bidding_system.backends.server.database;
 
-import backends.common.models.accounts.Admin;
-import backends.common.models.accounts.User;
-import backends.common.models.core.Account;
+import com.bidding_system.backends.common.models.accounts.Admin;
+import com.bidding_system.backends.common.models.accounts.User;
+import com.bidding_system.backends.common.models.core.Account;
 
 import java.io.IOException;
 import java.nio.file.Files;

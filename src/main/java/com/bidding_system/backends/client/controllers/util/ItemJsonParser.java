@@ -1,8 +1,8 @@
-package backends.client.controllers.util;
+package com.bidding_system.backends.client.controllers.util;
 
-import backends.common.models.core.Item;
-import backends.common.models.items.ItemFactory;
-import backends.common.models.items.ItemType;
+import com.bidding_system.backends.common.models.core.Item;
+import com.bidding_system.backends.common.models.items.ItemFactory;
+import com.bidding_system.backends.common.models.items.ItemType;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package backends.common.messages.MsgData;
+package com.bidding_system.backends.common.messages.MsgData;
 
 public class FetchBidHistoryRequest {
     public String type = "FETCH_BID_HISTORY";

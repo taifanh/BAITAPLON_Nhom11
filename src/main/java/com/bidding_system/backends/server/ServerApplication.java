@@ -1,7 +1,7 @@
-package backends.server;
+package com.bidding_system.backends.server;
 
-import backends.server.service.AuctionService;
-import backends.server.handler.ClientHandler;
+import com.bidding_system.backends.server.service.AuctionService;
+import com.bidding_system.backends.server.handler.ClientHandler;
 
 import java.net.ServerSocket;
 import java.net.Socket;

@@ -1,6 +1,7 @@
 package backends.server.database;
 
-import backends.common.messages.Common.Message;
+import com.bidding_system.backends.common.messages.Common.Message;
+import com.bidding_system.backends.server.database.MyRequestDAO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 

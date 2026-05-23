@@ -1,10 +1,10 @@
-package backends.client.controllers.user;
+package com.bidding_system.backends.client.controllers.user;
 
-import backends.client.network.MessageBus;
-import backends.client.session.UserSession;
-import backends.common.messages.Common.Message;
-import backends.common.messages.Common.SignupPayload;
-import backends.client.controllers.ViewLoader;
+import com.bidding_system.backends.client.network.MessageBus;
+import com.bidding_system.backends.client.session.UserSession;
+import com.bidding_system.backends.common.messages.Common.Message;
+import com.bidding_system.backends.common.messages.Common.SignupPayload;
+import com.bidding_system.backends.client.controllers.ViewLoader;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;

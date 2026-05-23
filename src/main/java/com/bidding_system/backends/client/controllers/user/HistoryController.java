@@ -1,11 +1,11 @@
-package backends.client.controllers.user;
+package com.bidding_system.backends.client.controllers.user;
 
-import backends.client.controllers.ViewLoader;
-import backends.client.session.UserSession;
-import backends.common.messages.Common.Createitempayload;
-import backends.common.models.accounts.User;
-import backends.server.database.BidTransactionDAO;
-import backends.server.database.MyRequestDAO;
+import com.bidding_system.backends.client.controllers.ViewLoader;
+import com.bidding_system.backends.client.session.UserSession;
+import com.bidding_system.backends.common.messages.Common.Createitempayload;
+import com.bidding_system.backends.common.models.accounts.User;
+import com.bidding_system.backends.server.database.BidTransactionDAO;
+import com.bidding_system.backends.server.database.MyRequestDAO;
 import com.google.gson.Gson;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

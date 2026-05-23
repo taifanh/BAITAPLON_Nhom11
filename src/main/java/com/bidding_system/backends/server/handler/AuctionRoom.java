@@ -1,9 +1,7 @@
-package backends.server.handler;
+package com.bidding_system.backends.server.handler;
 
-import backends.client.session.UserSession;
-import backends.common.models.core.Account;
+import com.bidding_system.backends.common.models.core.Account;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;

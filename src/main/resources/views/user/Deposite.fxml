@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="514.0" prefWidth="372.0" style="-fx-background-radius: 15;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="backends.client.controllers.user.DepositController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="514.0" prefWidth="372.0" style="-fx-background-radius: 15;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bidding_system.backends.client.controllers.user.DepositController">
    <children>
       <Separator layoutX="-4.0" layoutY="302.0" prefHeight="18.0" prefWidth="378.0" />
       <Button alignment="CENTER" layoutX="75.0" layoutY="436.0" mnemonicParsing="false" onAction="#CompleteDeposit" prefHeight="38.0" prefWidth="221.0" style="-fx-background-color: #20a8e7; -fx-background-radius: 13;" text="Thanh Toán" textAlignment="JUSTIFY" textFill="WHITE">

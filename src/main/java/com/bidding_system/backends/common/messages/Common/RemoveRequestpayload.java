@@ -1,4 +1,4 @@
-package backends.common.messages.Common;
+package com.bidding_system.backends.common.messages.Common;
 
 public class RemoveRequestpayload {
     private String request_id;

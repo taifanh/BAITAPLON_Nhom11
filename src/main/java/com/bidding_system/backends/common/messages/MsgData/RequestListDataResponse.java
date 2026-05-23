@@ -1,5 +1,5 @@
-package backends.common.messages.MsgData;
-import backends.server.database.RequestLogDAO;
+package com.bidding_system.backends.common.messages.MsgData;
+import com.bidding_system.backends.server.database.RequestLogDAO;
 import java.util.List;
 
 public class RequestListDataResponse {

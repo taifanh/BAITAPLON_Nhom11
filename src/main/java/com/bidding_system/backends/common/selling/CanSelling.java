@@ -1,6 +1,6 @@
-package backends.common.selling;
+package com.bidding_system.backends.common.selling;
 
-import backends.common.models.core.Item;
+import com.bidding_system.backends.common.models.core.Item;
 
 public interface CanSelling {
     public void sellItem(Item item);

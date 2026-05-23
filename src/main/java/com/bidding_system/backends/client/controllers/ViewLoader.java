@@ -1,4 +1,4 @@
-package backends.client.controllers;
+package com.bidding_system.backends.client.controllers;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

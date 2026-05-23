@@ -1,8 +1,6 @@
-package backends.launcher;
+package com.bidding_system.backends.launcher;
 
-import backends.client.AdminApplication;
-import backends.client.ClientApplication;
-import backends.server.ServerApplication;
+import com.bidding_system.backends.client.ClientApplication;
 import javafx.application.Application;
 
 public class ClientLauncher {

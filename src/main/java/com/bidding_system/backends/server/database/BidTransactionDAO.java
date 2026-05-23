@@ -1,7 +1,7 @@
-package backends.server.database;
+package com.bidding_system.backends.server.database;
 
-import backends.common.messages.MsgBid.ServerBidRespond;
-import backends.common.models.bidding.BidTransaction;
+import com.bidding_system.backends.common.messages.MsgBid.ServerBidRespond;
+import com.bidding_system.backends.common.models.bidding.BidTransaction;
 
 import java.io.IOException;
 import java.nio.file.Files;

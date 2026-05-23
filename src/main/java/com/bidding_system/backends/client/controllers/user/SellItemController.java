@@ -1,13 +1,13 @@
-package backends.client.controllers.user;
+package com.bidding_system.backends.client.controllers.user;
 
-import backends.client.controllers.ViewLoader;
-import backends.client.controllers.base.BaseController;
-import backends.client.controllers.components.CustomItemCell;
-import backends.client.network.MessageBus;
-import backends.client.session.UserSession;
-import backends.server.database.MyRequestDAO;
-import backends.common.messages.Common.*;
-import backends.common.models.accounts.User;
+import com.bidding_system.backends.client.controllers.ViewLoader;
+import com.bidding_system.backends.client.controllers.base.BaseController;
+import com.bidding_system.backends.client.controllers.components.CustomItemCell;
+import com.bidding_system.backends.client.network.MessageBus;
+import com.bidding_system.backends.client.session.UserSession;
+import com.bidding_system.backends.server.database.MyRequestDAO;
+import com.bidding_system.backends.common.messages.Common.*;
+import com.bidding_system.backends.common.models.accounts.User;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;

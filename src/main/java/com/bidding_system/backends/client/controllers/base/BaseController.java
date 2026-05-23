@@ -1,8 +1,8 @@
-package backends.client.controllers.base;
+package com.bidding_system.backends.client.controllers.base;
 
-import backends.client.controllers.ViewLoader;
-import backends.client.network.MessageBus;
-import backends.client.session.UserSession;
+import com.bidding_system.backends.client.controllers.ViewLoader;
+import com.bidding_system.backends.client.network.MessageBus;
+import com.bidding_system.backends.client.session.UserSession;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;

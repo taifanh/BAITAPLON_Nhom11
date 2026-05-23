@@ -1,7 +1,7 @@
-package backends.server.database;
+package com.bidding_system.backends.server.database;
 
-import backends.common.Extra.IdGenerator;
-import backends.common.messages.Common.Message;
+import com.bidding_system.backends.common.Extra.IdGenerator;
+import com.bidding_system.backends.common.messages.Common.Message;
 
 import java.io.IOException;
 import java.nio.file.Files;

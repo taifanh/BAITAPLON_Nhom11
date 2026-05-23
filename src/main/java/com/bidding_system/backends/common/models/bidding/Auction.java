@@ -1,10 +1,11 @@
-package backends.common.models.bidding;
+package com.bidding_system.backends.common.models.bidding;
 
+import com.bidding_system.backends.common.models.core.Entity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import backends.common.Extra.IdGenerator;
-import backends.common.models.core.Item;
+import com.bidding_system.backends.common.Extra.IdGenerator;
+import com.bidding_system.backends.common.models.core.Item;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -22,12 +23,12 @@ public class Auction {
 
     private final String auctionId;
     private final Item item;
-    private final List<backends.common.models.bidding.BidTransaction> bids;
+    private final List<BidTransaction> bids;
     private Status status;
     private LocalDateTime startAt;
     private LocalDateTime endAt;
     private double currentHighestBid;
-    private backends.common.models.bidding.BidTransaction highestBid;
+    private BidTransaction highestBid;
     private String currentHighestBidderId;
     private static final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule()) // Quan trọng nhất: để hiểu LocalDateTime
@@ -76,11 +77,11 @@ public class Auction {
 
     // Tao id moi cho auction moi.
     private String generateAuctionId() {
-        return "AUC" + backends.common.models.core.Entity.makeItemId(IdGenerator.nextId());
+        return "AUC" + Entity.makeItemId(IdGenerator.nextId());
     }
 
     // Them mot bid moi vao phien, dong thoi cap nhat gia cao nhat hien tai trong RAM.
-    public synchronized void addBid(backends.common.models.bidding.BidTransaction bid) {
+    public synchronized void addBid(BidTransaction bid) {
         closeIfExpired();
         if (status != Status.ACTIVE) {
             throw new IllegalStateException("Auction is not active");

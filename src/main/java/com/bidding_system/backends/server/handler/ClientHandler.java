@@ -1,10 +1,9 @@
-package backends.server.handler;
+package com.bidding_system.backends.server.handler;
 
-import backends.common.models.bidding.Auction;
-import backends.server.service.AccountService;
-import backends.server.service.AdminService;
-import backends.server.service.AuctionProcessors;
-import backends.server.service.UserService;
+import com.bidding_system.backends.server.service.AccountService;
+import com.bidding_system.backends.server.service.AdminService;
+import com.bidding_system.backends.server.service.AuctionProcessors;
+import com.bidding_system.backends.server.service.UserService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;

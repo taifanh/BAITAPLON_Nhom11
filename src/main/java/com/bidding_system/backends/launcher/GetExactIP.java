@@ -1,4 +1,4 @@
-package backends.launcher;
+package com.bidding_system.backends.launcher;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Collections;

@@ -1,7 +1,7 @@
-package backends.server.database;
+package com.bidding_system.backends.server.database;
 
-import backends.common.models.bidding.Auction;
-import backends.common.models.core.Item;
+import com.bidding_system.backends.common.models.bidding.Auction;
+import com.bidding_system.backends.common.models.core.Item;
 
 import java.io.IOException;
 import java.nio.file.Files;

@@ -1,4 +1,4 @@
-package backends.common.models.bidding;
+package com.bidding_system.backends.common.models.bidding;
 
 public interface CanBidding {
 

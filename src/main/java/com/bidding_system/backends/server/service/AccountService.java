@@ -1,10 +1,10 @@
-package backends.server.service;
+package com.bidding_system.backends.server.service;
 
-import backends.common.messages.Common.Change_infopayload;
-import backends.common.messages.Common.Depositpayload;
-import backends.common.messages.Common.Message;
-import backends.server.database.UserDAO;
-import backends.server.handler.ClientHandler;
+import com.bidding_system.backends.common.messages.Common.Change_infopayload;
+import com.bidding_system.backends.common.messages.Common.Depositpayload;
+import com.bidding_system.backends.common.messages.Common.Message;
+import com.bidding_system.backends.server.database.UserDAO;
+import com.bidding_system.backends.server.handler.ClientHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;

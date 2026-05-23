@@ -1,6 +1,6 @@
-package backends.common.Extra;
+package com.bidding_system.backends.common.Extra;
 
-import backends.common.models.items.ItemType;
+import com.bidding_system.backends.common.models.items.ItemType;
 
 public class IdGenerator {
     private static long lastGeneratedId = System.currentTimeMillis();

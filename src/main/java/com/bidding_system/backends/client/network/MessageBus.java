@@ -1,4 +1,4 @@
-package backends.client.network;
+package com.bidding_system.backends.client.network;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;

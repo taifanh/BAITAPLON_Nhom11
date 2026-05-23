@@ -1,4 +1,4 @@
-package backends.common.messages.MsgAuction;
+package com.bidding_system.backends.common.messages.MsgAuction;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

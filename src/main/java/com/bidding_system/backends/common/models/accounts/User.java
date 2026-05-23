@@ -1,10 +1,10 @@
-package backends.common.models.accounts;
+package com.bidding_system.backends.common.models.accounts;
 
-import backends.common.models.bidding.Auction;
-import backends.common.models.bidding.CanBidding;
-import backends.common.models.core.Account;
-import backends.common.models.core.Item;
-import backends.common.selling.CanSelling;
+import com.bidding_system.backends.common.models.bidding.Auction;
+import com.bidding_system.backends.common.models.bidding.CanBidding;
+import com.bidding_system.backends.common.models.core.Account;
+import com.bidding_system.backends.common.models.core.Item;
+import com.bidding_system.backends.common.selling.CanSelling;
 
 import java.io.IOException;
 import java.util.HashSet;

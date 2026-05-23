@@ -1,7 +1,6 @@
-package backends.launcher;
+package com.bidding_system.backends.launcher;
 
-import backends.server.ServerApplication;
-import backends.launcher.GetExactIP;
+import com.bidding_system.backends.server.ServerApplication;
 
 public class ServerLauncher {
     public static String serverIp = "localhost";

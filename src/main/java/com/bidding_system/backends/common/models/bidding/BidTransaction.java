@@ -1,8 +1,8 @@
-package backends.common.models.bidding;
+package com.bidding_system.backends.common.models.bidding;
 
-import backends.common.models.accounts.User;
-import backends.common.models.core.Account;
-import backends.common.models.core.Item;
+import com.bidding_system.backends.common.models.accounts.User;
+import com.bidding_system.backends.common.models.core.Account;
+import com.bidding_system.backends.common.models.core.Item;
 
 import java.util.Date;
 

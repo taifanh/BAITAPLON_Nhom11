@@ -1,15 +1,15 @@
-package backends.client.controllers.user;
+package com.bidding_system.backends.client.controllers.user;
 
-import backends.client.network.MessageBus;
-import backends.common.messages.Common.SigninPayload;
-import backends.common.messages.Common.SigninResponsePayload;
-import backends.common.models.accounts.Admin;
-import backends.common.models.accounts.User;
+import com.bidding_system.backends.client.network.MessageBus;
+import com.bidding_system.backends.common.messages.Common.SigninPayload;
+import com.bidding_system.backends.common.messages.Common.SigninResponsePayload;
+import com.bidding_system.backends.common.models.accounts.Admin;
+import com.bidding_system.backends.common.models.accounts.User;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import backends.client.session.UserSession;
-import backends.client.controllers.ViewLoader;
+import com.bidding_system.backends.client.session.UserSession;
+import com.bidding_system.backends.client.controllers.ViewLoader;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -24,8 +24,8 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import backends.common.messages.Common.Message;
-import backends.common.models.core.Account;
+import com.bidding_system.backends.common.messages.Common.Message;
+import com.bidding_system.backends.common.models.core.Account;
 
 import java.io.IOException;
 import java.util.function.Consumer;

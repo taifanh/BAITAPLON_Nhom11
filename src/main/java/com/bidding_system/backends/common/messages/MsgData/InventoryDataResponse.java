@@ -1,5 +1,5 @@
-package backends.common.messages.MsgData;
-import backends.common.models.core.Item;
+package com.bidding_system.backends.common.messages.MsgData;
+import com.bidding_system.backends.common.models.core.Item;
 import java.util.List;
 
 public class InventoryDataResponse {

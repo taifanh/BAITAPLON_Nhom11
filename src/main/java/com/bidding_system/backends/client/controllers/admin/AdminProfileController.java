@@ -1,12 +1,12 @@
-package backends.client.controllers.admin;
+package com.bidding_system.backends.client.controllers.admin;
 
-import backends.client.controllers.base.BaseController;
-import backends.client.session.UserSession;
-import backends.common.models.core.Account;
+import com.bidding_system.backends.client.controllers.base.BaseController;
+import com.bidding_system.backends.client.session.UserSession;
+import com.bidding_system.backends.common.models.core.Account;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import backends.client.controllers.ViewLoader;
+import com.bidding_system.backends.client.controllers.ViewLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;

@@ -1,14 +1,14 @@
-package backends.server.service;
+package com.bidding_system.backends.server.service;
 
-import backends.server.database.AuctionDAO;
-import backends.server.database.BidTransactionDAO;
-import backends.server.database.InventoryDAO;
-import backends.server.handler.ServerAuctionManager;
-import backends.common.models.accounts.Admin;
-import backends.common.models.accounts.User;
-import backends.common.models.bidding.Auction;
-import backends.common.models.bidding.BidTransaction;
-import backends.common.models.core.Item;
+import com.bidding_system.backends.server.database.AuctionDAO;
+import com.bidding_system.backends.server.database.BidTransactionDAO;
+import com.bidding_system.backends.server.database.InventoryDAO;
+import com.bidding_system.backends.server.handler.ServerAuctionManager;
+import com.bidding_system.backends.common.models.accounts.Admin;
+import com.bidding_system.backends.common.models.accounts.User;
+import com.bidding_system.backends.common.models.bidding.Auction;
+import com.bidding_system.backends.common.models.bidding.BidTransaction;
+import com.bidding_system.backends.common.models.core.Item;
 
 import java.io.IOException;
 import java.time.Duration;

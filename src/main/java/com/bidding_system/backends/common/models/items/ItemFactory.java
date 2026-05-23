@@ -1,6 +1,6 @@
-package backends.common.models.items;
+package com.bidding_system.backends.common.models.items;
 
-import backends.common.models.core.Item;
+import com.bidding_system.backends.common.models.core.Item;
 
 // Dựa vào tham số type được nhập vào mà hàm createItem (Factory pattern) sẽ return object kiểu sản phẩm tương ứng
 public class ItemFactory {
