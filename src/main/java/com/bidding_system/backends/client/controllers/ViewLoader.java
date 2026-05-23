@@ -15,9 +15,9 @@ public final class ViewLoader {
             "/views/admin/"
     };
     private static final Path[] FALLBACK_VIEW_DIRECTORIES = {
-            Path.of("src", "main", "java", "com", "Bidding System", "resources", "views"),
-            Path.of("src", "main", "java", "com", "Bidding System", "resources", "views", "user"),
-            Path.of("src", "main", "java", "com", "Bidding System", "resources", "views", "admin")
+            Path.of("src", "main", "java", "com", "Bidding System", "src/main/resources", "views"),
+            Path.of("src", "main", "java", "com", "Bidding System", "src/main/resources", "views", "user"),
+            Path.of("src", "main", "java", "com", "Bidding System", "src/main/resources", "views", "admin")
     };
 
     private ViewLoader() {
