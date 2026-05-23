@@ -157,7 +157,7 @@
                             <children>
                                 <Label text="Price Trend Monitor" textFill="#0f172a"><font><Font name="System Bold" size="22.0" /></font></Label>
                                 <LineChart fx:id="priceChart"
-                                           stylesheets="@../style.css"
+                                           stylesheets="@../../css/style.css"
                                            animated="false"
                                            createSymbols="true"
                                            horizontalGridLinesVisible="true"
