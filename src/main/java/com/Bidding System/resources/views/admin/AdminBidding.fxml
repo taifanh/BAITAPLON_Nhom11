@@ -174,18 +174,9 @@
                         <VBox minWidth="380.0" prefWidth="420.0" spacing="16.0" style="-fx-background-color: white; -fx-background-radius: 24; -fx-padding: 24 28 24 28; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 22, 0.12, 0, 8);">
                             <children>
                                 <Label text="Full Bid Logs" textFill="#0f172a"><font><Font name="System Bold" size="22.0" /></font></Label>
-                                <VBox spacing="10.0" VBox.vgrow="ALWAYS">
-                                    <children>
-                                        <HBox alignment="CENTER_LEFT" spacing="12.0" style="-fx-background-color: #f8fafc; -fx-background-radius: 14; -fx-padding: 12 14 12 14;">
-                                            <children>
-                                                <Label prefWidth="120.0" text="Bidder ID" textFill="#64748b" />
-                                                <Label prefWidth="100.0" text="Amount" textFill="#64748b" />
-                                                <Label text="Timestamp" textFill="#64748b" />
-                                            </children>
-                                        </HBox>
-                                        <ListView fx:id="bidHistoryList" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;" />
-                                    </children>
-                                </VBox>
+                                <TableView fx:id="bidHistoryTable"
+                                           VBox.vgrow="ALWAYS"
+                                           style="-fx-background-radius: 14; -fx-border-color: #dbe4f0; -fx-border-radius: 14; -fx-background-color: white; -fx-control-inner-background: white; -fx-table-cell-border-color: #e2e8f0; -fx-text-background-color: #0f172a;" />
                             </children>
                         </VBox>
                     </children>

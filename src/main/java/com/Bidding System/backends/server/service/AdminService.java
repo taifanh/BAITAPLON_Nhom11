@@ -2,6 +2,8 @@ package backends.server.service;
 
 import backends.common.messages.Common.Createitempayload;
 import backends.common.messages.MsgAuction.AdminActionCommand;
+import backends.common.messages.MsgData.BidHistoryDataResponse;
+import backends.common.messages.MsgData.BidHistoryRecordDto;
 import backends.common.messages.MsgData.InventoryDataResponse;
 import backends.common.messages.MsgData.RequestListDataResponse;
 import backends.common.models.accounts.Admin;
@@ -10,6 +12,7 @@ import backends.common.models.core.Item;
 import backends.common.models.items.ItemFactory;
 import backends.common.models.items.ItemType;
 import backends.server.database.InventoryDAO;
+import backends.server.database.BidTransactionDAO;
 import backends.server.database.RequestLogDAO;
 import backends.server.handler.AuctionRoom;
 import backends.server.handler.ClientHandler;
@@ -21,6 +24,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class AdminService {
     private static final String ADD_ITEM_REQUEST_TYPE = "additem";
@@ -54,6 +59,31 @@ public final class AdminService {
         RequestListDataResponse response = new RequestListDataResponse();
 
         response.requests = requestLogDAODB.getRequestsByType("additem");
+
+        return mapper.writeValueAsString(response);
+    }
+
+    public static String fetchBidHistory(ClientHandler handler, JsonNode node) throws Exception {
+        String auctionId = node.path("auctionId").asText("");
+        BidTransactionDAO bidTransactionDAO = new BidTransactionDAO();
+        BidHistoryDataResponse response = new BidHistoryDataResponse();
+        response.auctionId = auctionId;
+        response.records = new ArrayList<>();
+
+        if (!auctionId.isBlank()) {
+            List<BidTransactionDAO.BidHistoryDisplayRecord> records =
+                    bidTransactionDAO.getBidHistoryForDisplay(auctionId);
+            for (BidTransactionDAO.BidHistoryDisplayRecord record : records) {
+                response.records.add(new BidHistoryRecordDto(
+                        record.auctionId(),
+                        record.bidderId(),
+                        record.bidderName(),
+                        record.itemId(),
+                        record.amount(),
+                        record.bidTime()
+                ));
+            }
+        }
 
         return mapper.writeValueAsString(response);
     }
