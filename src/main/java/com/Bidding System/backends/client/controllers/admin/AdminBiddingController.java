@@ -359,7 +359,7 @@ public class AdminBiddingController extends BaseController {
         if (response.records != null) {
             for (BidHistoryRecordDto record : response.records) {
                 priceSeries.getData().add(new XYChart.Data<>(index, record.amount));
-                rows.add(CustomBidHistoryCell.toRow(index, record));
+                rows.add(0, CustomBidHistoryCell.toRow(index, record));
                 index++;
             }
         }

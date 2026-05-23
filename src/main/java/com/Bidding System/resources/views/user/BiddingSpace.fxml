@@ -148,7 +148,7 @@
                             <children>
                                 <VBox spacing="16.0" style="-fx-background-color: white; -fx-background-radius: 24; -fx-padding: 24 28 24 28; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 22, 0.12, 0, 8);" HBox.hgrow="ALWAYS">
                                     <children>
-                                        <LineChart fx:id="priceChart" animated="false" createSymbols="true" horizontalGridLinesVisible="true" legendVisible="false" minHeight="230.0" style="-fx-background-color: #f8fafc; -fx-background-radius: 18; -fx-border-color: #dbe4f0; -fx-border-radius: 18;" stylesheets="@../css/style.css" title="Bid price trend" verticalGridLinesVisible="false">
+                                        <LineChart fx:id="priceChart" animated="false" createSymbols="true" horizontalGridLinesVisible="true" legendVisible="false" minHeight="230.0" style="-fx-background-color: #f8fafc; -fx-background-radius: 18; -fx-border-color: #dbe4f0; -fx-border-radius: 18;" stylesheets="@../../css/style.css" title="Bid price trend" verticalGridLinesVisible="false">
 
                                             <xAxis>
                                                 <NumberAxis tickLabelFill="#1e293b" />
