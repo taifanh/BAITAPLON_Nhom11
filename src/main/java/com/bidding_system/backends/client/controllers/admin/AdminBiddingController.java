@@ -308,6 +308,7 @@ public class AdminBiddingController extends BaseController {
     private void applyEndedStatus() {
         currentAuctionId = null;
         resetClock();
+        selectedItem = null;
         buttonStartEndAuction.setText("START AUCTION");
         setTime.setDisable(false);
         fieldHighBidder.setText("-");

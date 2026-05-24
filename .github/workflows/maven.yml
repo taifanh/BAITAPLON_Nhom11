@@ -38,3 +38,7 @@ jobs:
         with:
           name: Bidding-System-Executable # Tên của file khi tải về trên web
           path: target/*.jar # Đường dẫn tới file .jar mà Maven vừa tạo ra
+
+      # Checkstyle maven
+      - name: Run Tests with Maven
+        run: mvn clean test

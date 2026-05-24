@@ -2,11 +2,13 @@ package com.bidding_system.backends.server.service;
 
 import com.bidding_system.backends.common.messages.Common.Createitempayload;
 import com.bidding_system.backends.common.messages.Common.Message;
+import com.bidding_system.backends.common.messages.Common.MessageType;
 import com.bidding_system.backends.common.messages.Common.RemoveRequestpayload;
 import com.bidding_system.backends.common.messages.Common.SigninPayload;
 import com.bidding_system.backends.common.messages.Common.SigninResponsePayload;
 import com.bidding_system.backends.common.messages.Common.SignupPayload;
-import com.bidding_system.backends.common.messages.MsgData.*;
+import com.bidding_system.backends.common.messages.MsgData.InventoryDataResponse;
+import com.bidding_system.backends.common.messages.MsgData.RequestListDataResponse;
 import com.bidding_system.backends.common.models.accounts.User;
 import com.bidding_system.backends.common.models.core.Account;
 import com.bidding_system.backends.server.database.InventoryDAO;
@@ -16,6 +18,8 @@ import com.bidding_system.backends.server.database.BidTransactionDAO;
 import com.bidding_system.backends.server.database.UserDAO;
 import com.bidding_system.backends.server.handler.AuctionRoom;
 import com.bidding_system.backends.server.handler.ClientHandler;
+import com.bidding_system.backends.common.messages.Common.*;
+import com.bidding_system.backends.common.messages.MsgData.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -88,7 +92,7 @@ public final class UserService {
         Message msg = new Message();
         msg.Id_user = userId;
         msg.payloadJson = payloadJson;
-        msg.messageType = "additem";
+        msg.messageType = MessageType.ADDITEM.getValue();
 
         Createitempayload payload = mapper.readValue(payloadJson, Createitempayload.class);
         

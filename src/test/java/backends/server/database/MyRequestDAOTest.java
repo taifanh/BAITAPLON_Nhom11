@@ -1,6 +1,7 @@
 package backends.server.database;
 
 import com.bidding_system.backends.common.messages.Common.Message;
+import com.bidding_system.backends.common.messages.Common.MessageType;
 import com.bidding_system.backends.server.database.MyRequestDAO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -38,7 +40,7 @@ public class MyRequestDAOTest {
     void testSaveAndFindRequest() throws Exception {
         Message msg = new Message();
         msg.Id_user = "USER1";
-        msg.messageType = "additem";
+        msg.messageType = MessageType.ADDITEM.getValue();
         msg.payloadJson = "{\"name\": \"test item\"}";
 
         MyRequestDAO.save_myrequest(msg, "REQ123");
@@ -46,7 +48,7 @@ public class MyRequestDAOTest {
         MyRequestDAO.RequestRecord record = myRequestDAO.findByRequestId("REQ123");
         assertNotNull(record);
         assertEquals("USER1", record.userId());
-        assertEquals("additem", record.requestType());
+        assertEquals(MessageType.ADDITEM.getValue(), record.requestType());
         assertEquals(MyRequestDAO.STATUS_PENDING, record.status());
     }
 
@@ -54,7 +56,7 @@ public class MyRequestDAOTest {
     void testUpdateRequestStatus() throws Exception {
         Message msg = new Message();
         msg.Id_user = "USER2";
-        msg.messageType = "withdraw";
+        msg.messageType = "withdraw"; // Note: "withdraw" type không được định nghĩa trong enum, sử dụng cho test
         MyRequestDAO.save_myrequest(msg, "REQ999");
 
         myRequestDAO.updateRequestStatus("REQ999", MyRequestDAO.STATUS_ACCEPTED);

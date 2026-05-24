@@ -25,6 +25,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import com.bidding_system.backends.common.messages.Common.Message;
+import com.bidding_system.backends.common.messages.Common.MessageType;
 import com.bidding_system.backends.common.models.core.Account;
 
 import java.io.IOException;
@@ -71,7 +72,7 @@ public class SignInController {
         pendingStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 
         Message msg = new Message();
-        msg.messageType = "signin";
+        msg.messageType = MessageType.SIGNIN.getValue();
         msg.payloadJson = gson.toJson(new SigninPayload(phoneNumber, password));
 
         UserSession.getConnection().send(msg);// còn tín hiệu gửi login cũ thì sẽ cho client xử lý luôn nếu đăng nhập thành công

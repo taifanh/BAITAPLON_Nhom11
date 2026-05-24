@@ -3,6 +3,7 @@ package com.bidding_system.backends.client.controllers.user;
 import com.bidding_system.backends.client.network.MessageBus;
 import com.bidding_system.backends.client.session.UserSession;
 import com.bidding_system.backends.common.messages.Common.Message;
+import com.bidding_system.backends.common.messages.Common.MessageType;
 import com.bidding_system.backends.common.messages.Common.SignupPayload;
 import com.bidding_system.backends.client.controllers.ViewLoader;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -81,7 +82,7 @@ public class SignUpController {
 
         SignupPayload payload = new SignupPayload(name , email , phoneNumber , password);
         Message msg = new Message();
-        msg.messageType = "signup";
+        msg.messageType = MessageType.SIGNUP.getValue();
         msg.payloadJson = gson.toJson(payload);
         UserSession.getConnection().send(msg);
     }

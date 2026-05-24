@@ -3,6 +3,7 @@ package com.bidding_system.backends.client.controllers.components;
 import com.bidding_system.backends.client.session.UserSession;
 import com.bidding_system.backends.common.messages.Common.Createitempayload;
 import com.bidding_system.backends.common.messages.Common.Message;
+import com.bidding_system.backends.common.messages.Common.MessageType;
 import com.bidding_system.backends.common.messages.Common.RemoveRequestpayload;
 import com.bidding_system.backends.common.messages.MsgData.RequestRecordDto;
 import com.google.gson.Gson;
@@ -70,7 +71,7 @@ public class CustomItemCell extends ListCell<RequestRecordDto> {
 
             Message msg = new Message();
             msg.Id_user = UserSession.getCurrentUser().getId();
-            msg.messageType = "removeitem";
+            msg.messageType = MessageType.REMOVEITEM.getValue();
             msg.payloadJson = payloadJson;
 
             UserSession.getConnection().send(msg);
