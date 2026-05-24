@@ -4,7 +4,6 @@ import com.bidding_system.backends.server.database.AuctionDAO;
 import com.bidding_system.backends.server.database.BidTransactionDAO;
 import com.bidding_system.backends.server.database.InventoryDAO;
 import com.bidding_system.backends.server.database.MyRequestDAO;
-import com.bidding_system.backends.server.handler.BidBatchProcessor;
 import com.bidding_system.backends.server.handler.ServerAuctionManager;
 import com.bidding_system.backends.common.messages.MsgBid.ServerBidRespond;
 import com.bidding_system.backends.common.models.accounts.Admin;
@@ -330,8 +329,6 @@ public final class AuctionService {
     }
 
     private static void syncWinnerFromPersistedBids(Auction auction) throws IOException {
-        BidBatchProcessor.getInstance().flushAuction(auction.getAuctionId());
-
         BidTransactionDAO bidTransactionDAO = new BidTransactionDAO();
         ServerBidRespond maxBidder;
         try {

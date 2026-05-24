@@ -51,9 +51,8 @@ public class CreateItemController {
         String itemName = this.itemName.getText();
 
         Gson gson = new Gson();
-        Createitempayload createitempayload = new Createitempayload(type, itemName, itemInfo, bidPrice, bidIncrement);
+        Createitempayload createitempayload = new Createitempayload(type, itemName, itemInfo, bidPrice);
         String payload = gson.toJson(createitempayload);
-
         Message msg = new Message();
         msg.payloadJson = payload;
         msg.messageType = MessageType.ADDITEM.getValue();
