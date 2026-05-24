@@ -20,8 +20,9 @@ public class AuctionDAO {
     private static final Path DATA_DIRECTORY = Path.of("data");
     private static final Path DATABASE_FILE = DATA_DIRECTORY.resolve("auctions.db");
     private static final String DATABASE_URL = "jdbc:sqlite:" + DATABASE_FILE;
+    private static final String TABLE_NAME = "auction";
     private static final String CREATE_AUCTIONS_TABLE_SQL = """
-            CREATE TABLE IF NOT EXISTS auctionDAO (
+            CREATE TABLE IF NOT EXISTS auction (
                 auctionId TEXT PRIMARY KEY,
                 startAt TEXT NOT NULL,
                 endAt TEXT NOT NULL,
@@ -36,14 +37,14 @@ public class AuctionDAO {
         try {
             initializeStorage();
         } catch (SQLException e) {
-            throw new IOException("Khong the khoi tao bang auctionDAO", e);
+            throw new IOException("Khong the khoi tao bang auction", e);
         }
     }
 
     public synchronized void saveAuction(Auction auction) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     INSERT INTO auctionDAO(auctionId,startAt,endAt,status,ItemId,highestBid,highestBidderId)
+                     INSERT INTO auction(auctionId,startAt,endAt,status,ItemId,highestBid,highestBidderId)
                      VALUES(?,?,?,?,?,?,?)
                      """)) {
             statement.setString(1, auction.getAuctionId());
@@ -62,7 +63,7 @@ public class AuctionDAO {
     public synchronized void updateHighestBid(String auctionId, double highestBid, String highestBidderId) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     UPDATE auctionDAO
+                     UPDATE auction
                      SET highestBid = ?, highestBidderId = ?
                      WHERE auctionId = ?
                      """)) {
@@ -78,7 +79,7 @@ public class AuctionDAO {
     public synchronized void updateAuctionState(String auctionId, Auction.Status status, LocalDateTime endAt, double highestBid, String highestBidderId) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     UPDATE auctionDAO
+                     UPDATE auction
                      SET status = ?, endAt = ?, highestBid = ?, highestBidderId = ?
                      WHERE auctionId = ?
                      """)) {
@@ -97,7 +98,7 @@ public class AuctionDAO {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
                      SELECT 1
-                     FROM auctionDAO
+                     FROM auction
                      WHERE ItemId = ? AND status = ?
                      LIMIT 1
                      """)) {
@@ -115,18 +116,18 @@ public class AuctionDAO {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
                      SELECT auctionId, startAt, endAt, status, ItemId, highestBid, highestBidderId
-                     FROM auctionDAO
+                     FROM auction
                      WHERE status = ?
                      ORDER BY endAt ASC
                      """)) {
             statement.setString(1, Auction.Status.ACTIVE.name());
             try (ResultSet resultSet = statement.executeQuery()) {
-                List<Auction> auctionDAO = new ArrayList<>();
+                List<Auction> auctions = new ArrayList<>();
                 InventoryDAO inventoryDAO = new InventoryDAO();
                 while (resultSet.next()) {
-                    auctionDAO.add(mapAuction(resultSet, inventoryDAO));
+                    auctions.add(mapAuction(resultSet, inventoryDAO));
                 }
-                return auctionDAO;
+                return auctions;
             }
         } catch (SQLException e) {
             throw new IOException("Khong the doc danh sach auction dang hoat dong", e);
@@ -137,7 +138,7 @@ public class AuctionDAO {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
                      SELECT auctionId, startAt, endAt, status, ItemId, highestBid, highestBidderId
-                     FROM auctionDAO
+                     FROM auction
                      WHERE auctionId = ?
                      LIMIT 1
                      """)) {
@@ -157,7 +158,7 @@ public class AuctionDAO {
     public synchronized void updateEndTime(String auctionId, LocalDateTime endAt) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                 UPDATE auctions
+                 UPDATE auction
                  SET endAt = ?
                  WHERE auctionId = ?
                  """)) {
@@ -179,7 +180,7 @@ public class AuctionDAO {
     }
 
     private void ensureColumnExists(Connection connection, String columnName, String columnDefinition) throws SQLException {
-        try (PreparedStatement statement = connection.prepareStatement("PRAGMA table_info(auctionDAO)");
+        try (PreparedStatement statement = connection.prepareStatement("PRAGMA table_info(" + TABLE_NAME + ")");
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
                 if (columnName.equalsIgnoreCase(resultSet.getString("name"))) {
@@ -189,9 +190,10 @@ public class AuctionDAO {
         }
 
         try (Statement statement = connection.createStatement()) {
-            statement.executeUpdate("ALTER TABLE auctionDAO ADD COLUMN " + columnName + " " + columnDefinition);
+            statement.executeUpdate("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + columnName + " " + columnDefinition);
         }
     }
+
 
     private void ensureDataDirectoryExists() throws IOException {
         if (Files.notExists(DATA_DIRECTORY)) {
