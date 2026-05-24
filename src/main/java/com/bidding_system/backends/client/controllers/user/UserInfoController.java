@@ -1,11 +1,12 @@
-package backends.client.controllers.user;
+package com.bidding_system.backends.client.controllers.user;
 
-import backends.client.controllers.ViewLoader;
-import backends.client.controllers.base.BaseController;
-import backends.client.network.MessageBus;
-import backends.client.session.UserSession;
-import backends.common.models.accounts.User;
-import backends.common.messages.Common.MessageType;
+import com.bidding_system.backends.client.controllers.ViewLoader;
+import com.bidding_system.backends.client.controllers.base.BaseController;
+import com.bidding_system.backends.client.network.MessageBus;
+import com.bidding_system.backends.client.session.UserSession;
+import com.bidding_system.backends.common.messages.Common.Message;
+import com.bidding_system.backends.common.models.accounts.User;
+import com.bidding_system.backends.common.messages.Common.MessageType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
@@ -33,6 +34,7 @@ public class UserInfoController extends BaseController {
     // ── Constants ─────────────────────────────────────────────────
     private static final String MSG_BALANCE_OK  = "BALANCE_OK";
     private static final String MSG_DEPOSIT_OK  = "deposit_OK";
+    private static final String MSG_GET_BALANCE = "GET_BALANCE";
 
     // ── State ─────────────────────────────────────────────────────
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -75,7 +77,7 @@ public class UserInfoController extends BaseController {
     }
 
     private void requestLatestBalance() {
-        var msg = new backends.common.messages.Common.Message();
+        var msg = new Message();
         msg.messageType = MessageType.GET_BALANCE.getValue();
         msg.Id_user     = currentUser.getId();
         UserSession.getConnection().send(msg);

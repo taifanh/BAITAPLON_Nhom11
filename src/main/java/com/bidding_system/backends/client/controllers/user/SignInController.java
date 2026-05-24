@@ -24,9 +24,9 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import backends.common.messages.Common.Message;
-import backends.common.messages.Common.MessageType;
-import backends.common.models.core.Account;
+import com.bidding_system.backends.common.messages.Common.Message;
+import com.bidding_system.backends.common.messages.Common.MessageType;
+import com.bidding_system.backends.common.models.core.Account;
 
 import java.io.IOException;
 import java.util.function.Consumer;
