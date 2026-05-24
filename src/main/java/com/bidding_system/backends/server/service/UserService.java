@@ -106,7 +106,7 @@ public final class UserService {
         responseNode.put("request_id", requestId);
         
         handler.send(responseNode.toString());
-        AuctionRoom.sendadmin(responseNode.toString());
+        AuctionRoom.sendToAdmin(responseNode.toString());
         return null;
     }
 

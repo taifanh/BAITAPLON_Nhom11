@@ -5,10 +5,11 @@ public class AuctionStatusMessage {
     public String status;
     public String itemId;
     public String auctionId;
+    public double increment;
     public String sellerId;
     public long endTimeEpoch;
     public String maxBidderName;
-    public String maxBidderAmount;
+    public double maxBidderAmount;
     public String startingPrice;
 
     public AuctionStatusMessage() {}

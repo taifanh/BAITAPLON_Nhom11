@@ -48,7 +48,7 @@ public abstract class BaseController {
 
     @FXML
     public void openProfile(ActionEvent event) throws IOException {
-        switchScene(event, "UserInfo.fxml", "User Profile");
+        switchScene(event, "UserProfile.fxml", "User Profile");
     }
 
     @FXML

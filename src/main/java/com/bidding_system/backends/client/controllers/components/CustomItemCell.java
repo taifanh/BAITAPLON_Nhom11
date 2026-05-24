@@ -55,7 +55,6 @@ public class CustomItemCell extends ListCell<RequestRecordDto> {
                                 "User ID: " + request.userId + "\n" +
                                 "Type: " + payload.getItemType() + "\n" +
                                 "Base price: " + payload.getBasePrice() + "\n" +
-                                "Increment: " + payload.getBidIncrement() + "\n" +
                                 "Info: " + payload.getItemInfo() + "\n" +
                                 "Status: " + request.status + "\n" +
                                 "Time: " + request.time

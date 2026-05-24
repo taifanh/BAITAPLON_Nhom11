@@ -263,7 +263,6 @@ public class AdminBiddingController extends BaseController {
                     !selectedItem.getId().equals(msg.auctionId)) return;
             itemName.setText(msg.itemName);
             basePrice.setText(String.valueOf(msg.startingPrice));
-            bidIncrement.setText(String.valueOf(msg.bidIncrement));
         });
     }
 
@@ -274,6 +273,7 @@ public class AdminBiddingController extends BaseController {
         Platform.runLater(() -> {
             fieldHighBidder.setText(msg.maxBidder.name);
             fieldCurrentAmount.setText(String.valueOf(msg.maxBidder.amount));
+            bidIncrement.setText(String.valueOf(msg.currentIncrement));
             requestBidVisuals(currentAuctionId);
         });
     }
@@ -285,9 +285,10 @@ public class AdminBiddingController extends BaseController {
         buttonStartEndAuction.setText("END AUCTION");
         setTime.setDisable(true);
         applyItemDetails(selectedItem);
+        bidIncrement.setText(String.valueOf(msg.increment));
         if (msg.maxBidderName != null && !msg.maxBidderName.isBlank()) {
             fieldHighBidder.setText(msg.maxBidderName);
-            fieldCurrentAmount.setText(msg.maxBidderAmount);
+            fieldCurrentAmount.setText(String.valueOf(msg.maxBidderAmount));
         } else {
             fieldHighBidder.setText("No bids yet");
             fieldCurrentAmount.setText(String.valueOf(currentStartingPrice));
@@ -410,7 +411,6 @@ public class AdminBiddingController extends BaseController {
         if (item == null) return;
         itemName.setText(item.getName());
         basePrice.setText(String.valueOf(item.getPrices()));
-        bidIncrement.setText(String.valueOf(item.getBidIncrement()));
         currentStartingPrice = item.getPrices();
     }
 

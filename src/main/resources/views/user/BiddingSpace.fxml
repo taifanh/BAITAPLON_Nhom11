@@ -1,23 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.chart.LineChart?>
-<?import javafx.scene.chart.NumberAxis?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="1300.0" prefWidth="1366.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bidding_system.backends.client.controllers.user.BiddingSpaceController">
+<AnchorPane prefHeight="1300.0" prefWidth="1366.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bidding_system.backends.client.controllers.user.BiddingSpaceController">
     <children>
         <HBox alignment="CENTER_LEFT" prefHeight="82.0" spacing="16.0" style="-fx-background-color: white; -fx-padding: 0 40 0 40; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.10), 18, 0.10, 0, 4);" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
@@ -92,18 +80,25 @@
                                                     </font>
                                                 </Label>
                                                 <TextField fx:id="fieldHighBidder" maxWidth="1.7976931348623157E308" prefHeight="38.0" style="-fx-background-radius: 12;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                                                <Label alignment="CENTER" minHeight="36.0" prefWidth="150.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5); -fx-background-radius: 10;" text="Current Bid" textFill="#9a3412" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                                <Label alignment="CENTER" minHeight="36.0" prefWidth="150.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5); -fx-background-radius: 10;" text="Next Minimum Bid" textFill="#9a3412" GridPane.rowIndex="2">
                                                     <font>
                                                         <Font size="17.0" />
                                                     </font>
                                                 </Label>
                                                 <TextField fx:id="fieldCurrentAmount" maxWidth="1.7976931348623157E308" prefHeight="38.0" style="-fx-background-radius: 12;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <Label alignment="CENTER" minHeight="36.0" prefWidth="150.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5); -fx-background-radius: 10;" text="Current Bid" textFill="#9a3412" GridPane.rowIndex="1">
+                                       <font>
+                                          <Font size="17.0" />
+                                       </font>
+                                    </Label>
+                                    <TextField fx:id="fieldNextMinimumBid" maxWidth="1.7976931348623157E308" prefHeight="38.0" prefWidth="282.0" style="-fx-background-radius: 12;" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                             </children>
                                             <columnConstraints>
                                                 <javafx.scene.layout.ColumnConstraints minWidth="150.0" prefWidth="150.0" />
                                                 <javafx.scene.layout.ColumnConstraints hgrow="ALWAYS" />
                                             </columnConstraints>
                                  <rowConstraints>
+                                    <RowConstraints />
                                     <RowConstraints />
                                     <RowConstraints />
                                  </rowConstraints>
@@ -120,7 +115,7 @@
                                                 <TextField fx:id="fieldItemName" maxWidth="1.7976931348623157E308" prefHeight="34.0" style="-fx-background-radius: 10; -fx-border-radius: 14; -fx-border-color: #000000; -fx-background-color: white;" />
                                                 <Label text="Opening Bid" textFill="#64748b" />
                                                 <TextField fx:id="fieldBasePrice" maxWidth="1.7976931348623157E308" prefHeight="34.0" style="-fx-background-radius: 10; -fx-border-radius: 14; -fx-border-color: #000000; -fx-background-color: white;" />
-                                                <Label text="Bid Increment" textFill="#64748b" />
+                                                <Label text="Current Bid Increment" textFill="#64748b" />
                                                 <TextField fx:id="fieldIncrement" maxWidth="1.7976931348623157E308" prefHeight="34.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-radius: 14; -fx-border-color: #000000;" />
                                             </children>
                                         </VBox>
@@ -131,7 +126,6 @@
                                                         <Font size="20.0" />
                                                     </font>
                                                 </Label>
-                                                <TextField fx:id="fieldAutoIncrement" maxWidth="1.7976931348623157E308" prefHeight="38.0" promptText="Auto increment" style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #fdba74;" />
                                                 <TextField fx:id="fieldMaxLimit" maxWidth="1.7976931348623157E308" prefHeight="38.0" promptText="Max limit" style="-fx-background-color: white; -fx-background-radius: 14; -fx-border-radius: 14; -fx-border-color: #fdba74;" />
                                                 <Button fx:id="buttonAutoBid" alignment="CENTER" mnemonicParsing="false" onAction="#handleAutoBid" prefHeight="34.0" prefWidth="108.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="AUTO" />
                                                 <Region VBox.vgrow="ALWAYS" />
@@ -168,9 +162,7 @@
                                                 <Font name="System Bold" size="22.0" />
                                             </font>
                                         </Label>
-                                        <TableView fx:id="bidHistoryTable"
-                                                   VBox.vgrow="ALWAYS"
-                                                   style="-fx-background-radius: 14; -fx-border-color: #dbe4f0; -fx-border-radius: 14; -fx-background-color: white; -fx-control-inner-background: white; -fx-table-cell-border-color: #e2e8f0; -fx-text-background-color: #0f172a;" />
+                                        <TableView fx:id="bidHistoryTable" style="-fx-background-radius: 14; -fx-border-color: #dbe4f0; -fx-border-radius: 14; -fx-background-color: white; -fx-control-inner-background: white; -fx-table-cell-border-color: #e2e8f0; -fx-text-background-color: #0f172a;" VBox.vgrow="ALWAYS" />
                                     </children>
                                 </VBox>
                             </children>

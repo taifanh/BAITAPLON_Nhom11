@@ -21,7 +21,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.function.Consumer;
 
-public class UserInfoController extends BaseController {
+public class UserProfileController extends BaseController {
 
     // ── FXML fields ──────────────────────────────────────────────
     @FXML private Label labelName;

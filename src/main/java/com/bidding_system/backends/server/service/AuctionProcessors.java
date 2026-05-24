@@ -2,16 +2,13 @@ package com.bidding_system.backends.server.service;
 
 import com.bidding_system.backends.common.messages.MsgAuction.AuctionCommandMessage;
 import com.bidding_system.backends.common.messages.MsgAuction.AuctionStatusMessage;
-import com.bidding_system.backends.common.messages.MsgBid.CancelAutoBidding;
-import com.bidding_system.backends.common.messages.MsgBid.ClientSendBid;
-import com.bidding_system.backends.common.messages.MsgBid.RegisterAutoBidding;
-import com.bidding_system.backends.common.messages.MsgBid.ServerBidRespond;
+import com.bidding_system.backends.common.messages.MsgBid.*;
 import com.bidding_system.backends.common.models.bidding.Auction;
 import com.bidding_system.backends.server.database.BidTransactionDAO;
 import com.bidding_system.backends.server.database.InventoryDAO;
 import com.bidding_system.backends.server.database.UserDAO;
 import com.bidding_system.backends.server.handler.*;
-import com.bidding_system.backends.server.handler.*;
+import com.bidding_system.backends.server.policy.IncrementPolicy;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -36,20 +33,29 @@ public class AuctionProcessors {
         statusMsg.auctionId = (managedAuction != null) ? managedAuction.getAuctionId() : "";
         boolean isRunning = !remaining.isZero() && !remaining.isNegative() && managedAuction != null;
         if (isRunning) {
-            statusMsg.status = "STARTED";
+            statusMsg.status       = "STARTED";
             statusMsg.endTimeEpoch = System.currentTimeMillis() + remaining.toMillis();
+
             try {
                 InventoryDAO inventoryDAODB = new InventoryDAO();
                 statusMsg.sellerId = inventoryDAODB.getUserIdByItemId(itemId);
             } catch (Exception e) {
                 statusMsg.sellerId = "";
             }
-            BidTransactionDAO bidDb = new BidTransactionDAO();
+
+            BidTransactionDAO bidDb   = new BidTransactionDAO();
             ServerBidRespond maxBidder = bidDb.getMaxBidder(managedAuction.getAuctionId());
+
             if (maxBidder != null && maxBidder.userId != null) {
-                statusMsg.maxBidderAmount = String.valueOf(maxBidder.amount);
+                statusMsg.maxBidderAmount = maxBidder.amount;
                 String name = userDAO.getNameById(maxBidder.userId);
-                statusMsg.maxBidderName = (name != null) ? name : "";
+                statusMsg.maxBidderName   = (name != null) ? name : "";
+                // increment tính theo giá cao nhất hiện tại
+                statusMsg.increment = IncrementPolicy.getIncrement(maxBidder.amount);
+            } else {
+                // chưa có ai bid → tính increment theo giá khởi điểm của item
+                double startingPrice = managedAuction.getItem().getPrices();
+                statusMsg.increment  = IncrementPolicy.getIncrement(startingPrice);
             }
         } else if (managedAuction == null) {
             statusMsg.status = "NOT_STARTED";
@@ -100,7 +106,7 @@ public class AuctionProcessors {
             error.put("message", "Không xác định được phiên đấu giá");
             return error.toString();
         }
-        AutoBidEngine.getInstance().register(new AutoBidEngine.AutoBidEntry(msg.userId, msg.auctionId, msg.maxBid, msg.increment, System.currentTimeMillis()));
+        AutoBidEngine.getInstance().register(new AutoBidEngine.AutoBidEntry(msg.userId, msg.auctionId, msg.maxBid, System.currentTimeMillis()));
         ObjectNode ack = mapper.createObjectNode();
         ack.put("type", "AUTO_BID_REGISTERED");
         return ack.toString();
@@ -119,9 +125,10 @@ public class AuctionProcessors {
             return error.toString();
         }
         AutoBidEngine.getInstance().remove(msg.auctionId, msg.userId);
-        ObjectNode ack = mapper.createObjectNode();
-        ack.put("type", "AUTO_BID_CANCELLED");
-        return ack.toString();
+        ObjectNode response = mapper.createObjectNode();
+        response.put("type", "AUTO_BID_CANCELLED");
+        response.put("message", "Auto bidding mode is cancelled");
+        return response.toString();
     }
 
     public static String placeBid(ClientHandler handler, JsonNode node) throws Exception {
@@ -137,14 +144,8 @@ public class AuctionProcessors {
             error.put("message", "Không xác định được phiên đấu giá");
             return error.toString();
         }
-
-        BidBatchProcessor.getInstance().submitBid(info.id, auctionId, info.amount);
-
-        ObjectNode ack = mapper.createObjectNode();
-        ack.put("type", "BID_QUEUED");
-        ack.put("auctionId", auctionId);
-        ack.put("amount", info.amount);
-        return ack.toString();
+        BidProcessor.getInstance().submit(info.id, auctionId, info.amount);
+        return null;
     }
 
     public static String getAuctions(ClientHandler handler, JsonNode node) throws Exception {

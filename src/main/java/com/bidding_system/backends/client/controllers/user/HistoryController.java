@@ -1,39 +1,30 @@
 package com.bidding_system.backends.client.controllers.user;
 
-import com.bidding_system.backends.client.controllers.base.BaseController;
-import com.bidding_system.backends.client.network.MessageBus;
+import com.bidding_system.backends.client.controllers.ViewLoader;
 import com.bidding_system.backends.client.session.UserSession;
 import com.bidding_system.backends.common.messages.Common.Createitempayload;
-import com.bidding_system.backends.common.messages.Common.Message;
-import com.bidding_system.backends.common.messages.MsgData.BidHistoryDataResponse;
-import com.bidding_system.backends.common.messages.MsgData.BidHistoryRecordDto;
-import com.bidding_system.backends.common.messages.MsgData.FetchBidHistoryRequest;
-import com.bidding_system.backends.common.messages.MsgData.FetchUserRequestsRequest;
-import com.bidding_system.backends.common.messages.MsgData.RequestRecordDto;
-import com.bidding_system.backends.common.messages.MsgData.UserRequestListResponse;
 import com.bidding_system.backends.common.models.accounts.User;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.bidding_system.backends.server.database.BidTransactionDAO;
+import com.bidding_system.backends.server.database.MyRequestDAO;
 import com.google.gson.Gson;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Rectangle2D;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Screen;
+import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.function.Consumer;
 
-public class HistoryController extends BaseController {
-    private static final String MSG_USER_REQUESTS = "USER_REQUEST_LIST_DATA";
-    private static final String MSG_USER_BID_HISTORY = "USER_BID_HISTORY_DATA";
-    private static final ObjectMapper MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
-
+public class HistoryController {
     @FXML
     private Label summaryLabel;
 
@@ -56,36 +47,64 @@ public class HistoryController extends BaseController {
     private TableColumn<HistoryRow, String> timeColumn;
 
     private final ObservableList<HistoryRow> rows = FXCollections.observableArrayList();
-    private final ObservableList<HistoryRow> sellRows = FXCollections.observableArrayList();
-    private final ObservableList<HistoryRow> bidRows = FXCollections.observableArrayList();
-
-    private Consumer<String> historyHandler;
 
     @FXML
-    public void initialize() throws IOException {
+    public void initialize() {
         typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
         itemColumn.setCellValueFactory(new PropertyValueFactory<>("item"));
         amountColumn.setCellValueFactory(new PropertyValueFactory<>("amount"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
         timeColumn.setCellValueFactory(new PropertyValueFactory<>("time"));
         historyTable.setItems(rows);
-        subscribeHistoryMessages();
         loadHistory();
-    }
-
-    @Override
-    public void cleanup() {
-        if (historyHandler != null) {
-            MessageBus.getInstance().unsubscribe(historyHandler);
-        }
     }
 
     @FXML
     public void backHome(ActionEvent event) throws IOException {
-        switchScene(event, "HomePage.fxml", "Home");
+        switchMainScene(event, "HomePage.fxml", "Home");
     }
 
-    private void loadHistory() throws IOException {
+    @FXML
+    public void openProfile(ActionEvent event) throws IOException {
+        switchMainScene(event, "UserProfile.fxml", "User Profile");
+    }
+
+    @FXML
+    public void openBiddingSpace(ActionEvent event) throws IOException {
+        switchMainScene(event, "BiddingSpace.fxml", "Bidding Space");
+    }
+
+    @FXML
+    public void openSellItem(ActionEvent event) throws IOException {
+        switchMainScene(event, "SellItem.fxml", "Sell Item");
+    }
+
+    @FXML
+    public void openHistory(ActionEvent event) throws IOException {
+        switchMainScene(event, "History.fxml", "Transaction History");
+    }
+
+    private void switchMainScene(ActionEvent event, String viewFileName, String title) throws IOException {
+        Parent root = ViewLoader.load(viewFileName);
+        Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        window.setScene(new Scene(root));
+        window.setTitle(title);
+        fitToVisibleScreen(window);
+        window.show();
+    }
+
+    private void fitToVisibleScreen(Stage stage) {
+        Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
+        stage.setMaximized(false);
+        stage.setMinWidth(1000);
+        stage.setMinHeight(620);
+        stage.setX(bounds.getMinX());
+        stage.setY(bounds.getMinY());
+        stage.setWidth(bounds.getWidth());
+        stage.setHeight(bounds.getHeight());
+    }
+
+    private void loadHistory() {
         User user = UserSession.getCurrentUser();
         if (user == null) {
             summaryLabel.setText("No user session found.");
@@ -93,88 +112,44 @@ public class HistoryController extends BaseController {
         }
 
         rows.clear();
-        sellRows.clear();
-        bidRows.clear();
-        summaryLabel.setText("Loading transaction history...");
-        requestSellRequests(user.getId());
-        requestBidRows(user.getId());
+        loadSellRequests(user.getId());
+        loadBidRows(user.getId());
+        summaryLabel.setText(rows.size() + " transaction records");
     }
 
-    private void subscribeHistoryMessages() {
-        historyHandler = raw -> {
-            try {
-                JsonNode node = MAPPER.readTree(raw);
-                String type = node.path("type").asText();
-                if (MSG_USER_REQUESTS.equals(type)) {
-                    handleSellRequests(raw);
-                } else if (MSG_USER_BID_HISTORY.equals(type)) {
-                    handleBidHistory(raw);
+    private void loadSellRequests(String userId) {
+        try {
+            Gson gson = new Gson();
+            MyRequestDAO myRequestDAO = new MyRequestDAO();
+            for (MyRequestDAO.RequestRecord record : myRequestDAO.getMyRequestsByType("additem")) {
+                if (!userId.equals(record.userId())) {
+                    continue;
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        };
-        MessageBus.getInstance().subscribe(historyHandler);
-    }
-
-    private void requestSellRequests(String userId) throws IOException {
-        Message msg = new Message();
-        msg.Id_user = userId;
-        msg.messageType = "FETCH_USER_REQUEST";
-        msg.payloadJson = MAPPER.writeValueAsString(new FetchUserRequestsRequest(userId, "additem"));
-        UserSession.getConnection().send(msg);
-    }
-
-    private void requestBidRows(String userId) {
-        UserSession.getConnection().send(FetchBidHistoryRequest.forBidder(userId));
-    }
-
-    private void handleSellRequests(String raw) throws IOException {
-        UserRequestListResponse response = MAPPER.readValue(raw, UserRequestListResponse.class);
-        ObservableList<HistoryRow> loadedRows = FXCollections.observableArrayList();
-        Gson gson = new Gson();
-
-        if (response.requests != null) {
-            for (RequestRecordDto record : response.requests) {
-                Createitempayload payload = gson.fromJson(record.requestInfo, Createitempayload.class);
-                String itemName = payload == null ? record.requestId : payload.getItem_name();
+                Createitempayload payload = gson.fromJson(record.requestInfo(), Createitempayload.class);
+                String itemName = payload == null ? record.requestId() : payload.getItem_name();
                 String amount = payload == null ? "" : String.valueOf(payload.getBasePrice());
-                loadedRows.add(new HistoryRow("Sell request", itemName, amount, record.status, record.time));
+                rows.add(new HistoryRow("Sell request", itemName, amount, record.status(), record.time()));
             }
+        } catch (Exception e) {
+            rows.add(new HistoryRow("Sell request", "Cannot load item history", "", "ERROR", ""));
         }
-
-        Platform.runLater(() -> {
-            sellRows.setAll(loadedRows);
-            refreshRows();
-        });
     }
 
-    private void handleBidHistory(String raw) throws IOException {
-        BidHistoryDataResponse response = MAPPER.readValue(raw, BidHistoryDataResponse.class);
-        ObservableList<HistoryRow> loadedRows = FXCollections.observableArrayList();
-
-        if (response.records != null) {
-            for (BidHistoryRecordDto record : response.records) {
-                loadedRows.add(new HistoryRow(
+    private void loadBidRows(String userId) {
+        try {
+            BidTransactionDAO bidTransactionDAO = new BidTransactionDAO();
+            for (BidTransactionDAO.BidHistoryRecord record : bidTransactionDAO.getBidHistoryByBidder(userId)) {
+                rows.add(new HistoryRow(
                         "Bid",
-                        record.itemId,
-                        String.valueOf(record.amount),
+                        record.itemId(),
+                        String.valueOf(record.amount()),
                         "PLACED",
-                        record.bidTime == null ? "" : record.bidTime.toString()
+                        record.bidTime().toString()
                 ));
             }
+        } catch (Exception e) {
+            rows.add(new HistoryRow("Bid", "Cannot load bid history", "", "ERROR", ""));
         }
-
-        Platform.runLater(() -> {
-            bidRows.setAll(loadedRows);
-            refreshRows();
-        });
-    }
-
-    private void refreshRows() {
-        rows.setAll(sellRows);
-        rows.addAll(bidRows);
-        summaryLabel.setText(rows.size() + " transaction records");
     }
 
     public static class HistoryRow {
