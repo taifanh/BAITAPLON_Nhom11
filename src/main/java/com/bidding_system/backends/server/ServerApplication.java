@@ -1,0 +1,29 @@
+package com.bidding_system.backends.server;
+
+import com.bidding_system.backends.server.service.AuctionService;
+import com.bidding_system.backends.server.handler.ClientHandler;
+
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class ServerApplication {
+
+    public static void start() {
+        ExecutorService executor = Executors.newCachedThreadPool();
+
+        try (ServerSocket serverSocket = new ServerSocket(9999)) {
+            AuctionService.restoreActiveAuctionsOnStartup();
+            System.out.println("[Server] Started on port 9999");
+
+            while (true) {
+                Socket client = serverSocket.accept();
+                System.out.println("[Server] New connection: " + client.getInetAddress());
+                executor.execute(new ClientHandler(client));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}

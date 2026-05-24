@@ -6,10 +6,10 @@ os.makedirs("src/main/java/com/Bidding System/backends/server/handler", exist_ok
 
 client_handler = """package backends.server.handler;
 
-import backends.server.service.AccountService;
-import backends.server.service.AdminService;
-import backends.server.service.AuctionProcessors;
-import backends.server.service.UserService;
+import com.bidding_system.backends.server.service.AccountService;
+import com.bidding_system.backends.server.service.AdminService;
+import com.bidding_system.backends.server.service.AuctionProcessors;
+import com.bidding_system.backends.server.service.UserService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -135,11 +135,11 @@ public class ClientHandler implements Runnable {
 
 account_service = """package backends.server.service;
 
-import backends.common.messages.Common.Change_infopayload;
-import backends.common.messages.Common.Depositpayload;
-import backends.common.messages.Common.Message;
-import backends.server.database.UserDAO;
-import backends.server.handler.ClientHandler;
+import com.bidding_system.backends.common.messages.Common.Change_infopayload;
+import com.bidding_system.backends.common.messages.Common.Depositpayload;
+import com.bidding_system.backends.common.messages.Common.Message;
+import com.bidding_system.backends.server.database.UserDAO;
+import com.bidding_system.backends.server.handler.ClientHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -195,20 +195,20 @@ public class AccountService {
 
 admin_service = """package backends.server.service;
 
-import backends.common.messages.Common.Createitempayload;
-import backends.common.messages.MsgAuction.AdminActionCommand;
-import backends.common.messages.MsgData.InventoryDataResponse;
-import backends.common.messages.MsgData.RequestListDataResponse;
-import backends.common.models.accounts.Admin;
-import backends.common.models.bidding.Auction;
-import backends.common.models.core.Item;
-import backends.common.models.items.ItemFactory;
-import backends.common.models.items.ItemType;
-import backends.server.database.InventoryDAO;
-import backends.server.database.RequestLogDAO;
-import backends.server.database.MyRequestDAO;
-import backends.server.handler.AuctionRoom;
-import backends.server.handler.ClientHandler;
+import com.bidding_system.backends.common.messages.Common.Createitempayload;
+import com.bidding_system.backends.common.messages.MsgAuction.AdminActionCommand;
+import com.bidding_system.backends.common.messages.MsgData.InventoryDataResponse;
+import com.bidding_system.backends.common.messages.MsgData.RequestListDataResponse;
+import com.bidding_system.backends.common.models.accounts.Admin;
+import com.bidding_system.backends.common.models.bidding.Auction;
+import com.bidding_system.backends.common.models.core.Item;
+import com.bidding_system.backends.common.models.items.ItemFactory;
+import com.bidding_system.backends.common.models.items.ItemType;
+import com.bidding_system.backends.server.database.InventoryDAO;
+import com.bidding_system.backends.server.database.RequestLogDAO;
+import com.bidding_system.backends.server.database.MyRequestDAO;
+import com.bidding_system.backends.server.handler.AuctionRoom;
+import com.bidding_system.backends.server.handler.ClientHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -322,18 +322,18 @@ public final class AdminService {
 
 auction_processors = """package backends.server.service;
 
-import backends.common.messages.MsgAuction.AuctionCommandMessage;
-import backends.common.messages.MsgAuction.AuctionStatusMessage;
-import backends.common.messages.MsgBid.ClientSendBid;
-import backends.common.messages.MsgBid.ServerBidRespond;
-import backends.common.models.bidding.Auction;
-import backends.server.database.BidTransactionDAO;
-import backends.server.database.InventoryDAO;
-import backends.server.database.UserDAO;
-import backends.server.handler.AuctionRoom;
-import backends.server.handler.BidBatchProcessor;
-import backends.server.handler.ClientHandler;
-import backends.server.handler.ServerAuctionManager;
+import com.bidding_system.backends.common.messages.MsgAuction.AuctionCommandMessage;
+import com.bidding_system.backends.common.messages.MsgAuction.AuctionStatusMessage;
+import com.bidding_system.backends.common.messages.MsgBid.ClientSendBid;
+import com.bidding_system.backends.common.messages.MsgBid.ServerBidRespond;
+import com.bidding_system.backends.common.models.bidding.Auction;
+import com.bidding_system.backends.server.database.BidTransactionDAO;
+import com.bidding_system.backends.server.database.InventoryDAO;
+import com.bidding_system.backends.server.database.UserDAO;
+import com.bidding_system.backends.server.handler.AuctionRoom;
+import com.bidding_system.backends.server.handler.BidBatchProcessor;
+import com.bidding_system.backends.server.handler.ClientHandler;
+import com.bidding_system.backends.server.handler.ServerAuctionManager;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -441,22 +441,22 @@ public class AuctionProcessors {
 
 user_service = """package backends.server.service;
 
-import backends.common.messages.Common.Createitempayload;
-import backends.common.messages.Common.Message;
-import backends.common.messages.Common.RemoveRequestpayload;
-import backends.common.messages.Common.SigninPayload;
-import backends.common.messages.Common.SigninResponsePayload;
-import backends.common.messages.Common.SignupPayload;
-import backends.common.messages.MsgData.InventoryDataResponse;
-import backends.common.messages.MsgData.RequestListDataResponse;
-import backends.common.models.accounts.User;
-import backends.common.models.core.Account;
-import backends.server.database.InventoryDAO;
-import backends.server.database.MyRequestDAO;
-import backends.server.database.RequestLogDAO;
-import backends.server.database.UserDAO;
-import backends.server.handler.AuctionRoom;
-import backends.server.handler.ClientHandler;
+import com.bidding_system.backends.common.messages.Common.Createitempayload;
+import com.bidding_system.backends.common.messages.Common.Message;
+import com.bidding_system.backends.common.messages.Common.RemoveRequestpayload;
+import com.bidding_system.backends.common.messages.Common.SigninPayload;
+import com.bidding_system.backends.common.messages.Common.SigninResponsePayload;
+import com.bidding_system.backends.common.messages.Common.SignupPayload;
+import com.bidding_system.backends.common.messages.MsgData.InventoryDataResponse;
+import com.bidding_system.backends.common.messages.MsgData.RequestListDataResponse;
+import com.bidding_system.backends.common.models.accounts.User;
+import com.bidding_system.backends.common.models.core.Account;
+import com.bidding_system.backends.server.database.InventoryDAO;
+import com.bidding_system.backends.server.database.MyRequestDAO;
+import com.bidding_system.backends.server.database.RequestLogDAO;
+import com.bidding_system.backends.server.database.UserDAO;
+import com.bidding_system.backends.server.handler.AuctionRoom;
+import com.bidding_system.backends.server.handler.ClientHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

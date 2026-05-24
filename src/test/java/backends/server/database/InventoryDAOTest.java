@@ -1,7 +1,8 @@
 package backends.server.database;
 
-import backends.common.models.core.Item;
-import backends.common.models.items.Electronics;
+import com.bidding_system.backends.common.models.core.Item;
+import com.bidding_system.backends.common.models.items.Electronics;
+import com.bidding_system.backends.server.database.InventoryDAO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

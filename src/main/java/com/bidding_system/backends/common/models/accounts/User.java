@@ -1,0 +1,70 @@
+package com.bidding_system.backends.common.models.accounts;
+
+import com.bidding_system.backends.common.models.bidding.Auction;
+import com.bidding_system.backends.common.models.bidding.CanBidding;
+import com.bidding_system.backends.common.models.core.Account;
+import com.bidding_system.backends.common.models.core.Item;
+import com.bidding_system.backends.common.selling.CanSelling;
+
+import java.io.IOException;
+import java.util.HashSet;
+
+public class User extends Account implements CanBidding, CanSelling {
+    HashSet<Item> items = new HashSet<>();
+    private double balance;
+
+    public double getBalance() {
+        return balance;
+    }
+    public void setBalance(double balance){
+        this.balance = balance;
+    }
+
+    public User(String id, String name, String email, String phoneNumber, String password , double balance) {
+        super(id, name, email,phoneNumber, password);
+        this.balance = balance;
+        this.role="User";
+    }
+    public User(String id, String name, String email, String phoneNumber, String password) {
+        super(id, name, email,phoneNumber,  password);
+        this.role="User";
+    }
+
+    public User(String name, String email, String phoneNumber, String password) {
+        this(buildGeneratedId(phoneNumber), name, email,phoneNumber,  password);
+        this.balance = 0.0;
+        this.role="User";
+    }
+
+    private static String buildGeneratedId(String phoneNumber) {
+        String normalizedPhoneNumber = phoneNumber == null ? "" : phoneNumber.replaceAll("\\D", "");
+        if (normalizedPhoneNumber.isBlank()) {
+            return "USER";
+        }
+        return "USER" + normalizedPhoneNumber;
+    }
+
+    public void deposit(double amount) {
+
+        this.balance += amount;
+
+    }
+
+    public void withdraw(double amount) {
+        this.balance -= amount;
+    }
+
+    @Override
+    public void sellItem(Item item) {// lúc đã giao dịch xong
+
+        if (items.contains(item)) {
+            items.remove(item);
+        }
+        else  {
+            throw new IllegalArgumentException("Not exist item in this user");
+        }
+    }
+    public void bids(Auction auction,double amount) throws IOException {
+        //AuctionService.placeBid(this,auction,amount);
+    }
+}
