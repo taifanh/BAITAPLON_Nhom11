@@ -2,10 +2,7 @@ package com.bidding_system.backends.server.service;
 
 import com.bidding_system.backends.common.messages.MsgAuction.AuctionCommandMessage;
 import com.bidding_system.backends.common.messages.MsgAuction.AuctionStatusMessage;
-import com.bidding_system.backends.common.messages.MsgBid.CancelAutoBidding;
-import com.bidding_system.backends.common.messages.MsgBid.ClientSendBid;
-import com.bidding_system.backends.common.messages.MsgBid.RegisterAutoBidding;
-import com.bidding_system.backends.common.messages.MsgBid.ServerBidRespond;
+import com.bidding_system.backends.common.messages.MsgBid.*;
 import com.bidding_system.backends.common.models.bidding.Auction;
 import com.bidding_system.backends.server.database.BidTransactionDAO;
 import com.bidding_system.backends.server.database.InventoryDAO;
@@ -128,9 +125,10 @@ public class AuctionProcessors {
             return error.toString();
         }
         AutoBidEngine.getInstance().remove(msg.auctionId, msg.userId);
-        ObjectNode ack = mapper.createObjectNode();
-        ack.put("type", "AUTO_BID_CANCELLED");
-        return ack.toString();
+        ObjectNode response = mapper.createObjectNode();
+        response.put("type", "AUTO_BID_CANCELLED");
+        response.put("message", "Auto bidding mode is cancelled");
+        return response.toString();
     }
 
     public static String placeBid(ClientHandler handler, JsonNode node) throws Exception {

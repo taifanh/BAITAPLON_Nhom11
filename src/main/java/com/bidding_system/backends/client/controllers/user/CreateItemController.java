@@ -43,20 +43,43 @@ public class CreateItemController {
     private final RequestLogDAO requestLogDAO = new RequestLogDAO();
 
     public void handle_create_ok(ActionEvent event) throws IOException {
-        String type = itemType.getSelectionModel().getSelectedItem().toString();
-        double bidPrice = Double.parseDouble(basePrice.getText());
-        double bidIncrement = 0;
-        String itemInfo = this.itemInfo.getText();
-        String itemName = this.itemName.getText();
+        // Validate trước khi xử lý
+        if (itemType.getSelectionModel().getSelectedItem() == null) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Vui lòng chọn loại sản phẩm");
+            return;
+        }
+        if (itemName.getText() == null || itemName.getText().isBlank()) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Vui lòng nhập tên sản phẩm");
+            return;
+        }
+        if (basePrice.getText() == null || basePrice.getText().isBlank()) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Vui lòng nhập giá khởi điểm");
+            return;
+        }
+        double bidPrice;
+        try {
+            bidPrice = Double.parseDouble(basePrice.getText());
+            if (bidPrice <= 0) throw new NumberFormatException();
+        } catch (NumberFormatException e) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Giá khởi điểm phải là số dương");
+            return;
+        }
+        if (itemInfo.getText() == null || itemInfo.getText().isBlank()) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Vui lòng nhập mô tả sản phẩm");
+            return;
+        }
+
+        String type     = itemType.getSelectionModel().getSelectedItem();
+        String name     = itemName.getText().trim();
+        String info     = itemInfo.getText().trim();
 
         Gson gson = new Gson();
-        Createitempayload createitempayload = new Createitempayload(type, itemName, itemInfo, bidPrice);
-        String payload = gson.toJson(createitempayload);
+        Createitempayload payload = new Createitempayload(type, name, info, bidPrice);
 
         Message msg = new Message();
-        msg.payloadJson = payload;
-        msg.messageType = "additem";
-        msg.Id_user = UserSession.getCurrentUser().getId();
+        msg.payloadJson  = gson.toJson(payload);
+        msg.messageType  = "additem";
+        msg.Id_user      = UserSession.getCurrentUser().getId();
 
         UserSession.getConnection().send(msg);
 

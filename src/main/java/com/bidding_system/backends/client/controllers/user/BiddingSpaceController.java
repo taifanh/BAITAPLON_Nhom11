@@ -76,6 +76,7 @@ public class BiddingSpaceController extends BaseController {
     private final ObservableList<Item> auctionItems = FXCollections.observableArrayList();
     private final Map<String, Long>   endTimeByItemId    = new HashMap<>();
     private final Map<String, String> auctionIdByItemId  = new HashMap<>();
+    private final Map<String, Boolean> autoBidStateByAuctionId = new HashMap<>();
 
     private Item   selectedItem;
     private String currentAuctionId;
@@ -151,14 +152,13 @@ public class BiddingSpaceController extends BaseController {
         currentSellerId      = null;
         currentHighestBid    = 0;
         auctionEndTime       = null;
-
         applyItemDetails(item);
         fieldHighBidder.setText("Loading...");
         fieldCurrentAmount.setText("Loading...");
         clearBidVisuals("Select an active auction to view bid history.");
         buttonPlaceBid.setDisable(true);
         fieldBidPrice.setDisable(true);
-
+        applyAutoBidInactive();
         restoreAuctionStateIfAvailable(item);
         requestAuctionStatus(item.getId());
     }
@@ -329,6 +329,13 @@ public class BiddingSpaceController extends BaseController {
             fieldIncrement.setText(String.valueOf(currentBidIncrement));
             fieldNextMinimumBid.setText(String.valueOf(startingPrice + currentBidIncrement));
         }
+        boolean wasAutoBidActive = autoBidStateByAuctionId.getOrDefault(currentAuctionId, false);
+        if (wasAutoBidActive) {
+            applyAutoBidActive();
+        } else {
+            buttonPlaceBid.setDisable(false);
+            fieldBidPrice.setDisable(false);
+        }
         requestBidVisuals(currentAuctionId);
     }
 
@@ -410,6 +417,8 @@ public class BiddingSpaceController extends BaseController {
 
     private void applyAutoBidActive() {
         isAutoBidActive = true;
+        if (currentAuctionId != null)
+            autoBidStateByAuctionId.put(currentAuctionId, true);
         buttonPlaceBid.setDisable(true);
         fieldBidPrice.setDisable(true);
         fieldMaxLimit.setEditable(false);
@@ -421,6 +430,8 @@ public class BiddingSpaceController extends BaseController {
 
     private void applyAutoBidInactive() {
         isAutoBidActive = false;
+        if (currentAuctionId != null)
+            autoBidStateByAuctionId.put(currentAuctionId, false);
         buttonPlaceBid.setDisable(false);
         fieldBidPrice.setDisable(false);
         fieldMaxLimit.setEditable(true);

@@ -69,9 +69,12 @@ public class BidProcessor {
             ServerBidRespond currentMax = bidDAO.getMaxBidder(req.auctionId());
             double currentMaxAmount = (currentMax != null) ? currentMax.amount : 0;
 
-            // 2. Validate — bid phải cao hơn giá hiện tại
-            if (req.amount() <= currentMaxAmount) {
-                notifyBidFailed(req.userId(), "Your bid price must be higher than " + currentMaxAmount + " !");
+            Auction auction = AuctionService.getManagedActiveAuctionByAuctionId(req.auctionId());
+            double startingPrice = (auction != null) ? auction.getItem().getPrices() : 0;
+            double floorPrice = Math.max(currentMaxAmount, startingPrice);
+
+            if (req.amount() <= floorPrice) {
+                notifyBidFailed(req.userId(), "Your bid must higher than " + floorPrice);
                 return;
             }
 

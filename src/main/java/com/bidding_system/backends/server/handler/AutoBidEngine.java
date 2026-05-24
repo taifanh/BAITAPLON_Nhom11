@@ -1,16 +1,25 @@
 package com.bidding_system.backends.server.handler;
 
+import com.bidding_system.backends.common.messages.MsgBid.AutoBiddingCancelled;
 import com.bidding_system.backends.common.messages.MsgBid.PlaceBidFailed;
 import com.bidding_system.backends.common.messages.MsgBid.ServerBidRespond;
+import com.bidding_system.backends.common.models.bidding.Auction;
 import com.bidding_system.backends.server.database.BidTransactionDAO;
 import com.bidding_system.backends.server.handler.BidProcessor.BidRequest;
 import com.bidding_system.backends.server.policy.IncrementPolicy;
+import com.bidding_system.backends.server.service.AuctionService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.gson.Gson;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AutoBidEngine {
+    private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
 
     // ── Singleton ──────────────────────────────────────────────────────────────
     private static AutoBidEngine instance;
@@ -37,7 +46,6 @@ public class AutoBidEngine {
     // Được gọi khi user đăng ký auto-bid.
     // Tính giá tối ưu ngay tại đây (Proxy Bidding) rồi submit vào BidProcessor.
     public void register(AutoBidEntry entry) {
-        // 1. Thêm entry vào registry
         autoBids.computeIfAbsent(entry.auctionId(),
                 _ -> Collections.synchronizedList(new ArrayList<>())).add(entry);
 
@@ -48,18 +56,21 @@ public class AutoBidEngine {
             ServerBidRespond currentMax = db.getMaxBidder(entry.auctionId());
             double currentMaxAmount = (currentMax != null) ? currentMax.amount : 0;
 
-            double minValidMaxBid = currentMaxAmount + IncrementPolicy.getIncrement(currentMaxAmount);
+            // Lấy startingPrice làm sàn khi chưa có ai bid
+            Auction auction = AuctionService.getManagedActiveAuctionByAuctionId(entry.auctionId());
+            double startingPrice = (auction != null) ? auction.getItem().getPrices() : 0;
+            double floorPrice = Math.max(currentMaxAmount, startingPrice);
 
+            // Validate maxBid phải đủ để vượt floorPrice
+            double minValidMaxBid = floorPrice + IncrementPolicy.getIncrement(floorPrice);
             if (entry.maxBid() < minValidMaxBid) {
-                // Thông báo cho client: maxBid phải >= minValidMaxBid
                 AuctionRoom.getInstance().sendToUser(entry.userId(),
-                        new Gson().toJson(new PlaceBidFailed("maxBid phải ít nhất " + minValidMaxBid + "đ")));
-                // Xoá entry vừa thêm vào
+                        new Gson().toJson(new PlaceBidFailed("maxBid phải ít nhất " + minValidMaxBid)));
                 remove(entry.auctionId(), entry.userId());
                 return;
             }
 
-            // 3. Tìm rival mạnh nhất (auto-bidder khác có maxBid cao nhất)
+            // 3. Tìm rival mạnh nhất
             List<AutoBidEntry> entries = autoBids.get(entry.auctionId());
             Optional<AutoBidEntry> topRival;
             synchronized (entries) {
@@ -68,18 +79,16 @@ public class AutoBidEngine {
                         .max(Comparator.comparingDouble(AutoBidEntry::maxBid));
             }
 
-            // 4. Tính giá tối ưu theo Proxy Bidding
-            //    Nếu có rival → bid vừa đủ vượt rival.maxBid
-            //    Nếu không    → bid vừa đủ vượt currentMax
+            // 4. Tính giá tối ưu — dùng floorPrice thay vì currentMaxAmount
             double basePrice = topRival
                     .map(AutoBidEntry::maxBid)
-                    .orElse(currentMaxAmount);
+                    .orElse(floorPrice); // ← floorPrice thay vì currentMaxAmount
 
             double inc = IncrementPolicy.getIncrement(basePrice);
             double targetPrice = Math.min(entry.maxBid(), basePrice + inc);
 
-            // 5. Submit vào BidProcessor — từ đây xử lý như bid thủ công
-            if (targetPrice > currentMaxAmount) {
+            // 5. Submit nếu vượt được floorPrice
+            if (targetPrice > floorPrice) { // ← so sánh với floorPrice
                 BidProcessor.getInstance().submit(entry.userId(), entry.auctionId(), targetPrice);
             }
 
@@ -136,6 +145,31 @@ public class AutoBidEngine {
             if (targetPrice <= triggerAmount) return Optional.empty();
 
             return Optional.of(new BidRequest(winner.userId(), auctionId, targetPrice));
+        }
+    }
+
+    public void cancelExhaustedBidders(String auctionId, double currentAmount) {
+        List<AutoBidEntry> entries = autoBids.get(auctionId);
+        if (entries == null) return;
+
+        List<AutoBidEntry> exhausted;
+        synchronized (entries) {
+            // Tìm những người maxBid <= giá hiện tại — không còn khả năng counter
+            exhausted = entries.stream()
+                    .filter(e -> e.maxBid() <= currentAmount)
+                    .toList();
+
+            // Xoá khỏi registry
+            entries.removeIf(e -> e.maxBid() <= currentAmount);
+        }
+        Gson gson = new Gson();
+        // Gửi thông báo cancel cho từng người
+        for (AutoBidEntry e : exhausted) {
+            AutoBiddingCancelled msg = new AutoBiddingCancelled();
+            msg.message = "Your max bid is no longer sufficient";
+            AuctionRoom.getInstance().sendToUser(e.userId(), gson.toJson(msg));
+            System.out.printf("[AutoBidEngine] Exhausted | user=%s auction=%s maxBid=%.0f currentPrice=%.0f%n",
+                    e.userId(), auctionId, e.maxBid(), currentAmount);
         }
     }
 
