@@ -444,7 +444,7 @@ public class BiddingSpaceController extends BaseController {
         buttonAutoBid.setText("AUTO");
         buttonAutoBid.setStyle(
                 "-fx-background-color:#ea580c;-fx-text-fill:white;" +
-                        "-fx-background-radius:12;-fx-border-radius:12;");
+                        "-fx-background-radius:12;-fx-border-radius:12;-fx-font-weight:bold;");
     }
 
     // ── Button actions ────────────────────────────────────────────
