@@ -331,7 +331,7 @@ import com.bidding_system.backends.server.database.BidTransactionDAO;
 import com.bidding_system.backends.server.database.InventoryDAO;
 import com.bidding_system.backends.server.database.UserDAO;
 import com.bidding_system.backends.server.handler.AuctionRoom;
-import com.bidding_system.backends.server.handler.BidBatchProcessor;
+import com.bidding_system.backends.server.handler.BidProcessor;
 import com.bidding_system.backends.server.handler.ClientHandler;
 import com.bidding_system.backends.server.handler.ServerAuctionManager;
 import com.fasterxml.jackson.databind.JsonNode;

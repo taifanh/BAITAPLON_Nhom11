@@ -33,9 +33,6 @@ public class CreateItemController {
     public TextField basePrice;
 
     @FXML
-    public TextField bidIncrement;
-
-    @FXML
     public ComboBox<String> itemType;
 
     @FXML
@@ -48,12 +45,12 @@ public class CreateItemController {
     public void handle_create_ok(ActionEvent event) throws IOException {
         String type = itemType.getSelectionModel().getSelectedItem().toString();
         double bidPrice = Double.parseDouble(basePrice.getText());
-        double bidIncrement = Double.parseDouble(this.bidIncrement.getText());
+        double bidIncrement = 0;
         String itemInfo = this.itemInfo.getText();
         String itemName = this.itemName.getText();
 
         Gson gson = new Gson();
-        Createitempayload createitempayload = new Createitempayload(type, itemName, itemInfo, bidPrice, bidIncrement);
+        Createitempayload createitempayload = new Createitempayload(type, itemName, itemInfo, bidPrice);
         String payload = gson.toJson(createitempayload);
 
         Message msg = new Message();

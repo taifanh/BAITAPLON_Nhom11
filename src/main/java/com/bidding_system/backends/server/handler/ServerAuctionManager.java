@@ -3,6 +3,7 @@ package com.bidding_system.backends.server.handler;
 import com.bidding_system.backends.server.database.BidTransactionDAO;
 import com.bidding_system.backends.server.database.InventoryDAO;
 import com.bidding_system.backends.server.database.UserDAO;
+import com.bidding_system.backends.server.policy.IncrementPolicy;
 import com.bidding_system.backends.server.service.AuctionService;
 import com.bidding_system.backends.common.messages.MsgAuction.AuctionResultMessage;
 import com.bidding_system.backends.common.messages.MsgBid.ServerBidRespond;
@@ -62,9 +63,11 @@ public class ServerAuctionManager {
             // Gọi AuctionService của bạn (Nó sẽ tự lo Timer và set DB IN_PROGRESS)
             Auction auction = AuctionService.startAuction(serverAdmin, item, 0, durationMinutes, 0);
             // Báo cho tất cả Client/Admin trên mạng lưới biết
+            double systemIncrement = IncrementPolicy.getIncrement(auction.getItem().getPrices());
             AuctionStatusMessage statusMsg = new AuctionStatusMessage();
             statusMsg.status = "STARTED";
             statusMsg.itemId = itemId;
+            statusMsg.increment = systemIncrement;
             statusMsg.auctionId = auction.getAuctionId();
             statusMsg.endTimeEpoch = System.currentTimeMillis() + (durationMinutes * 60000L);
 
@@ -76,7 +79,7 @@ public class ServerAuctionManager {
                     sellerId,
                     auction.getAuctionId(),
                     auction.getItem().getPrices(),
-                    item.getBidIncrement()
+                    systemIncrement
             );
             AuctionRoom.getInstance().broadcast(mapper.writeValueAsString(start_msg));
         } catch (Exception e) {
@@ -118,7 +121,6 @@ public class ServerAuctionManager {
             String auctionId = auction.getAuctionId();
 
             if (auctionId != null) {
-                BidBatchProcessor.getInstance().flushAuction(auctionId);
                 AutoBidEngine.getInstance().removeAll(auctionId);
             }
 
@@ -172,7 +174,7 @@ public class ServerAuctionManager {
             BidTransactionDAO bidDb = new BidTransactionDAO();
             ServerBidRespond maxBidder = bidDb.getMaxBidder(auction.getAuctionId());
             if (maxBidder != null && maxBidder.userId != null) {
-                statusMsg.maxBidderAmount = String.valueOf(maxBidder.amount);
+                statusMsg.maxBidderAmount = maxBidder.amount;
 
                 UserDAO userStore = new UserDAO();
                 User winner = userStore.getUser(maxBidder.userId);

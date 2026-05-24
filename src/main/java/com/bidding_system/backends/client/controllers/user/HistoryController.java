@@ -66,7 +66,7 @@ public class HistoryController {
 
     @FXML
     public void openProfile(ActionEvent event) throws IOException {
-        switchMainScene(event, "UserInfo.fxml", "User Profile");
+        switchMainScene(event, "UserProfile.fxml", "User Profile");
     }
 
     @FXML

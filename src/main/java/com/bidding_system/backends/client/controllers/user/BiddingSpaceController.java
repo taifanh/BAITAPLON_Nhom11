@@ -50,7 +50,7 @@ public class BiddingSpaceController extends BaseController {
     @FXML private TextField fieldBasePrice;
     @FXML private TextField fieldIncrement;
     @FXML private TextField fieldItemName;
-    @FXML private TextField fieldAutoIncrement;
+    @FXML private TextField fieldNextMinimumBid;
     @FXML private TextField fieldMaxLimit;
     @FXML private Label     labelTimer;
     @FXML private Button    buttonPlaceBid;
@@ -242,14 +242,12 @@ public class BiddingSpaceController extends BaseController {
         Platform.runLater(() -> {
             if (selectedItem == null ||
                     !selectedItem.getId().equals(msg.auctionId)) return;
-            currentAuctionId    = msg.auctionId;
-            currentSellerId     = msg.sellerId;
-            startingPrice       = msg.startingPrice;
-            currentBidIncrement = msg.bidIncrement;
+            currentAuctionId = msg.auctionId;
+            currentSellerId  = msg.sellerId;
+            startingPrice    = msg.startingPrice;
             if (msg.endAt != null) auctionEndTime = msg.endAt;
             fieldItemName.setText(msg.itemName);
             fieldBasePrice.setText(String.valueOf(msg.startingPrice));
-            fieldIncrement.setText(String.valueOf(msg.bidIncrement));
             buttonPlaceBid.setDisable(false);
             fieldBidPrice.setDisable(false);
         });
@@ -259,9 +257,12 @@ public class BiddingSpaceController extends BaseController {
         ReceiveMaxBidder msg = MAPPER.readValue(raw, ReceiveMaxBidder.class);
         if (currentAuctionId == null ||
                 !currentAuctionId.equals(msg.maxBidder.auctionId)) return;
+        currentBidIncrement = msg.currentIncrement;
         Platform.runLater(() -> {
             fieldHighBidder.setText(msg.maxBidder.name);
             fieldCurrentAmount.setText(String.valueOf(msg.maxBidder.amount));
+            fieldNextMinimumBid.setText(String.valueOf(msg.maxBidder.amount + currentBidIncrement));
+            fieldIncrement.setText(String.valueOf(currentBidIncrement));
             currentHighestBid = msg.maxBidder.amount;
             requestBidVisuals(currentAuctionId);
             buttonPlaceBid.setDisable(false);
@@ -305,21 +306,27 @@ public class BiddingSpaceController extends BaseController {
     // ── Status helpers ────────────────────────────────────────────
     private void applyStartedStatus(AuctionStatusMessage msg) {
         currentAuctionId    = msg.auctionId;
+        currentBidIncrement = msg.increment;
         currentSellerId     = msg.sellerId;
         auctionEndTime      = Instant.ofEpochMilli(msg.endTimeEpoch)
                 .atZone(ZoneId.systemDefault()).toLocalDateTime();
         buttonPlaceBid.setDisable(false);
         fieldBidPrice.setDisable(false);
+        currentBidIncrement = msg.increment;
         applyItemDetails(selectedItem);
         if (msg.maxBidderName != null && !msg.maxBidderName.isBlank()) {
             fieldHighBidder.setText(msg.maxBidderName);
-            fieldCurrentAmount.setText(msg.maxBidderAmount);
-            try { currentHighestBid = Double.parseDouble(msg.maxBidderAmount); }
+            fieldIncrement.setText(String.valueOf(currentBidIncrement));
+            fieldCurrentAmount.setText(String.valueOf(msg.maxBidderAmount));
+            fieldNextMinimumBid.setText(String.valueOf(msg.maxBidderAmount + currentBidIncrement));
+            try { currentHighestBid = Double.parseDouble(String.valueOf(msg.maxBidderAmount)); }
             catch (NumberFormatException e) { currentHighestBid = startingPrice; }
         } else {
             fieldHighBidder.setText("No bids yet");
             fieldCurrentAmount.setText(String.valueOf(startingPrice));
             currentHighestBid = startingPrice;
+            fieldIncrement.setText(String.valueOf(currentBidIncrement));
+            fieldNextMinimumBid.setText(String.valueOf(startingPrice + currentBidIncrement));
         }
         requestBidVisuals(currentAuctionId);
     }
@@ -405,7 +412,6 @@ public class BiddingSpaceController extends BaseController {
         buttonPlaceBid.setDisable(true);
         fieldBidPrice.setDisable(true);
         fieldMaxLimit.setEditable(false);
-        fieldAutoIncrement.setEditable(false);
         buttonAutoBid.setText("STOP");
         buttonAutoBid.setStyle(
                 "-fx-background-color:#dc2626;-fx-text-fill:white;" +
@@ -417,7 +423,6 @@ public class BiddingSpaceController extends BaseController {
         buttonPlaceBid.setDisable(false);
         fieldBidPrice.setDisable(false);
         fieldMaxLimit.setEditable(true);
-        fieldAutoIncrement.setEditable(true);
         buttonAutoBid.setText("AUTO");
         buttonAutoBid.setStyle(
                 "-fx-background-color:#ea580c;-fx-text-fill:white;" +
@@ -458,9 +463,8 @@ public class BiddingSpaceController extends BaseController {
     private void registerAutoBid() {
         try {
             validateAuctionActive();
-            double increment = parsePositive(fieldAutoIncrement.getText(), "increment");
             double maxLimit  = parsePositive(fieldMaxLimit.getText(), "max limit");
-            double balance   = 0;
+            double balance;
             if (UserSession.getCurrentUser() != null) {
                 balance = UserSession.getCurrentUser().getBalance();
             }
@@ -473,11 +477,8 @@ public class BiddingSpaceController extends BaseController {
                 throw new IllegalArgumentException("Max limit too low");
             if (UserSession.getCurrentUser().getId().equals(currentSellerId))
                 throw new IllegalArgumentException("Cannot bid on your own item");
-
-            UserSession.getConnection().send(new RegisterAutoBidding(
-                    currentAuctionId,
-                    UserSession.getCurrentUser().getId(),
-                    maxLimit, increment));
+            String userId = UserSession.getCurrentUser().getId();
+            UserSession.getConnection().send(new RegisterAutoBidding(currentAuctionId, userId , maxLimit));
         } catch (RuntimeException e) {
             showAlert(Alert.AlertType.ERROR, e.getMessage());
         }
@@ -525,12 +526,11 @@ public class BiddingSpaceController extends BaseController {
             throw new IllegalArgumentException("Disable auto-bid first");
         if (UserSession.getCurrentUser().getId().equals(currentSellerId))
             throw new IllegalArgumentException("Cannot bid on your own item");
-        if (amount < startingPrice + currentBidIncrement)
-            throw new IllegalArgumentException("Minimum bid: " + (startingPrice + currentBidIncrement));
         if (amount > UserSession.getCurrentUser().getBalance())
             throw new IllegalArgumentException("Balance insufficient");
-        if (amount < currentHighestBid + currentBidIncrement)
-            throw new IllegalArgumentException("Minimum next bid: " + (currentHighestBid + currentBidIncrement));
+        double minimumBid = currentHighestBid + currentBidIncrement;
+        if (amount < minimumBid)
+            throw new IllegalArgumentException("Minimum next bid: " + minimumBid);
     }
 
     private double parsePositive(String text, String fieldName) {
@@ -571,9 +571,7 @@ public class BiddingSpaceController extends BaseController {
         if (item == null) return;
         fieldItemName.setText(item.getName());
         fieldBasePrice.setText(String.valueOf(item.getPrices()));
-        fieldIncrement.setText(String.valueOf(item.getBidIncrement()));
         startingPrice       = item.getPrices();
-        currentBidIncrement = item.getBidIncrement();
     }
 
     private String resolveType(JsonNode node) {

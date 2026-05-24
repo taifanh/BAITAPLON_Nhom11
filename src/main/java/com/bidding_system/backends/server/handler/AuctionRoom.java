@@ -66,14 +66,14 @@ public class AuctionRoom {
             handler.send(json);
         }
     }
-    public static void sendadmin(String json) {
+    public static void sendToAdmin(String json) {
         for (ClientHandler handler : AuctionRoom.getInstance().observers) {
             if (handler.getRole() != null && handler.getRole().equalsIgnoreCase(Account.ADMIN)) {
                 handler.send(json);
             }
         }
     }
-    public static void SendToOneuser(String userId,String json) {
+    public static void sendToUser(String userId,String json) {
         ClientHandler handler = AuctionRoom.getInstance().connectors.get(userId);
         if (handler != null) {
             handler.send(json);

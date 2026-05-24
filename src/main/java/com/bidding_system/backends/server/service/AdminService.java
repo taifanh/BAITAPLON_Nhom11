@@ -123,8 +123,7 @@ public final class AdminService {
                         itemType,
                         payload.getItem_name(),
                         payload.getBasePrice(),
-                        payload.getItemInfo(),
-                        payload.getBidIncrement()
+                        payload.getItemInfo()
                 );
 
                 inventoryDAODB.saveItem(item, request.userId(), request.id());

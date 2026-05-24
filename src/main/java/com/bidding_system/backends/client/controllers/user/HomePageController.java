@@ -15,7 +15,7 @@ import java.io.IOException;
 public class HomePageController {
     @FXML
     public void openProfile(ActionEvent event) throws IOException {
-        openView(event, "UserInfo.fxml", "User Profile");
+        openView(event, "UserProfile.fxml", "User Profile");
     }
 
     @FXML
