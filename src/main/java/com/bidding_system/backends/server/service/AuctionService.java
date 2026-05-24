@@ -64,9 +64,8 @@ public final class AuctionService {
         auction.schedule(now, duration);
         auction.start(now);
 
-//        Auctions auctionsRepository = new Auctions();
-//        auctionsRepository.saveAuction(auction);
-//        inventory.updateItemStatus(itemAuction.getId(), Inventory.STATUS_IN_PROGRESS);
+        AuctionDAO auctionDAO = new AuctionDAO();
+        auctionDAO.saveAuction(auction);
         registerActiveAuction(auction);
         scheduleAutoClose(auction, duration);
         return auction;
@@ -94,10 +93,12 @@ public final class AuctionService {
         Auction auction = new Auction(item);
         LocalDateTime now = LocalDateTime.now();
         auction.schedule(now, duration);
-        registerActiveAuction(auction);
 
         try {
             auction.start(now);
+            AuctionDAO auctionDAO = new AuctionDAO();
+            auctionDAO.saveAuction(auction);
+            registerActiveAuction(auction);
             scheduleAutoClose(auction, duration);
         } catch (Exception e) {
             unregisterActiveAuction(auction);
