@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="768.0" prefWidth="1366.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bidding_system.backends.client.controllers.user.HomePageController">
+    <children>
+        <HBox alignment="CENTER_LEFT" prefHeight="82.0" spacing="16.0" style="-fx-background-color: white; -fx-padding: 0 40 0 40; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.10), 18, 0.10, 0, 4);" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <Label text="Bidding System" textFill="#0f172a">
+                    <font>
+                        <Font name="System Bold" size="24.0" />
+                    </font>
+                </Label>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button mnemonicParsing="false" onAction="#openProfile" prefHeight="40.0" prefWidth="116.0" style="-fx-background-color: transparent; -fx-border-color: #ea580c; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #ea580c; -fx-font-weight: bold;" text="Profile" />
+                <Button mnemonicParsing="false" onAction="#openBiddingSpace" prefHeight="40.0" prefWidth="138.0" style="-fx-background-color: transparent; -fx-border-color: #ea580c; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #ea580c; -fx-font-weight: bold;" text="Bidding space" />
+                <Button mnemonicParsing="false" onAction="#openSellItem" prefHeight="40.0" prefWidth="116.0" style="-fx-background-color: transparent; -fx-border-color: #ea580c; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #ea580c; -fx-font-weight: bold;" text="Sell item" />
+                <Button mnemonicParsing="false" onAction="#openHistory" prefHeight="40.0" prefWidth="116.0" style="-fx-background-color: transparent; -fx-border-color: #0f172a; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #0f172a; -fx-font-weight: bold;" text="History" />
+            </children>
+        </HBox>
+
+        <VBox spacing="34.0" style="-fx-background-color: white; -fx-background-radius: 24; -fx-padding: 42 52 44 52; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 24, 0.12, 0, 10);" AnchorPane.bottomAnchor="48.0" AnchorPane.leftAnchor="56.0" AnchorPane.rightAnchor="56.0" AnchorPane.topAnchor="122.0">
+            <children>
+                <VBox spacing="8.0">
+                    <children>
+                        <Label text="Auction Overview" textFill="#0f172a">
+                            <font>
+                                <Font name="System Bold" size="34.0" />
+                            </font>
+                        </Label>
+                        <Label maxWidth="760.0" text="Manage your profile, join live bidding, submit items for auction, and review transaction history from one entry point." textFill="#64748b" wrapText="true">
+                            <font>
+                                <Font size="15.0" />
+                            </font>
+                        </Label>
+                    </children>
+                </VBox>
+
+                <HBox alignment="CENTER" spacing="26.0" VBox.vgrow="ALWAYS">
+                    <children>
+                        <VBox alignment="CENTER" maxWidth="260.0" prefHeight="260.0" prefWidth="240.0" spacing="18.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5); -fx-background-radius: 22;">
+                            <children>
+                                <Label alignment="CENTER" prefHeight="76.0" prefWidth="106.0" style="-fx-background-color: white; -fx-background-radius: 38;" text="1" textFill="#ea580c">
+                                    <font>
+                                        <Font name="System Bold" size="36.0" />
+                                    </font>
+                                </Label>
+                                <Label text="Profile" textFill="#9a3412">
+                                    <font>
+                                        <Font name="System Bold" size="18.0" />
+                                    </font>
+                                </Label>
+                                <Label alignment="CENTER" maxWidth="180.0" text="Check account and balance" textFill="#9a3412" wrapText="true" />
+                            </children>
+                            <padding>
+                                <Insets bottom="28.0" left="20.0" right="20.0" top="28.0" />
+                            </padding>
+                        </VBox>
+                        <VBox alignment="CENTER" maxWidth="260.0" prefHeight="260.0" prefWidth="240.0" spacing="18.0" style="-fx-background-color: #0f172a; -fx-background-radius: 22;">
+                            <children>
+                                <Label alignment="CENTER" prefHeight="76.0" prefWidth="106.0" style="-fx-background-color: rgba(255,255,255,0.10); -fx-background-radius: 38;" text="2" textFill="#fbbf24">
+                                    <font>
+                                        <Font name="System Bold" size="36.0" />
+                                    </font>
+                                </Label>
+                                <Label text="Bidding" textFill="WHITE">
+                                    <font>
+                                        <Font name="System Bold" size="18.0" />
+                                    </font>
+                                </Label>
+                                <Label alignment="CENTER" maxWidth="180.0" text="Follow auctions and place bids" textFill="#cbd5e1" wrapText="true" />
+                            </children>
+                            <padding>
+                                <Insets bottom="28.0" left="20.0" right="20.0" top="28.0" />
+                            </padding>
+                        </VBox>
+                        <VBox alignment="CENTER" maxWidth="260.0" prefHeight="260.0" prefWidth="240.0" spacing="18.0" style="-fx-background-color: linear-gradient(to bottom right, #ecfdf5, #dcfce7); -fx-background-radius: 22;">
+                            <children>
+                                <Label alignment="CENTER" prefHeight="76.0" prefWidth="106.0" style="-fx-background-color: white; -fx-background-radius: 38;" text="3" textFill="#16a34a">
+                                    <font>
+                                        <Font name="System Bold" size="36.0" />
+                                    </font>
+                                </Label>
+                                <Label text="Sell item" textFill="#166534">
+                                    <font>
+                                        <Font name="System Bold" size="18.0" />
+                                    </font>
+                                </Label>
+                                <Label alignment="CENTER" maxWidth="180.0" text="Create items and track requests" textFill="#166534" wrapText="true" />
+                            </children>
+                            <padding>
+                                <Insets bottom="28.0" left="20.0" right="20.0" top="28.0" />
+                            </padding>
+                        </VBox>
+                        <VBox alignment="CENTER" maxWidth="260.0" prefHeight="260.0" prefWidth="240.0" spacing="18.0" style="-fx-background-color: linear-gradient(to bottom right, #eff6ff, #dbeafe); -fx-background-radius: 22;">
+                            <children>
+                                <Label alignment="CENTER" prefHeight="76.0" prefWidth="106.0" style="-fx-background-color: white; -fx-background-radius: 38;" text="4" textFill="#2563eb">
+                                    <font>
+                                        <Font name="System Bold" size="36.0" />
+                                    </font>
+                                </Label>
+                                <Label text="History" textFill="#1d4ed8">
+                                    <font>
+                                        <Font name="System Bold" size="18.0" />
+                                    </font>
+                                </Label>
+                                <Label alignment="CENTER" maxWidth="180.0" text="Review bids and item requests" textFill="#1d4ed8" wrapText="true" />
+                            </children>
+                            <padding>
+                                <Insets bottom="28.0" left="20.0" right="20.0" top="28.0" />
+                            </padding>
+                        </VBox>
+                    </children>
+                </HBox>
+
+                <Pane maxHeight="8.0" minHeight="8.0" style="-fx-background-color: #e2e8f0; -fx-background-radius: 4;">
+                    <children>
+                        <Pane prefHeight="8.0" prefWidth="720.0" style="-fx-background-color: #ea580c; -fx-background-radius: 4;" />
+                    </children>
+                </Pane>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

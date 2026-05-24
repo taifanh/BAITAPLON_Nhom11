@@ -1,8 +1,10 @@
 package backends.common.models.bidding;
 
-import backends.common.models.accounts.User;
-import backends.common.models.items.Art;
-import backends.common.models.core.Item;
+import com.bidding_system.backends.common.models.accounts.User;
+import com.bidding_system.backends.common.models.bidding.Auction;
+import com.bidding_system.backends.common.models.bidding.BidTransaction;
+import com.bidding_system.backends.common.models.items.Art;
+import com.bidding_system.backends.common.models.core.Item;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

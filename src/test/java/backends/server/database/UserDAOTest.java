@@ -1,7 +1,8 @@
 package backends.server.database;
 
-import backends.common.models.accounts.User;
-import backends.common.models.core.Account;
+import com.bidding_system.backends.common.models.accounts.User;
+import com.bidding_system.backends.common.models.core.Account;
+import com.bidding_system.backends.server.database.UserDAO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
