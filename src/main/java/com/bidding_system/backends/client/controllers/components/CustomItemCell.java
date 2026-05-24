@@ -4,8 +4,7 @@ import com.bidding_system.backends.client.session.UserSession;
 import com.bidding_system.backends.common.messages.Common.Createitempayload;
 import com.bidding_system.backends.common.messages.Common.Message;
 import com.bidding_system.backends.common.messages.Common.RemoveRequestpayload;
-import com.bidding_system.backends.server.database.MyRequestDAO;
-import com.bidding_system.backends.server.database.RequestLogDAO;
+import com.bidding_system.backends.common.messages.MsgData.RequestRecordDto;
 import com.google.gson.Gson;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
@@ -18,14 +17,12 @@ import javafx.scene.layout.Priority;
 
 import java.io.IOException;
 
-public class CustomItemCell extends ListCell<String> {
+public class CustomItemCell extends ListCell<RequestRecordDto> {
     private HBox content;
     private Label itemName;
     private Button viewInfo;
     private Button removeItem;
     private Pane spacer;
-    private final RequestLogDAO requestLogDAO = new RequestLogDAO();
-    private final MyRequestDAO myRequest = new MyRequestDAO();
     private final Gson gson = new Gson();
 
     public CustomItemCell(){
@@ -44,39 +41,31 @@ public class CustomItemCell extends ListCell<String> {
         content.setAlignment(Pos.CENTER_LEFT);
 
         viewInfo.setOnAction(event ->{
-            String requestId = getItem();
-            if (requestId == null) {
+            RequestRecordDto request = getItem();
+            if (request == null) {
                 return;
             }
-            try {
-                MyRequestDAO.RequestRecord request = myRequest.findByRequestId(requestId);
-                if (request == null) {
-                    return;
-                }
-                Createitempayload payload = gson.fromJson(request.requestInfo(), Createitempayload.class);
+                Createitempayload payload = gson.fromJson(request.requestInfo, Createitempayload.class);
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Thong tin item");
                 alert.setHeaderText(payload.getItem_name());
                 alert.setContentText(
-                        "Request ID: " + request.requestId() + "\n" +
-                                "User ID: " + request.userId() + "\n" +
+                        "Request ID: " + request.requestId + "\n" +
+                                "User ID: " + request.userId + "\n" +
                                 "Type: " + payload.getItemType() + "\n" +
                                 "Base price: " + payload.getBasePrice() + "\n" +
                                 "Increment: " + payload.getBidIncrement() + "\n" +
                                 "Info: " + payload.getItemInfo() + "\n" +
-                                "Status: " + request.status() + "\n" +
-                                "Time: " + request.time()
+                                "Status: " + request.status + "\n" +
+                                "Time: " + request.time
                 );
                 alert.showAndWait();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         });
         removeItem.setOnAction(event ->{
-            String item = getItem();// trả về id_request
+            RequestRecordDto item = getItem();// trả về dạng request record lưu các thông tin cơ bản của request và item đó
 
             Gson gson = new Gson();
-            RemoveRequestpayload payload = new RemoveRequestpayload(item , myRequest.getStatusById(item));
+            RemoveRequestpayload payload = new RemoveRequestpayload(item.requestId , item.status);
             String payloadJson = gson.toJson(payload);
 
             Message msg = new Message();
@@ -91,23 +80,14 @@ public class CustomItemCell extends ListCell<String> {
 
     }
     @Override
-    protected void updateItem(String item , boolean empty){// javafx AUTO call it
-        super.updateItem(item, empty);
-        if(item!=null && !empty){
-            try {
-                RequestLogDAO.RequestRecord request = requestLogDAO.findByRequestId(item);
-                if (request != null) {
-                    Createitempayload payload = gson.fromJson(request.requestInfo(), Createitempayload.class);
-                    itemName.setText(payload.getItem_name());
-                } else {
-                    itemName.setText(item);
-                }
-            } catch (IOException e) {
-                itemName.setText(item);
-            }
+    protected void updateItem(RequestRecordDto request , boolean empty){// javafx AUTO call it
+        super.updateItem(request, empty);
+        if (request != null && !empty) {
+            Createitempayload payload = gson.fromJson(request.requestInfo, Createitempayload.class);
+            itemName.setText(payload.getItem_name());
             setGraphic(content);
-        }
-        else
+        } else {
             setGraphic(null);
+        }
     }
 }

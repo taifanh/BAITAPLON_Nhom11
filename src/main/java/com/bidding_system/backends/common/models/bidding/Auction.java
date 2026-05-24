@@ -203,6 +203,13 @@ public class Auction {
         return currentHighestBidderId;
     }
 
+    // Dong bo winner/highest bid tu DB vao object auction trong RAM.
+    public synchronized void syncHighestBidState(double highestBidAmount, String highestBidderId) {
+        this.currentHighestBid = highestBidAmount;
+        this.currentHighestBidderId = highestBidderId;
+        this.highestBid = null;
+    }
+
     // Tra ve item dang duoc dau gia.
     public Item getItem() {
         return item;

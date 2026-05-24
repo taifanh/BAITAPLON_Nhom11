@@ -13,6 +13,7 @@ import com.bidding_system.backends.common.models.items.ItemFactory;
 import com.bidding_system.backends.common.models.items.ItemType;
 import com.bidding_system.backends.server.database.InventoryDAO;
 import com.bidding_system.backends.server.database.BidTransactionDAO;
+import com.bidding_system.backends.server.database.MyRequestDAO;
 import com.bidding_system.backends.server.database.RequestLogDAO;
 import com.bidding_system.backends.server.handler.AuctionRoom;
 import com.bidding_system.backends.server.handler.ClientHandler;
@@ -92,9 +93,11 @@ public final class AdminService {
         AdminActionCommand cmd = mapper.treeToValue(node, AdminActionCommand.class);
         InventoryDAO inventoryDAODB = new InventoryDAO();
         RequestLogDAO requestLogDAODB = new RequestLogDAO();
+        MyRequestDAO myRequestDAO = new MyRequestDAO();
 
         if ("SCHEDULE_ITEM".equals(cmd.action)) {
             inventoryDAODB.updateItemStatus(cmd.targetId, InventoryDAO.STATUS_SCHEDULED);
+            myRequestDAO.updateRequestStatus(inventoryDAODB.getRequestIdbyItem(cmd.targetId), MyRequestDAO.STATUS_SCHEDULED);
 
             ObjectNode ack = mapper.createObjectNode();
             ack.put("type", "ACTION_SUCCESS");
@@ -109,6 +112,7 @@ public final class AdminService {
             return null; // Already sent ack
         } else if ("REJECT_REQUEST".equals(cmd.action)) {
             requestLogDAODB.updateRequestStatus(cmd.targetId, RequestLogDAO.STATUS_REJECTED);
+            myRequestDAO.updateRequestStatus(cmd.targetId, RequestLogDAO.STATUS_REJECTED);
 
             ObjectNode ack = mapper.createObjectNode();
             ack.put("type", "ACTION_SUCCESS");
@@ -128,8 +132,9 @@ public final class AdminService {
                 );
 
                 inventoryDAODB.saveItem(item, request.userId(), request.id());
-                requestLogDAODB.updateRequestStatus(cmd.targetId, RequestLogDAO.STATUS_WAITING);
-                
+                requestLogDAODB.removeRequest(cmd.targetId);
+                myRequestDAO.updateRequestStatus(cmd.targetId, RequestLogDAO.STATUS_WAITING);
+
                 ObjectNode response = mapper.createObjectNode();
                 response.put("type", "ACCEPTED_SUCCESS");
                 String targetUserId = (cmd.userId != null && !cmd.userId.isBlank())

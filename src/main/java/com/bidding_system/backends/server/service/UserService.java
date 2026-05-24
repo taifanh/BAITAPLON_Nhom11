@@ -6,8 +6,7 @@ import com.bidding_system.backends.common.messages.Common.RemoveRequestpayload;
 import com.bidding_system.backends.common.messages.Common.SigninPayload;
 import com.bidding_system.backends.common.messages.Common.SigninResponsePayload;
 import com.bidding_system.backends.common.messages.Common.SignupPayload;
-import com.bidding_system.backends.common.messages.MsgData.InventoryDataResponse;
-import com.bidding_system.backends.common.messages.MsgData.RequestListDataResponse;
+import com.bidding_system.backends.common.messages.MsgData.*;
 import com.bidding_system.backends.common.models.accounts.User;
 import com.bidding_system.backends.common.models.core.Account;
 import com.bidding_system.backends.server.database.InventoryDAO;
@@ -16,6 +15,7 @@ import com.bidding_system.backends.server.database.RequestLogDAO;
 import com.bidding_system.backends.server.database.UserDAO;
 import com.bidding_system.backends.server.handler.AuctionRoom;
 import com.bidding_system.backends.server.handler.ClientHandler;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -91,11 +91,13 @@ public final class UserService {
 
         Createitempayload payload = mapper.readValue(payloadJson, Createitempayload.class);
         
+
         ObjectNode responseNode = mapper.createObjectNode();
         responseNode.put("type", "add_item_OK");
         responseNode.put("payloadJson", gson.toJson(payload));
 
         String requestId = RequestLogDAO.save_request(msg);
+        MyRequestDAO.save_myrequest(msg, requestId);
         responseNode.put("request_id", requestId);
         
         handler.send(responseNode.toString());
@@ -110,6 +112,7 @@ public final class UserService {
         String status_item = payload.getStatus();
         RequestLogDAO requestlog = new RequestLogDAO();
         InventoryDAO inventoryDAODB = new InventoryDAO();
+        MyRequestDAO requestDAO = new MyRequestDAO();
 
         if (MyRequestDAO.STATUS_IN_PROGRESS.equals(status_item)
                 || MyRequestDAO.STATUS_SCHEDULED.equals(status_item)) {
@@ -119,6 +122,7 @@ public final class UserService {
         } else {
             inventoryDAODB.removeItem(payload.getRequest_id());
             requestlog.removeRequest(payload.getRequest_id());
+            requestDAO.remove_request(payload.getRequest_id());
 
             ObjectNode response = mapper.createObjectNode();
             response.put("type", "remove_item_OK");
@@ -136,5 +140,30 @@ public final class UserService {
             AuctionRoom.getInstance().broadcast(mapper.writeValueAsString(requestResponse));
             return null;
         }
+    }
+    public static String fetchUserRequest(ClientHandler clienthandler ,JsonNode node) throws IOException {
+        FetchUserRequestsRequest request =
+                mapper.readValue(node.get("payloadJson").asText(), FetchUserRequestsRequest.class);
+        MyRequestDAO myrequestDAO = new MyRequestDAO();
+        UserRequestListResponse response = new UserRequestListResponse();
+
+        response.requests = myrequestDAO.getMyRequestsByType(
+                        request.requestType == null ? "additem" : request.requestType
+                ).stream()
+                .filter(record -> request.userId != null && request.userId.equals(record.userId()))
+                .map(record -> {
+                    RequestRecordDto dto = new RequestRecordDto();
+                    dto.requestId = record.requestId();
+                    dto.userId = record.userId();
+                    dto.requestType = record.requestType();
+                    dto.requestInfo = record.requestInfo();
+                    dto.time = record.time();
+                    dto.status = record.status();
+                    return dto;
+                })
+                .toList();
+
+        clienthandler.send(mapper.writeValueAsString(response));
+        return null;
     }
 }

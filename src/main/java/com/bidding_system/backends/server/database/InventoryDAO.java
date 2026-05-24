@@ -255,6 +255,22 @@ public class InventoryDAO {
             return false;
         }
     }
+    public synchronized String getRequestIdbyItem(String itemId) throws IOException {
+        try(Connection connection = openConnection();
+        PreparedStatement statement = connection.prepareStatement(
+                """
+                 SELECT request_id FROM inventoryDAO 
+                 WHERE ItemId = ?
+"""
+        )){
+            statement.setString(1,itemId);
+            try(ResultSet resultSet = statement.executeQuery()){
+                return resultSet.getString("request_id");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public synchronized void removeItem(String requestId) throws IOException {
         try(Connection connection = openConnection();
             PreparedStatement statement = connection.prepareStatement("""

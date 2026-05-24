@@ -3,7 +3,10 @@ package com.bidding_system.backends.server.service;
 import com.bidding_system.backends.server.database.AuctionDAO;
 import com.bidding_system.backends.server.database.BidTransactionDAO;
 import com.bidding_system.backends.server.database.InventoryDAO;
+import com.bidding_system.backends.server.database.MyRequestDAO;
+import com.bidding_system.backends.server.handler.BidBatchProcessor;
 import com.bidding_system.backends.server.handler.ServerAuctionManager;
+import com.bidding_system.backends.common.messages.MsgBid.ServerBidRespond;
 import com.bidding_system.backends.common.models.accounts.Admin;
 import com.bidding_system.backends.common.models.accounts.User;
 import com.bidding_system.backends.common.models.bidding.Auction;
@@ -11,6 +14,7 @@ import com.bidding_system.backends.common.models.bidding.BidTransaction;
 import com.bidding_system.backends.common.models.core.Item;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -84,6 +88,8 @@ public final class AuctionService {
         }
         InventoryDAO inventoryDAO = new InventoryDAO();
         inventoryDAO.updateItemStatus(item.getId(), InventoryDAO.STATUS_IN_PROGRESS);
+        MyRequestDAO myRequestDAO = new MyRequestDAO();
+        myRequestDAO.updateRequestStatus(item.getId(), MyRequestDAO.STATUS_IN_PROGRESS);
 
         Auction auction = new Auction(item);
         LocalDateTime now = LocalDateTime.now();
@@ -144,6 +150,7 @@ public final class AuctionService {
 
         Auction managedAuction = resolveAuction(auction);
         managedAuction.end(time);
+        syncWinnerFromPersistedBids(managedAuction);
         syncAuctionClosure(managedAuction);
         unregisterActiveAuction(managedAuction);
     }
@@ -248,6 +255,8 @@ public final class AuctionService {
     private static void syncAuctionClosure(Auction auction) throws IOException {
         AuctionDAO auctionDAO = new AuctionDAO();
         InventoryDAO inventoryDAO = new InventoryDAO();
+        MyRequestDAO requestDAO = new  MyRequestDAO();
+
         auctionDAO.updateAuctionState(
                 auction.getAuctionId(),
                 auction.getStatus(),
@@ -260,12 +269,14 @@ public final class AuctionService {
                 ? InventoryDAO.STATUS_UNSOLD
                 : InventoryDAO.STATUS_SOLD;
         inventoryDAO.updateItemStatus(auction.getItem().getId(), itemStatus);
+        requestDAO.updateRequestStatus(inventoryDAO.getRequestIdbyItem(auction.getItem().getId()), itemStatus);
     }
 
     // Cap nhat DB khi huy phien va dua item tro lai hang doi WAITING.
     private static void syncAuctionCancellation(Auction auction) throws IOException {
         AuctionDAO auctionDAO = new AuctionDAO();
         InventoryDAO inventoryDAO = new InventoryDAO();
+        MyRequestDAO myrequestDAO =   new MyRequestDAO();
         auctionDAO.updateAuctionState(
                 auction.getAuctionId(),
                 auction.getStatus(),
@@ -274,6 +285,7 @@ public final class AuctionService {
                 null
         );
         inventoryDAO.updateItemStatus(auction.getItem().getId(), InventoryDAO.STATUS_WAITING);
+        myrequestDAO.updateRequestStatus(inventoryDAO.getRequestIdbyItem(auction.getItem().getId()), InventoryDAO.STATUS_WAITING);
     }
 
     // Lay instance Auction dang duoc service quan ly neu da ton tai,
@@ -314,5 +326,23 @@ public final class AuctionService {
         if (future != null) {
             future.cancel(false);
         }
+    }
+
+    private static void syncWinnerFromPersistedBids(Auction auction) throws IOException {
+        BidBatchProcessor.getInstance().flushAuction(auction.getAuctionId());
+
+        BidTransactionDAO bidTransactionDAO = new BidTransactionDAO();
+        ServerBidRespond maxBidder;
+        try {
+            maxBidder = bidTransactionDAO.getMaxBidder(auction.getAuctionId());
+        } catch (SQLException e) {
+            throw new IOException("Khong the doc winner cua auction " + auction.getAuctionId(), e);
+        }
+        if (maxBidder == null || maxBidder.userId == null) {
+            auction.syncHighestBidState(0, null);
+            return;
+        }
+
+        auction.syncHighestBidState(maxBidder.amount, maxBidder.userId);
     }
 }

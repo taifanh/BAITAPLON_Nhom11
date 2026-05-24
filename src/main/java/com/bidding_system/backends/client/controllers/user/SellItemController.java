@@ -5,8 +5,11 @@ import com.bidding_system.backends.client.controllers.base.BaseController;
 import com.bidding_system.backends.client.controllers.components.CustomItemCell;
 import com.bidding_system.backends.client.network.MessageBus;
 import com.bidding_system.backends.client.session.UserSession;
-import com.bidding_system.backends.server.database.MyRequestDAO;
+import com.bidding_system.backends.common.constants.Statuses;
 import com.bidding_system.backends.common.messages.Common.*;
+import com.bidding_system.backends.common.messages.MsgData.FetchUserRequestsRequest;
+import com.bidding_system.backends.common.messages.MsgData.RequestRecordDto;
+import com.bidding_system.backends.common.messages.MsgData.UserRequestListResponse;
 import com.bidding_system.backends.common.models.accounts.User;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,34 +25,35 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.function.Consumer;
 
 public class SellItemController extends BaseController {
 
-    @FXML private ListView<String> listPendingItems;
+    @FXML private ListView<RequestRecordDto> listPendingItems;
 
     private static final String MSG_ADD_ITEM_OK    = "add_item_OK";
     private static final String MSG_REMOVE_ITEM_OK = "remove_item_OK";
     private static final String MSG_REMOVE_FAIL    = "remove_item_fail";
     private static final String MSG_ACCEPTED        = "ACCEPTED_SUCCESS";
+    private static final String MSG_LOADREQUEST     = "USER_REQUEST_LIST_DATA";
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private final ObservableList<String> pendingRequestIds =
+    private final ObservableList<RequestRecordDto> pendingRequestIds =
             FXCollections.observableArrayList();
-    private final MyRequestDAO requestDAO = new MyRequestDAO();
 
     private Consumer<String> addItemHandler;
     private Consumer<String> removeItemHandler;
     private Consumer<String> acceptedHandler;
-
+    private Consumer<String> loadUserHandler;
     @FXML
     public void initialize() throws IOException {
-        loadPendingRequests();
+        loadUserRequest();
+        subsribeloadPendingRequests();
         subscribeAddItem();
         subscribeRemoveItem();
         subscribeAccepted();
+
     }
 
     @Override
@@ -57,6 +61,7 @@ public class SellItemController extends BaseController {
         if (addItemHandler    != null) MessageBus.getInstance().unsubscribe(addItemHandler);
         if (removeItemHandler != null) MessageBus.getInstance().unsubscribe(removeItemHandler);
         if (acceptedHandler   != null) MessageBus.getInstance().unsubscribe(acceptedHandler);
+        if (loadUserHandler   != null) MessageBus.getInstance().unsubscribe(loadUserHandler);
     }
 
     // ── Subscriptions ─────────────────────────────────────────────
@@ -66,20 +71,11 @@ public class SellItemController extends BaseController {
                 JsonNode node = MAPPER.readTree(raw);
                 if (!MSG_ADD_ITEM_OK.equals(node.path("type").asText())) return;
 
-                String requestId  = node.path("request_id").asText(null);
-                String payloadRaw = node.path("payloadJson").asText();
-                Createitempayload payload =
-                        new Gson().fromJson(payloadRaw, Createitempayload.class);
+                String requestId = node.path("request_id").asText(null);
+                if (requestId == null || requestId.isBlank()) return;
 
-                Message msg = new Message();
-                msg.Id_user     = UserSession.getCurrentUser().getId();
-                msg.messageType = "additem";
-                msg.payloadJson = new Gson().toJson(payload);
-
-                requestDAO.save_myrequest(msg, requestId);
                 Platform.runLater(() -> {
-                    if (requestId != null) pendingRequestIds.add(requestId);
-                    refreshListView();
+                    try { loadUserRequest(); } catch (IOException e) { e.printStackTrace(); }
                 });
             } catch (Exception e) { e.printStackTrace(); }
         };
@@ -99,10 +95,8 @@ public class SellItemController extends BaseController {
                     String requestId = payload.getRequest_id();
                     if (requestId == null || requestId.isBlank()) return;
 
-                    requestDAO.remove_request(requestId);
                     Platform.runLater(() -> {
-                        pendingRequestIds.remove(requestId);
-                        try { loadPendingRequests(); } catch (IOException e) { e.printStackTrace(); }
+                        try { loadUserRequest(); } catch (IOException e) { e.printStackTrace(); }
                         showAlert(Alert.AlertType.INFORMATION, "Item removed successfully");
                     });
                 } else if (MSG_REMOVE_FAIL.equals(type)) {
@@ -123,14 +117,14 @@ public class SellItemController extends BaseController {
 
                 String requestId = node.path("request_id").asText("");
                 String userId    = node.path("user_id").asText("");
-                String status    = node.path("status").asText(MyRequestDAO.STATUS_WAITING);
+                String status    = node.path("status").asText(Statuses.WAITING);
+
                 User   current   = UserSession.getCurrentUser();
                 if (current == null || requestId.isBlank()) return;
                 if (!userId.isBlank() && !current.getId().equals(userId)) return;
 
-                requestDAO.updateRequestStatus(requestId, status);
                 Platform.runLater(() -> {
-                    try { loadPendingRequests(); } catch (IOException e) { e.printStackTrace(); }
+                    try { loadUserRequest(); } catch (IOException e) { e.printStackTrace(); }
                     showAlert(Alert.AlertType.INFORMATION, "Admin accepted your item!");
                 });
             } catch (Exception e) { e.printStackTrace(); }
@@ -139,26 +133,46 @@ public class SellItemController extends BaseController {
     }
 
     // ── UI helpers ────────────────────────────────────────────────
-    private void loadPendingRequests() throws IOException {
-        if (listPendingItems == null) return;
-        User current = UserSession.getCurrentUser();
-        if (current == null) return;
+    private void subsribeloadPendingRequests() throws IOException {
+        loadUserHandler = rawJson -> {
 
-        List<MyRequestDAO.RequestRecord> records =
-                requestDAO.getMyRequestsByType("additem");
+            try {
+                JsonNode node = MAPPER.readTree(rawJson);
+                if(!MSG_LOADREQUEST.equals(node.path("type").asText())) return;
 
-        pendingRequestIds.clear();
-        records.stream()
-                .filter(r -> current.getId().equals(r.userId()))
-                .filter(r -> r.requestId() != null)
-                .forEach(r -> pendingRequestIds.add(r.requestId()));
+                UserRequestListResponse response = MAPPER.readValue(rawJson, UserRequestListResponse.class);
 
-        refreshListView();
+                Platform.runLater(() -> {
+                    pendingRequestIds.clear();
+
+                    if (response.requests != null) {
+                        pendingRequestIds.addAll(response.requests);
+                    }
+
+                    refreshListView();
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        };
+        MessageBus.getInstance().subscribe(loadUserHandler);
     }
+
 
     private void refreshListView() {
         listPendingItems.setItems(pendingRequestIds);
         listPendingItems.setCellFactory(lv -> new CustomItemCell());
+    }
+    public void loadUserRequest() throws IOException {
+        User currentUser = UserSession.getCurrentUser();
+        if (currentUser == null) {
+            return;
+        }
+        Message msg = new Message();
+        msg.Id_user = currentUser.getId();
+        msg.messageType = "FETCH_USER_REQUEST";
+        msg.payloadJson = MAPPER.writeValueAsString(new FetchUserRequestsRequest(currentUser.getId(), "additem"));
+        UserSession.getConnection().send(msg);
     }
 
     @FXML
