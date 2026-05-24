@@ -77,6 +77,7 @@ public class BiddingSpaceController extends BaseController {
     private final Map<String, Long>   endTimeByItemId    = new HashMap<>();
     private final Map<String, String> auctionIdByItemId  = new HashMap<>();
     private final Map<String, Boolean> autoBidStateByAuctionId = new HashMap<>();
+    private final Map<String, Double> maxLimitByAuctionId = new HashMap<>();
 
     private Item   selectedItem;
     private String currentAuctionId;
@@ -331,8 +332,11 @@ public class BiddingSpaceController extends BaseController {
         }
         boolean wasAutoBidActive = autoBidStateByAuctionId.getOrDefault(currentAuctionId, false);
         if (wasAutoBidActive) {
+            Double savedLimit = maxLimitByAuctionId.get(currentAuctionId);
+            if (savedLimit != null) fieldMaxLimit.setText(String.valueOf(savedLimit));
             applyAutoBidActive();
         } else {
+            fieldMaxLimit.clear();
             buttonPlaceBid.setDisable(false);
             fieldBidPrice.setDisable(false);
         }
@@ -343,6 +347,8 @@ public class BiddingSpaceController extends BaseController {
         auctionEndTime   = null;
         currentAuctionId = null;
         resetClock();
+        fieldMaxLimit.clear();
+        applyAutoBidInactive();
         fieldHighBidder.setText("Not started");
         fieldCurrentAmount.setText(String.valueOf(startingPrice));
         clearBidVisuals("Auction has not started.");
@@ -489,6 +495,7 @@ public class BiddingSpaceController extends BaseController {
                 throw new IllegalArgumentException("Max limit too low");
             if (UserSession.getCurrentUser().getId().equals(currentSellerId))
                 throw new IllegalArgumentException("Cannot bid on your own item");
+            maxLimitByAuctionId.put(currentAuctionId, maxLimit);
             String userId = UserSession.getCurrentUser().getId();
             UserSession.getConnection().send(new RegisterAutoBidding(currentAuctionId, userId , maxLimit));
         } catch (RuntimeException e) {
