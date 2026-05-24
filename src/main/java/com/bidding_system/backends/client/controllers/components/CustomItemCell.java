@@ -1,10 +1,10 @@
 package com.bidding_system.backends.client.controllers.components;
 
-import backends.client.session.UserSession;
-import backends.common.messages.Common.Createitempayload;
-import backends.common.messages.Common.Message;
-import backends.common.messages.Common.MessageType;
-import backends.common.messages.Common.RemoveRequestpayload;
+import com.bidding_system.backends.client.session.UserSession;
+import com.bidding_system.backends.common.messages.Common.Createitempayload;
+import com.bidding_system.backends.common.messages.Common.Message;
+import com.bidding_system.backends.common.messages.Common.MessageType;
+import com.bidding_system.backends.common.messages.Common.RemoveRequestpayload;
 import com.bidding_system.backends.common.messages.MsgData.RequestRecordDto;
 import com.google.gson.Gson;
 import javafx.geometry.Pos;
