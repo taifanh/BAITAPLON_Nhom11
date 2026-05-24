@@ -50,6 +50,7 @@ public class ClientHandler implements Runnable {
         processors.put("FETCH_USER_REQUEST", UserService::fetchUserRequest);
         processors.put("FETCH_INVENTORY", AdminService::fetchInventory);
         processors.put("FETCH_BID_HISTORY", AdminService::fetchBidHistory);
+        processors.put("FETCH_USER_BID_HISTORY", UserService::fetchUserBidHistory);
         processors.put("FETCH_AUCTION_STATUS", AuctionProcessors::fetchAuctionStatus);
         processors.put("FETCH_REQUESTS", AdminService::fetchRequests);
         processors.put("ADMIN_ACTION", AdminService::adminAction);

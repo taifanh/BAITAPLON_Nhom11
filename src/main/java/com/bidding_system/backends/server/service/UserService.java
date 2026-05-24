@@ -12,6 +12,7 @@ import com.bidding_system.backends.common.models.core.Account;
 import com.bidding_system.backends.server.database.InventoryDAO;
 import com.bidding_system.backends.server.database.MyRequestDAO;
 import com.bidding_system.backends.server.database.RequestLogDAO;
+import com.bidding_system.backends.server.database.BidTransactionDAO;
 import com.bidding_system.backends.server.database.UserDAO;
 import com.bidding_system.backends.server.handler.AuctionRoom;
 import com.bidding_system.backends.server.handler.ClientHandler;
@@ -164,6 +165,28 @@ public final class UserService {
                 .toList();
 
         clienthandler.send(mapper.writeValueAsString(response));
+        return null;
+    }
+
+    public static String fetchUserBidHistory(ClientHandler clientHandler, JsonNode node) throws IOException {
+        FetchBidHistoryRequest request = mapper.treeToValue(node, FetchBidHistoryRequest.class);
+        BidTransactionDAO bidTransactionDAO = new BidTransactionDAO();
+        BidHistoryDataResponse response = new BidHistoryDataResponse();
+
+        response.type = "USER_BID_HISTORY_DATA";
+        response.auctionId = "";
+        response.records = bidTransactionDAO.getBidHistoryByBidder(request.bidderId).stream()
+                .map(record -> new BidHistoryRecordDto(
+                        record.auctionId(),
+                        record.bidderId(),
+                        record.bidderId(),
+                        record.itemId(),
+                        record.amount(),
+                        record.bidTime()
+                ))
+                .toList();
+
+        clientHandler.send(mapper.writeValueAsString(response));
         return null;
     }
 }

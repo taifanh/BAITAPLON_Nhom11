@@ -1,6 +1,6 @@
 package com.bidding_system.backends.client.controllers.user;
 
-import com.bidding_system.backends.server.database.RequestLogDAO;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,8 +42,6 @@ public class CreateItemController {
     public TextField itemName;
 
     private Consumer<String> createItemHandler;
-
-    private final RequestLogDAO requestLogDAO = new RequestLogDAO();
 
     public void handle_create_ok(ActionEvent event) throws IOException {
         String type = itemType.getSelectionModel().getSelectedItem().toString();
