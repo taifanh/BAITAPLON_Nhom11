@@ -116,6 +116,7 @@ public class BiddingSpaceController extends BaseController {
         fieldItemName.setEditable(false);
         fieldBasePrice.setEditable(false);
         fieldIncrement.setEditable(false);
+        fieldNextMinimumBid.setEditable(false);
     }
 
     private void setupItemListView() {
