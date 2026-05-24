@@ -3,6 +3,7 @@ package backends.client.controllers.components;
 import backends.client.session.UserSession;
 import backends.common.messages.Common.Createitempayload;
 import backends.common.messages.Common.Message;
+import backends.common.messages.Common.MessageType;
 import backends.common.messages.Common.RemoveRequestpayload;
 import backends.server.database.MyRequestDAO;
 import backends.server.database.RequestLogDAO;
@@ -81,7 +82,7 @@ public class CustomItemCell extends ListCell<String> {
 
             Message msg = new Message();
             msg.Id_user = UserSession.getCurrentUser().getId();
-            msg.messageType = "removeitem";
+            msg.messageType = MessageType.REMOVEITEM.getValue();
             msg.payloadJson = payloadJson;
 
             UserSession.getConnection().send(msg);

@@ -1,6 +1,7 @@
 package backends.server.database;
 
 import backends.common.messages.Common.Message;
+import backends.common.messages.Common.MessageType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,7 @@ public class MyRequestDAOTest {
     void testSaveAndFindRequest() throws Exception {
         Message msg = new Message();
         msg.Id_user = "USER1";
-        msg.messageType = "additem";
+        msg.messageType = MessageType.ADDITEM.getValue();
         msg.payloadJson = "{\"name\": \"test item\"}";
 
         MyRequestDAO.save_myrequest(msg, "REQ123");
@@ -46,7 +47,7 @@ public class MyRequestDAOTest {
         MyRequestDAO.RequestRecord record = myRequestDAO.findByRequestId("REQ123");
         assertNotNull(record);
         assertEquals("USER1", record.userId());
-        assertEquals("additem", record.requestType());
+        assertEquals(MessageType.ADDITEM.getValue(), record.requestType());
         assertEquals(MyRequestDAO.STATUS_PENDING, record.status());
     }
 
@@ -54,7 +55,7 @@ public class MyRequestDAOTest {
     void testUpdateRequestStatus() throws Exception {
         Message msg = new Message();
         msg.Id_user = "USER2";
-        msg.messageType = "withdraw";
+        msg.messageType = "withdraw"; // Note: "withdraw" type không được định nghĩa trong enum, sử dụng cho test
         MyRequestDAO.save_myrequest(msg, "REQ999");
 
         myRequestDAO.updateRequestStatus("REQ999", MyRequestDAO.STATUS_ACCEPTED);

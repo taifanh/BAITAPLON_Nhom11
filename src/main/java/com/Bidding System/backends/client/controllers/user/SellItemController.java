@@ -73,7 +73,7 @@ public class SellItemController extends BaseController {
 
                 Message msg = new Message();
                 msg.Id_user     = UserSession.getCurrentUser().getId();
-                msg.messageType = "additem";
+                msg.messageType = MessageType.ADDITEM.getValue();
                 msg.payloadJson = new Gson().toJson(payload);
 
                 requestDAO.save_myrequest(msg, requestId);
@@ -145,7 +145,7 @@ public class SellItemController extends BaseController {
         if (current == null) return;
 
         List<MyRequestDAO.RequestRecord> records =
-                requestDAO.getMyRequestsByType("additem");
+                requestDAO.getMyRequestsByType(MessageType.ADDITEM.getValue());
 
         pendingRequestIds.clear();
         records.stream()

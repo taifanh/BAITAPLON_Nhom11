@@ -21,6 +21,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import backends.common.messages.Common.Createitempayload;
 import backends.common.messages.Common.Message;
+import backends.common.messages.Common.MessageType;
 
 import java.io.IOException;
 import java.util.function.Consumer;
@@ -58,7 +59,7 @@ public class CreateItemController {
 
         Message msg = new Message();
         msg.payloadJson = payload;
-        msg.messageType = "additem";
+        msg.messageType = MessageType.ADDITEM.getValue();
         msg.Id_user = UserSession.getCurrentUser().getId();
 
         UserSession.getConnection().send(msg);

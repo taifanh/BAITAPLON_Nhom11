@@ -2,6 +2,7 @@ package backends.server.service;
 
 import backends.common.messages.Common.Createitempayload;
 import backends.common.messages.Common.Message;
+import backends.common.messages.Common.MessageType;
 import backends.common.messages.Common.RemoveRequestpayload;
 import backends.common.messages.Common.SigninPayload;
 import backends.common.messages.Common.SigninResponsePayload;
@@ -87,7 +88,7 @@ public final class UserService {
         Message msg = new Message();
         msg.Id_user = userId;
         msg.payloadJson = payloadJson;
-        msg.messageType = "additem";
+        msg.messageType = MessageType.ADDITEM.getValue();
 
         Createitempayload payload = mapper.readValue(payloadJson, Createitempayload.class);
         

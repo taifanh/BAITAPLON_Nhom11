@@ -14,6 +14,7 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import backends.common.messages.Common.Depositpayload;
 import backends.common.messages.Common.Message;
+import backends.common.messages.Common.MessageType;
 import java.util.function.Consumer;
 
 public class DepositController {
@@ -92,7 +93,7 @@ public class DepositController {
             }
             Message msg = new Message();
             msg.Id_user = currentUser.getId();
-            msg.messageType = "DEPOSIT";
+            msg.messageType = MessageType.DEPOSIT.getValue();
             msg.payloadJson = gson.toJson(new Depositpayload(moneyIn));
 
             UserSession.getConnection().send(msg);

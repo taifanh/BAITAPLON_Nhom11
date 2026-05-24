@@ -1,6 +1,7 @@
 package backends.server.handler;
 
 import backends.common.models.bidding.Auction;
+import backends.common.messages.Common.MessageType;
 import backends.server.service.AccountService;
 import backends.server.service.AdminService;
 import backends.server.service.AuctionProcessors;
@@ -42,26 +43,26 @@ public class ClientHandler implements Runnable {
     }
 
     private void registerProcessors() {
-        processors.put("AUCTION_ITEMS_RESPONSE", AuctionProcessors::auctionItemsResponse);
-        processors.put("GET_BALANCE", AccountService::getBalance);
-        processors.put("signin", UserService::signin);
-        processors.put("REGISTER_AUTO_BIDDING", AuctionProcessors::registerAutoBid);
-        processors.put("CANCEL_AUTO_BIDDING", AuctionProcessors::cancelAutoBid);
-        processors.put("signup", UserService::signup);
-        processors.put("FETCH_INVENTORY", AdminService::fetchInventory);
-        processors.put("FETCH_BID_HISTORY", AdminService::fetchBidHistory);
-        processors.put("FETCH_AUCTION_STATUS", AuctionProcessors::fetchAuctionStatus);
-        processors.put("FETCH_REQUESTS", AdminService::fetchRequests);
-        processors.put("ADMIN_ACTION", AdminService::adminAction);
-        processors.put("AUCTION_COMMAND", AuctionProcessors::auctionCommand);
-        processors.put("WATCH_AUCTION", AuctionProcessors::watchAuction);
-        processors.put("UNWATCH_AUCTION", AuctionProcessors::unwatchAuction);
-        processors.put("PLACE_BID", AuctionProcessors::placeBid);
-        processors.put("GET_AUCTIONS", AuctionProcessors::getAuctions);
-        processors.put("DEPOSIT", AccountService::deposit);
-        processors.put("additem", UserService::addItem);
-        processors.put("change_info", AccountService::changeInfo);
-        processors.put("removeitem", UserService::removeItem);
+        processors.put(MessageType.AUCTION_ITEMS_RESPONSE.getValue(), AuctionProcessors::auctionItemsResponse);
+        processors.put(MessageType.GET_BALANCE.getValue(), AccountService::getBalance);
+        processors.put(MessageType.SIGNIN.getValue(), UserService::signin);
+        processors.put(MessageType.REGISTER_AUTO_BIDDING.getValue(), AuctionProcessors::registerAutoBid);
+        processors.put(MessageType.CANCEL_AUTO_BIDDING.getValue(), AuctionProcessors::cancelAutoBid);
+        processors.put(MessageType.SIGNUP.getValue(), UserService::signup);
+        processors.put(MessageType.FETCH_INVENTORY.getValue(), AdminService::fetchInventory);
+        processors.put(MessageType.FETCH_BID_HISTORY.getValue(), AdminService::fetchBidHistory);
+        processors.put(MessageType.FETCH_AUCTION_STATUS.getValue(), AuctionProcessors::fetchAuctionStatus);
+        processors.put(MessageType.FETCH_REQUESTS.getValue(), AdminService::fetchRequests);
+        processors.put(MessageType.ADMIN_ACTION.getValue(), AdminService::adminAction);
+        processors.put(MessageType.AUCTION_COMMAND.getValue(), AuctionProcessors::auctionCommand);
+        processors.put(MessageType.WATCH_AUCTION.getValue(), AuctionProcessors::watchAuction);
+        processors.put(MessageType.UNWATCH_AUCTION.getValue(), AuctionProcessors::unwatchAuction);
+        processors.put(MessageType.PLACE_BID.getValue(), AuctionProcessors::placeBid);
+        processors.put(MessageType.GET_AUCTIONS.getValue(), AuctionProcessors::getAuctions);
+        processors.put(MessageType.DEPOSIT.getValue(), AccountService::deposit);
+        processors.put(MessageType.ADDITEM.getValue(), UserService::addItem);
+        processors.put(MessageType.CHANGE_INFO.getValue(), AccountService::changeInfo);
+        processors.put(MessageType.REMOVEITEM.getValue(), UserService::removeItem);
     }
 
     // AuctionRoom gọi hàm này để push tin xuống client
