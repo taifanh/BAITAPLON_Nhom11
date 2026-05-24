@@ -21,16 +21,18 @@ public class BidProcessor {
 
     // ── Singleton ──────────────────────────────────────────────────────────────
     private static BidProcessor instance;
-
+    
     public static synchronized BidProcessor getInstance() {
         if (instance == null) instance = new BidProcessor();
         return instance;
     }
 
+    private Thread workerThread;
+    
     private BidProcessor() {
-        Thread worker = new Thread(this::processLoop, "bid-worker");
-        worker.setDaemon(true);
-        worker.start();
+        workerThread = new Thread(this::processLoop, "bid-worker");
+        workerThread.setDaemon(true);
+        workerThread.start();
     }
 
     // ── Unified BidRequest — không phân biệt manual hay auto ──────────────────
