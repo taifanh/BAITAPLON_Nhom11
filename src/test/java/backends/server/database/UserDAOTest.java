@@ -5,6 +5,7 @@ import com.bidding_system.backends.common.models.accounts.User;
 import com.bidding_system.backends.common.models.core.Account;
 import com.bidding_system.backends.server.database.UserDAO;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *  - No backup / restore is needed because CI runners start from a clean checkout.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@ResourceLock("app.db")
 public class UserDAOTest {
 
     private static final Path DATA_DIR = Path.of("data");

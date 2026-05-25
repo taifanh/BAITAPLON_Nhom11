@@ -2,8 +2,10 @@ package backends.server.handler;
 
 
 import com.bidding_system.backends.server.handler.BidProcessor;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.CountDownLatch;
@@ -13,6 +15,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ResourceLock("app.db")
 class BidProcessorTest {
 
     private BidProcessor processor;
@@ -41,6 +44,19 @@ class BidProcessorTest {
         instanceField.set(null, null);
 
         processor = BidProcessor.getInstance();
+        pauseWorker();
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        pauseWorker();
+
+        Field field = BidProcessor.class.getDeclaredField("workerThread");
+        field.setAccessible(true);
+        Thread worker = (Thread) field.get(processor);
+        if (worker != null) {
+            worker.join(1000);
+        }
     }
 
     // =========================================================

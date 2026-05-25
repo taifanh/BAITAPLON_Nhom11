@@ -6,6 +6,7 @@ import com.bidding_system.backends.server.database.InventoryDAO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,6 +15,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ResourceLock("app.db")
 public class InventoryDAOTest {
     private static final Path DB_PATH = Path.of("data", "app.db");
     private static final Path BACKUP_PATH = Path.of("data", "app.db.backup");
