@@ -1,6 +1,5 @@
 package com.bidding_system.backends.server.handler;
 
-import com.bidding_system.backends.common.models.bidding.Auction;
 import com.bidding_system.backends.common.messages.Common.MessageType;
 import com.bidding_system.backends.server.service.AccountService;
 import com.bidding_system.backends.server.service.AdminService;
@@ -45,10 +44,10 @@ public class ClientHandler implements Runnable {
     private void registerProcessors() {
         processors.put(MessageType.AUCTION_ITEMS_RESPONSE.getValue(), AuctionProcessors::auctionItemsResponse);
         processors.put(MessageType.GET_BALANCE.getValue(), AccountService::getBalance);
-        processors.put(MessageType.SIGNIN.getValue(), UserService::signin);
+        processors.put(MessageType.SIGN_IN.getValue(), UserService::signin);
         processors.put(MessageType.REGISTER_AUTO_BIDDING.getValue(), AuctionProcessors::registerAutoBid);
         processors.put(MessageType.CANCEL_AUTO_BIDDING.getValue(), AuctionProcessors::cancelAutoBid);
-        processors.put(MessageType.SIGNUP.getValue(), UserService::signup);
+        processors.put(MessageType.SIGN_UP.getValue(), UserService::signup);
         processors.put("FETCH_USER_REQUEST", UserService::fetchUserRequest);
         processors.put(MessageType.FETCH_INVENTORY.getValue(), AdminService::fetchInventory);
         processors.put(MessageType.FETCH_BID_HISTORY.getValue(), AdminService::fetchBidHistory);
@@ -61,9 +60,9 @@ public class ClientHandler implements Runnable {
         processors.put(MessageType.PLACE_BID.getValue(), AuctionProcessors::placeBid);
         processors.put(MessageType.GET_AUCTIONS.getValue(), AuctionProcessors::getAuctions);
         processors.put(MessageType.DEPOSIT.getValue(), AccountService::deposit);
-        processors.put(MessageType.ADDITEM.getValue(), UserService::addItem);
+        processors.put(MessageType.ADD_ITEM.getValue(), UserService::addItem);
         processors.put(MessageType.CHANGE_INFO.getValue(), AccountService::changeInfo);
-        processors.put(MessageType.REMOVEITEM.getValue(), UserService::removeItem);
+        processors.put(MessageType.REMOVE_ITEM.getValue(), UserService::removeItem);
     }
 
     // AuctionRoom gọi hàm này để push tin xuống client

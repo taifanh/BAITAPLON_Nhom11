@@ -89,7 +89,7 @@
                             </font>
                         </Button>
 
-                        <Button fx:id="btnCreateProduct" alignment="CENTER" onAction="#handle_create_ok" prefHeight="40.0" prefWidth="130.0" style="-fx-background-color: #ea580c; -fx-text-fill: white; -fx-background-radius: 15; -fx-padding: 6 22 6 22;" text="Tao san pham">
+                        <Button fx:id="btnCreateProduct" alignment="CENTER" onAction="#handleCreateItem" prefHeight="40.0" prefWidth="130.0" style="-fx-background-color: #ea580c; -fx-text-fill: white; -fx-background-radius: 15; -fx-padding: 6 22 6 22;" text="Tao san pham">
                             <font>
                                 <Font name="System Bold" size="13.0" />
                             </font>

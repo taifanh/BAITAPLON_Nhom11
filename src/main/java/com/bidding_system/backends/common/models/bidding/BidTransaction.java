@@ -11,12 +11,27 @@ public class BidTransaction {
     private final Item item;
     private final double amount;
     private final Date time;
+    private boolean isAuto;
+    private double maxBid;
 
     public BidTransaction(User bidder, Item item, double amount) {
         this.bidder = bidder;
         this.item = item;
         this.amount = amount;
         this.time = new Date();
+        this.isAuto = false;
+        this.maxBid = 0;
+    }
+
+    public boolean isAuto() { return isAuto; }
+    public double getMaxBid() { return maxBid; }
+
+    public void setAuto(boolean isAuto) { this.isAuto = isAuto; }
+    public void setMaxBid(double maxBid) { this.maxBid = maxBid; }
+
+    public void disableAuto() {
+        this.isAuto = false;
+        this.maxBid = 0;
     }
 
     public double getAmount() {

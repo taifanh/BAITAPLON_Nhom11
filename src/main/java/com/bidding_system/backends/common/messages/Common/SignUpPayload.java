@@ -1,18 +1,18 @@
 package com.bidding_system.backends.common.messages.Common;
 
-public class SignupPayload {
+public class SignUpPayload {
     private  String name;
     private String email;
     private String phoneNumber;
     private String password;
 
-    public SignupPayload(String name, String email, String phoneNumber, String password) {
+    public SignUpPayload(String name, String email, String phoneNumber, String password) {
         this.name = name;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.password = password;
     }
-    public SignupPayload(){}
+    public SignUpPayload(){}
 
     public String getName() {
         return name;

@@ -77,51 +77,51 @@ class BidProcessorTest {
     // =========================================================
 
     @Test
-    void submit_BidDauTien_VaoQueue() throws Exception {
+    void submit_ManualBid_BidDauTien_VaoQueue() throws Exception {
         pauseWorker(); // dừng worker để queue không bị consume ngay
 
-        processor.submit("user-A", "auction-001", 100.0);
+        processor.submitManualBid("user-A", "auction-001", 100.0);
 
         LinkedBlockingQueue<BidProcessor.BidRequest> queue = getQueue();
         // Worker đã bị dừng → queue còn ít nhất 1 item
         // (hoặc đã được process trước khi dừng → kiểm tra không throw là đủ)
-        assertDoesNotThrow(() -> processor.submit("user-A", "auction-001", 100.0));
+        assertDoesNotThrow(() -> processor.submitManualBid("user-A", "auction-001", 100.0));
     }
 
     @Test
-    void submit_KhongThrowException() {
+    void submit_ManualBid_KhongThrowException() {
         // submit() chỉ gọi queue.offer() — không bao giờ ném exception
-        assertDoesNotThrow(() -> processor.submit("user-A", "auction-001", 100.0));
+        assertDoesNotThrow(() -> processor.submitManualBid("user-A", "auction-001", 100.0));
     }
 
     @Test
-    void submit_NhieuBidLienTiep_KhongThrowException() {
+    void submit_ManualBid_NhieuBidLienTiep_KhongThrowException() {
         assertDoesNotThrow(() -> {
-            processor.submit("user-A", "auction-001", 100.0);
-            processor.submit("user-B", "auction-001", 200.0);
-            processor.submit("user-C", "auction-001", 150.0);
+            processor.submitManualBid("user-A", "auction-001", 100.0);
+            processor.submitManualBid("user-B", "auction-001", 200.0);
+            processor.submitManualBid("user-C", "auction-001", 150.0);
         });
     }
 
     @Test
-    void submit_BidKhacAuction_KhongThrowException() {
+    void submit_ManualBid_BidKhacAuction_KhongThrowException() {
         assertDoesNotThrow(() -> {
-            processor.submit("user-A", "auction-001", 100.0);
-            processor.submit("user-B", "auction-002", 200.0);
-            processor.submit("user-C", "auction-003", 300.0);
+            processor.submitManualBid("user-A", "auction-001", 100.0);
+            processor.submitManualBid("user-B", "auction-002", 200.0);
+            processor.submitManualBid("user-C", "auction-003", 300.0);
         });
     }
 
     @Test
-    void submit_AmountAm_KhongThrowException() {
+    void submit_ManualBid_AmountAm_KhongThrowException() {
         // submit() không validate — validation nằm trong process()
         // nên submit giá âm vẫn không throw, chỉ bị reject khi process
-        assertDoesNotThrow(() -> processor.submit("user-A", "auction-001", -50.0));
+        assertDoesNotThrow(() -> processor.submitManualBid("user-A", "auction-001", -50.0));
     }
 
     @Test
-    void submit_AmountZero_KhongThrowException() {
-        assertDoesNotThrow(() -> processor.submit("user-A", "auction-001", 0.0));
+    void submit_ManualBid_AmountZero_KhongThrowException() {
+        assertDoesNotThrow(() -> processor.submitManualBid("user-A", "auction-001", 0.0));
     }
 
     // =========================================================
@@ -141,7 +141,7 @@ class BidProcessorTest {
     // =========================================================
 
     @Test
-    void submit_50ThreadCungSubmit_KhongThrowException() throws Exception {
+    void submit_50ThreadCungSubmit_ManualBid_KhongThrowException() throws Exception {
         int threadCount = 50;
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         CountDownLatch startLatch = new CountDownLatch(1);
@@ -152,7 +152,7 @@ class BidProcessorTest {
             executor.submit(() -> {
                 try {
                     startLatch.await(); // tất cả thread chờ, rồi cùng xuất phát
-                    processor.submit("user-" + idx, "auction-001", (idx + 1) * 10.0);
+                    processor.submitManualBid("user-" + idx, "auction-001", (idx + 1) * 10.0);
                 } catch (Exception e) {
                     fail("submit() ném exception không mong muốn: " + e.getMessage());
                 } finally {
@@ -169,7 +169,7 @@ class BidProcessorTest {
     }
 
     @Test
-    void submit_30ThreadNhieuAuction_KhongThrowException() throws Exception {
+    void submit_ManualBid_30ThreadNhieuAuction_KhongThrowException() throws Exception {
         int auctionCount  = 3;
         int bidPerAuction = 10;
         int threadCount   = auctionCount * bidPerAuction;
@@ -183,7 +183,7 @@ class BidProcessorTest {
             executor.submit(() -> {
                 try {
                     startLatch.await();
-                    processor.submit(
+                    processor.submitManualBid(
                             "user-" + idx,
                             "auction-" + (idx % auctionCount),
                             (idx + 1) * 5.0
@@ -202,7 +202,7 @@ class BidProcessorTest {
     }
 
     @Test
-    void submit_100ThreadCungAuction_KhongMucNaoLamCrash() throws Exception {
+    void submit_ManualBid_100ThreadCungAuction_KhongMucNaoLamCrash() throws Exception {
         int threadCount = 100;
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         CountDownLatch startLatch = new CountDownLatch(1);
@@ -213,7 +213,7 @@ class BidProcessorTest {
             executor.submit(() -> {
                 try {
                     startLatch.await();
-                    processor.submit("user-" + idx, "auction-stress", idx * 1000.0);
+                    processor.submitManualBid("user-" + idx, "auction-stress", idx * 1000.0);
                 } catch (Exception e) {
                     fail("Crash tại thread " + idx + ": " + e.getMessage());
                 } finally {

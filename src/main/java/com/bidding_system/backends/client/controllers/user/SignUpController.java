@@ -4,7 +4,7 @@ import com.bidding_system.backends.client.network.MessageBus;
 import com.bidding_system.backends.client.session.UserSession;
 import com.bidding_system.backends.common.messages.Common.Message;
 import com.bidding_system.backends.common.messages.Common.MessageType;
-import com.bidding_system.backends.common.messages.Common.SignupPayload;
+import com.bidding_system.backends.common.messages.Common.SignUpPayload;
 import com.bidding_system.backends.client.controllers.ViewLoader;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -80,9 +80,9 @@ public class SignUpController {
         // nếu đủ thông tin thì mới gửi tín hiệu cho server
         pendingStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 
-        SignupPayload payload = new SignupPayload(name , email , phoneNumber , password);
+        SignUpPayload payload = new SignUpPayload(name , email , phoneNumber , password);
         Message msg = new Message();
-        msg.messageType = MessageType.SIGNUP.getValue();
+        msg.messageType = MessageType.SIGN_UP.getValue();
         msg.payloadJson = gson.toJson(payload);
         UserSession.getConnection().send(msg);
     }

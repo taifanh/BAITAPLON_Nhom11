@@ -63,11 +63,10 @@ public class ServerAuctionManager {
             // Gọi AuctionService của bạn (Nó sẽ tự lo Timer và set DB IN_PROGRESS)
             Auction auction = AuctionService.startAuction(serverAdmin, item, 0, durationMinutes, 0);
             // Báo cho tất cả Client/Admin trên mạng lưới biết
-            double systemIncrement = IncrementPolicy.getIncrement(auction.getItem().getPrices());
             AuctionStatusMessage statusMsg = new AuctionStatusMessage();
             statusMsg.status = "STARTED";
             statusMsg.itemId = itemId;
-            statusMsg.increment = systemIncrement;
+            statusMsg.increment = 0;
             statusMsg.auctionId = auction.getAuctionId();
             statusMsg.endTimeEpoch = System.currentTimeMillis() + (durationMinutes * 60000L);
 
@@ -79,7 +78,7 @@ public class ServerAuctionManager {
                     sellerId,
                     auction.getAuctionId(),
                     auction.getItem().getPrices(),
-                    systemIncrement
+                    0
             );
             AuctionRoom.getInstance().broadcast(mapper.writeValueAsString(start_msg));
         } catch (Exception e) {
@@ -117,13 +116,7 @@ public class ServerAuctionManager {
                 AuctionRoom.getInstance().broadcast(mapper.writeValueAsString(statusMsg));
                 return;
             }
-
             String auctionId = auction.getAuctionId();
-
-            if (auctionId != null) {
-                AutoBidEngine.getInstance().removeAll(auctionId);
-            }
-
             AuctionStatusMessage statusMsg = new AuctionStatusMessage();
             statusMsg.status = "ENDED";
             statusMsg.itemId = itemId;

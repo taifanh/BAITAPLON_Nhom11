@@ -2,7 +2,7 @@ package com.bidding_system.backends.client.controllers.user;
 
 import com.bidding_system.backends.client.controllers.ViewLoader;
 import com.bidding_system.backends.client.session.UserSession;
-import com.bidding_system.backends.common.messages.Common.Createitempayload;
+import com.bidding_system.backends.common.messages.Common.CreateItemPayload;
 import com.bidding_system.backends.common.models.accounts.User;
 import com.bidding_system.backends.server.database.BidTransactionDAO;
 import com.bidding_system.backends.server.database.MyRequestDAO;
@@ -125,7 +125,7 @@ public class HistoryController {
                 if (!userId.equals(record.userId())) {
                     continue;
                 }
-                Createitempayload payload = gson.fromJson(record.requestInfo(), Createitempayload.class);
+                CreateItemPayload payload = gson.fromJson(record.requestInfo(), CreateItemPayload.class);
                 String itemName = payload == null ? record.requestId() : payload.getItem_name();
                 String amount = payload == null ? "" : String.valueOf(payload.getBasePrice());
                 rows.add(new HistoryRow("Sell request", itemName, amount, record.status(), record.time()));

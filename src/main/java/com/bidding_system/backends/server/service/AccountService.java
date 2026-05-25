@@ -1,7 +1,7 @@
 package com.bidding_system.backends.server.service;
 
-import com.bidding_system.backends.common.messages.Common.Change_infopayload;
-import com.bidding_system.backends.common.messages.Common.Depositpayload;
+import com.bidding_system.backends.common.messages.Common.ChangeInfoPayload;
+import com.bidding_system.backends.common.messages.Common.DepositPayload;
 import com.bidding_system.backends.common.messages.Common.Message;
 import com.bidding_system.backends.server.database.UserDAO;
 import com.bidding_system.backends.server.handler.ClientHandler;
@@ -31,7 +31,7 @@ public class AccountService {
         String userId = node.get("Id_user").asText();
         String payloadJson = node.get("payloadJson").asText();
 
-        Depositpayload payload = mapper.readValue(payloadJson, Depositpayload.class);
+        DepositPayload payload = mapper.readValue(payloadJson, DepositPayload.class);
         System.out.println("[Server] DEPOSIT received | userId=" + userId + " | amount=" + payload.getAmount());
 
         UserDAO userDAO = new UserDAO();
@@ -47,7 +47,7 @@ public class AccountService {
 
     public static String changeInfo(ClientHandler handler, JsonNode node) throws Exception {
         String payloadJson = node.get("payloadJson").asText();
-        Change_infopayload payload = mapper.readValue(payloadJson, Change_infopayload.class);
+        ChangeInfoPayload payload = mapper.readValue(payloadJson, ChangeInfoPayload.class);
 
         ObjectNode responseNode = mapper.createObjectNode();
         responseNode.put("type", "change_info_OK");

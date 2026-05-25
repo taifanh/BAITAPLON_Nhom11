@@ -191,7 +191,7 @@ public class UserDAO {
             statement.setString(4, admin.getPhoneNumber());
             statement.setString(5, admin.getPassword());
             statement.setDouble(6,0.0);
-            statement.setString(7,"Admin");
+            statement.setString(7,Account.ADMIN);
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new IOException("Khong the luu nguoi dung vao SQLite.", e);
