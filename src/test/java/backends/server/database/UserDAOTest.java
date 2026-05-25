@@ -1,67 +1,59 @@
 package backends.server.database;
 
+import com.bidding_system.backends.common.models.accounts.Admin;
 import com.bidding_system.backends.common.models.accounts.User;
 import com.bidding_system.backends.common.models.core.Account;
 import com.bidding_system.backends.server.database.UserDAO;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.*;
 
-import java.lang.reflect.Field;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Integration tests for UserDAO.
+ *
+ * Strategy (no reflection, no System.setProperty):
+ *  - UserDAO always writes to  <cwd>/data/users.db  (Path.of("data") is relative to OS CWD).
+ *  - On CI the directory does not exist yet; UserDAO.initializeStorage() creates it automatically.
+ *  - @BeforeEach simply deletes the DB file so every test starts with a clean, empty schema.
+ *  - @AfterAll deletes the DB file one final time to leave the workspace tidy.
+ *  - No backup / restore is needed because CI runners start from a clean checkout.
+ */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserDAOTest {
 
-    @TempDir
-    Path tempDir;
+    private static final Path DATA_DIR = Path.of("data");
+    private static final Path DB_FILE  = DATA_DIR.resolve("users.db");
 
     private UserDAO userDAO;
 
+    // ------------------------------------------------------------------
+    // Lifecycle
+    // ------------------------------------------------------------------
+
     @BeforeEach
     void setUp() throws Exception {
-        // Redirect UserDAO's DATA_DIRECTORY and DATABASE_FILE to tempDir via reflection
-        // so each test runs against a fresh, isolated DB without touching the real data/
-        setStaticFinalField(UserDAO.class, "DATA_DIRECTORY", tempDir);
-        setStaticFinalField(UserDAO.class, "DATABASE_FILE", tempDir.resolve("users.db"));
-        setStaticFinalField(UserDAO.class, "DATABASE_URL",
-                "jdbc:sqlite:" + tempDir.resolve("users.db"));
-
+        // Delete DB so each test gets a fresh, empty database.
+        Files.deleteIfExists(DB_FILE);
+        // UserDAO constructor calls initializeStorage() → creates data/ and the users table.
         userDAO = new UserDAO();
     }
 
-    @AfterEach
-    void tearDown() {
-        // TempDir is cleaned up automatically by JUnit 5; nothing extra needed
+    @AfterAll
+    static void cleanUp() throws Exception {
+        Files.deleteIfExists(DB_FILE);
     }
 
-    // ------------------------------------------------------------------ helpers
-
-    /**
-     * Uses reflection to overwrite a private static final field.
-     * Works for ordinary object fields; not needed for primitive-typed constants
-     * that the compiler inlines (none here).
-     */
-    private static void setStaticFinalField(Class<?> clazz, String fieldName, Object value)
-            throws Exception {
-        Field field = clazz.getDeclaredField(fieldName);
-        field.setAccessible(true);
-
-        // Remove 'final' modifier so we can write to it
-        Field modifiersField = Field.class.getDeclaredField("modifiers");
-        modifiersField.setAccessible(true);
-        modifiersField.setInt(field, field.getModifiers() & ~java.lang.reflect.Modifier.FINAL);
-
-        field.set(null, value);
-    }
-
-    // ------------------------------------------------------------------ tests
+    // ------------------------------------------------------------------
+    // saveUser / getUser
+    // ------------------------------------------------------------------
 
     @Test
+    @Order(1)
     void testSaveAndGetUser() throws Exception {
         User user = new User("U1", "John Doe", "john@example.com", "123456789", "password123");
         userDAO.saveUser(user);
@@ -69,14 +61,19 @@ public class UserDAOTest {
         User fetched = userDAO.getUser("U1");
 
         assertNotNull(fetched);
-        assertEquals("U1",         fetched.getId());
-        assertEquals("John Doe",   fetched.getName());
-        assertEquals("123456789",  fetched.getPhoneNumber());
-        assertEquals("john@example.com", fetched.getEmail());
+        assertEquals("U1",              fetched.getId());
+        assertEquals("John Doe",        fetched.getName());
+        assertEquals("123456789",       fetched.getPhoneNumber());
+        assertEquals("john@example.com",fetched.getEmail());
     }
 
+    // ------------------------------------------------------------------
+    // getAllUsers
+    // ------------------------------------------------------------------
+
     @Test
-    void testGetAllUsers() throws Exception {
+    @Order(2)
+    void testGetAllUsers_returnsAllSavedUsers() throws Exception {
         userDAO.saveUser(new User("U1", "Alice", "alice@example.com", "111000001", "p1"));
         userDAO.saveUser(new User("U2", "Bob",   "bob@example.com",   "111000002", "p2"));
 
@@ -86,9 +83,20 @@ public class UserDAOTest {
     }
 
     @Test
-    void testAuthenticate_success() throws Exception {
-        User user = new User("U2", "Jane Doe", "jane@example.com", "987654321", "securePass");
-        userDAO.saveUser(user);
+    @Order(3)
+    void testGetAllUsers_emptyTable() throws Exception {
+        List<User> users = userDAO.getAllUsers();
+        assertTrue(users.isEmpty());
+    }
+
+    // ------------------------------------------------------------------
+    // authenticate
+    // ------------------------------------------------------------------
+
+    @Test
+    @Order(4)
+    void testAuthenticate_correctCredentials_returnsUserAccount() throws Exception {
+        userDAO.saveUser(new User("U2", "Jane Doe", "jane@example.com", "987654321", "securePass"));
 
         Optional<Account> result = userDAO.authenticate("987654321", "securePass");
 
@@ -98,7 +106,8 @@ public class UserDAOTest {
     }
 
     @Test
-    void testAuthenticate_wrongPassword() throws Exception {
+    @Order(5)
+    void testAuthenticate_wrongPassword_returnsEmpty() throws Exception {
         userDAO.saveUser(new User("U2", "Jane Doe", "jane@example.com", "987654321", "securePass"));
 
         Optional<Account> result = userDAO.authenticate("987654321", "wrongPass");
@@ -107,22 +116,48 @@ public class UserDAOTest {
     }
 
     @Test
-    void testAuthenticate_unknownPhone() throws Exception {
+    @Order(6)
+    void testAuthenticate_unknownPhone_returnsEmpty() throws Exception {
         Optional<Account> result = userDAO.authenticate("000000000", "any");
-
         assertFalse(result.isPresent());
     }
 
     @Test
-    void testPhoneNumberExists() throws Exception {
-        userDAO.saveUser(new User("U3", "Alice", "alice@example.com", "111222333", "pass"));
+    @Order(7)
+    void testAuthenticate_adminRole() throws Exception {
+        Admin admin = new Admin("A1", "Super Admin", "admin@example.com", "999888777", "adminPass");
+        userDAO.saveAdmin(admin);
 
+        Optional<Account> result = userDAO.authenticate("999888777", "adminPass");
+
+        assertTrue(result.isPresent());
+        assertEquals("Admin", result.get().getRole());
+    }
+
+    // ------------------------------------------------------------------
+    // phoneNumberExists
+    // ------------------------------------------------------------------
+
+    @Test
+    @Order(8)
+    void testPhoneNumberExists_existing() throws Exception {
+        userDAO.saveUser(new User("U3", "Alice", "alice@example.com", "111222333", "pass"));
         assertTrue(userDAO.phoneNumberExists("111222333"));
-        assertFalse(userDAO.phoneNumberExists("999999999"));
     }
 
     @Test
-    void testUpdateAndGetBalance() throws Exception {
+    @Order(9)
+    void testPhoneNumberExists_notExisting() throws Exception {
+        assertFalse(userDAO.phoneNumberExists("999999999"));
+    }
+
+    // ------------------------------------------------------------------
+    // balance
+    // ------------------------------------------------------------------
+
+    @Test
+    @Order(10)
+    void testUpdateBalance_setsCorrectValue() throws Exception {
         userDAO.saveUser(new User("U3", "Alice", "alice@example.com", "111222333", "pass"));
 
         userDAO.update_balance(150.5, "U3");
@@ -131,6 +166,7 @@ public class UserDAOTest {
     }
 
     @Test
+    @Order(11)
     void testUpdateBalance_accumulates() throws Exception {
         userDAO.saveUser(new User("U4", "Bob", "bob@example.com", "444555666", "pass"));
 
@@ -141,42 +177,69 @@ public class UserDAOTest {
     }
 
     @Test
-    void testGetNameById() throws Exception {
-        userDAO.saveUser(new User("U5", "Charlie", "charlie@example.com", "777888999", "pass"));
+    @Order(12)
+    void testGetBalance_initialValueIsZero() throws Exception {
+        userDAO.saveUser(new User("U5", "Zero", "zero@example.com", "000111222", "pass"));
+        assertEquals(0.0, userDAO.get_balance("U5"), 1e-9);
+    }
 
+    // ------------------------------------------------------------------
+    // getNameById
+    // ------------------------------------------------------------------
+
+    @Test
+    @Order(13)
+    void testGetNameById_found() throws Exception {
+        userDAO.saveUser(new User("U5", "Charlie", "charlie@example.com", "777888999", "pass"));
         assertEquals("Charlie", userDAO.getNameById("U5"));
-        assertNull(userDAO.getNameById("nonexistent"));
     }
 
     @Test
-    void testChangeInfo() throws Exception {
+    @Order(14)
+    void testGetNameById_notFound_returnsNull() throws Exception {
+        assertNull(userDAO.getNameById("nonexistent"));
+    }
+
+    // ------------------------------------------------------------------
+    // change_info
+    // ------------------------------------------------------------------
+
+    @Test
+    @Order(15)
+    void testChangeInfo_updatesAllFields() throws Exception {
         userDAO.saveUser(new User("U6", "Old Name", "old@example.com", "100200300", "oldPass"));
 
         userDAO.change_info("New Name", "new@example.com", "300200100", "newPass", "U6");
 
-        // Authenticate with the new credentials to verify the update was persisted
         Optional<Account> result = userDAO.authenticate("300200100", "newPass");
         assertTrue(result.isPresent());
         assertEquals("New Name", result.get().getName());
     }
 
+    // ------------------------------------------------------------------
+    // constraint / error cases
+    // ------------------------------------------------------------------
+
     @Test
-    void testSaveUser_duplicatePhoneThrows() throws Exception {
+    @Order(16)
+    void testSaveUser_duplicatePhone_throwsException() throws Exception {
         userDAO.saveUser(new User("U7", "First",  "first@example.com",  "555666777", "pass"));
 
-        // phone_number has a UNIQUE constraint — second insert must fail
+        // UNIQUE constraint on phone_number must cause an exception
         assertThrows(Exception.class, () ->
                 userDAO.saveUser(new User("U8", "Second", "second@example.com", "555666777", "pass"))
         );
     }
 
     @Test
-    void testGetUser_notFound_throws() {
+    @Order(17)
+    void testGetUser_notFound_throwsException() {
         assertThrows(Exception.class, () -> userDAO.getUser("doesNotExist"));
     }
 
     @Test
-    void testGetBalance_notFound_throws() {
+    @Order(18)
+    void testGetBalance_notFound_throwsException() {
         assertThrows(Exception.class, () -> userDAO.get_balance("doesNotExist"));
     }
 }
