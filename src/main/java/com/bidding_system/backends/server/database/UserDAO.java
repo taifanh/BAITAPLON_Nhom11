@@ -322,6 +322,12 @@ public class UserDAO {
     }
 
     private Connection openConnection() throws SQLException {
+        try {
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("SQLite JDBC driver not found", e);
+        }
+
         return DriverManager.getConnection(DATABASE_URL);
     }
 }
