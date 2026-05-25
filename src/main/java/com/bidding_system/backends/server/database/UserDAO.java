@@ -21,7 +21,7 @@ import java.util.Set;
 
 public class UserDAO {
     private static final Path DATA_DIRECTORY = Path.of("data");
-    private static final Path DATABASE_FILE = DATA_DIRECTORY.resolve("users.db");
+    private static final Path DATABASE_FILE = DATA_DIRECTORY.resolve("app.db");
     private static final String DATABASE_URL = "jdbc:sqlite:" + DATABASE_FILE;
     private static final String CREATE_USERS_TABLE_SQL = """
             CREATE TABLE IF NOT EXISTS users (

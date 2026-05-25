@@ -15,8 +15,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class InventoryDAOTest {
-    private static final Path DB_PATH = Path.of("data", "inventory.db");
-    private static final Path BACKUP_PATH = Path.of("data", "inventory.db.backup");
+    private static final Path DB_PATH = Path.of("data", "app.db");
+    private static final Path BACKUP_PATH = Path.of("data", "app.db.backup");
     private InventoryDAO inventoryDAO;
 
     @BeforeEach

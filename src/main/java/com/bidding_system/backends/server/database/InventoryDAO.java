@@ -30,7 +30,7 @@ public class InventoryDAO {
     public static final String STATUS_REJECTED = "REJECTED";
 
     private static final Path DATA_DIRECTORY = Path.of("data");
-    private static final Path DATABASE_FILE = DATA_DIRECTORY.resolve("inventory.db");
+    private static final Path DATABASE_FILE = DATA_DIRECTORY.resolve("app.db");
     private static final String DATABASE_URL = "jdbc:sqlite:" + DATABASE_FILE;
     private static final String CREATE_INVENTORY_TABLE_SQL = """
             CREATE TABLE IF NOT EXISTS inventory (

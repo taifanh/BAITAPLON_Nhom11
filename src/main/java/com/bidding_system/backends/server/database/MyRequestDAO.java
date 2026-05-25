@@ -21,7 +21,7 @@ public class MyRequestDAO {
     public static final String STATUS_REJECTED = "REJECTED";
     //                STT INTEGER PRIMARY KEY AUTOINCREMENT,
     private static final Path DATA_DIRECTORY = Path.of("data");
-    static final Path DATABASE_FILE = DATA_DIRECTORY.resolve("my_request.db");
+    static final Path DATABASE_FILE = DATA_DIRECTORY.resolve("app.db");
     private static final String DATABASE_URL = "jdbc:sqlite:" + DATABASE_FILE;
     private static final String CREATE_REQUEST_TABLE_SQL = """
             CREATE TABLE IF NOT EXISTS my_request (

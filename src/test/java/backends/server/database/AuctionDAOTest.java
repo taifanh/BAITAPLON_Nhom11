@@ -18,10 +18,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AuctionDAOTest {
-    private static final Path AUCTION_DB = Path.of("data", "auctions.db");
-    private static final Path AUCTION_BACKUP = Path.of("data", "auctions.db.backup");
-    private static final Path INV_DB = Path.of("data", "inventory.db");
-    private static final Path INV_BACKUP = Path.of("data", "inventory.db.backup");
+    private static final Path AUCTION_DB = Path.of("data", "app.db");
+    private static final Path AUCTION_BACKUP = Path.of("data", "app.db.backup");
+    private static final Path INV_DB = Path.of("data", "app.db");
+    private static final Path INV_BACKUP = Path.of("data", "app.db.backup");
 
     private AuctionDAO auctionDAO;
     private InventoryDAO inventoryDAO;

@@ -15,8 +15,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MyRequestDAOTest {
-    private static final Path DB_PATH = Path.of("data", "my_request.db");
-    private static final Path BACKUP_PATH = Path.of("data", "my_request.db.backup");
+    private static final Path DB_PATH = Path.of("data", "app.db");
+    private static final Path BACKUP_PATH = Path.of("data", "app.db.backup");
     private MyRequestDAO myRequestDAO;
 
     @BeforeEach

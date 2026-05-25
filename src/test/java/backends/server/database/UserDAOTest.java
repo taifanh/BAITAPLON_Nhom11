@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Integration tests for UserDAO.
  *
  * Strategy (no reflection, no System.setProperty):
- *  - UserDAO always writes to  <cwd>/data/users.db  (Path.of("data") is relative to OS CWD).
+ *  - UserDAO always writes to  <cwd>/data/app.db  (Path.of("data") is relative to OS CWD).
  *  - On CI the directory does not exist yet; UserDAO.initializeStorage() creates it automatically.
  *  - @BeforeEach simply deletes the DB file so every test starts with a clean, empty schema.
  *  - @AfterAll deletes the DB file one final time to leave the workspace tidy.
@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UserDAOTest {
 
     private static final Path DATA_DIR = Path.of("data");
-    private static final Path DB_FILE  = DATA_DIR.resolve("users.db");
+    private static final Path DB_FILE  = DATA_DIR.resolve("app.db");
 
     private UserDAO userDAO;
 
