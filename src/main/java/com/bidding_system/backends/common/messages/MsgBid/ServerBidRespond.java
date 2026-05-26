@@ -5,6 +5,8 @@ public class ServerBidRespond {
     public double amount;
     public String userId;
     public String auctionId;
+    public boolean isAuto;
+    public double maxBid;
     public ServerBidRespond() {}
     public ServerBidRespond(String name, double amount, String userId) {
         this.name = name;

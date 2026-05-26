@@ -1,14 +1,14 @@
 package com.bidding_system.backends.common.messages.Common;
 
-public class Depositpayload {
+public class DepositPayload {
     private double amount;
     public double getAmount() {
         return amount;
     }
     public void setAmount(double amount) {this.amount = amount;}
 
-    public Depositpayload(){}
-    public Depositpayload(double amount) {
+    public DepositPayload(){}
+    public DepositPayload(double amount) {
         this.amount = amount;
     }
 }

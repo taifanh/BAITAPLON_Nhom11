@@ -1,12 +1,7 @@
 package com.bidding_system.backends.server.service;
 
-import com.bidding_system.backends.common.messages.Common.Createitempayload;
-import com.bidding_system.backends.common.messages.Common.Message;
-import com.bidding_system.backends.common.messages.Common.MessageType;
-import com.bidding_system.backends.common.messages.Common.RemoveRequestpayload;
-import com.bidding_system.backends.common.messages.Common.SigninPayload;
-import com.bidding_system.backends.common.messages.Common.SigninResponsePayload;
-import com.bidding_system.backends.common.messages.Common.SignupPayload;
+import com.bidding_system.backends.common.messages.Common.*;
+import com.bidding_system.backends.common.messages.Common.SignUpPayload;
 import com.bidding_system.backends.common.messages.MsgData.InventoryDataResponse;
 import com.bidding_system.backends.common.messages.MsgData.RequestListDataResponse;
 import com.bidding_system.backends.common.models.accounts.User;
@@ -18,9 +13,7 @@ import com.bidding_system.backends.server.database.BidTransactionDAO;
 import com.bidding_system.backends.server.database.UserDAO;
 import com.bidding_system.backends.server.handler.AuctionRoom;
 import com.bidding_system.backends.server.handler.ClientHandler;
-import com.bidding_system.backends.common.messages.Common.*;
 import com.bidding_system.backends.common.messages.MsgData.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -71,7 +64,7 @@ public final class UserService {
     }
 
     public static String signup(ClientHandler clientHandler, JsonNode node) throws IOException {
-        SignupPayload payload = mapper.readValue(node.get("payloadJson").asText(), SignupPayload.class);
+        SignUpPayload payload = mapper.readValue(node.get("payloadJson").asText(), SignUpPayload.class);
         UserDAO userDAO = new UserDAO();
         if (userDAO.phoneNumberExists(payload.getPhoneNumber())) {
             ObjectNode fail = mapper.createObjectNode();
@@ -92,9 +85,9 @@ public final class UserService {
         Message msg = new Message();
         msg.Id_user = userId;
         msg.payloadJson = payloadJson;
-        msg.messageType = MessageType.ADDITEM.getValue();
+        msg.messageType = MessageType.ADD_ITEM.getValue();
 
-        Createitempayload payload = mapper.readValue(payloadJson, Createitempayload.class);
+        CreateItemPayload payload = mapper.readValue(payloadJson, CreateItemPayload.class);
         
 
         ObjectNode responseNode = mapper.createObjectNode();
@@ -113,7 +106,7 @@ public final class UserService {
     public static String removeItem(ClientHandler handler, JsonNode node) throws Exception {
         String payloadJson = node.get("payloadJson").asText();
 
-        RemoveRequestpayload payload = mapper.readValue(payloadJson, RemoveRequestpayload.class);
+        RemoveRequestPayload payload = mapper.readValue(payloadJson, RemoveRequestPayload.class);
         String status_item = payload.getStatus();
         RequestLogDAO requestlog = new RequestLogDAO();
         InventoryDAO inventoryDAODB = new InventoryDAO();

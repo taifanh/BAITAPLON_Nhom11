@@ -42,8 +42,9 @@ public class Admin extends Account {
             instance = new Admin(name, email, phoneNumber, password);
             return instance;
         }
+        return instance;
         // Vứt Exception ra, và Controller bên JavaFX sẽ bắt lấy để hiển thị Alert
-        throw new IllegalStateException("One admin already exists.");
+//        throw new IllegalStateException("One admin already exists.");
     }
 
     public void manageAuction(Auction auction) {

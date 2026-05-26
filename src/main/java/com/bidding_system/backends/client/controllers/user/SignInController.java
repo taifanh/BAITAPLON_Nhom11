@@ -72,7 +72,7 @@ public class SignInController {
         pendingStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 
         Message msg = new Message();
-        msg.messageType = MessageType.SIGNIN.getValue();
+        msg.messageType = MessageType.SIGN_IN.getValue();
         msg.payloadJson = gson.toJson(new SigninPayload(phoneNumber, password));
 
         UserSession.getConnection().send(msg);// còn tín hiệu gửi login cũ thì sẽ cho client xử lý luôn nếu đăng nhập thành công

@@ -1,6 +1,6 @@
 package com.bidding_system.backends.server.service;
 
-import com.bidding_system.backends.common.messages.Common.Createitempayload;
+import com.bidding_system.backends.common.messages.Common.CreateItemPayload;
 import com.bidding_system.backends.common.messages.MsgAuction.AdminActionCommand;
 import com.bidding_system.backends.common.messages.MsgData.BidHistoryDataResponse;
 import com.bidding_system.backends.common.messages.MsgData.BidHistoryRecordDto;
@@ -59,7 +59,7 @@ public final class AdminService {
         RequestLogDAO requestLogDAODB = new RequestLogDAO();
         RequestListDataResponse response = new RequestListDataResponse();
 
-        response.requests = requestLogDAODB.getRequestsByType("additem");
+        response.requests = requestLogDAODB.getRequestsByType("ADD_ITEM");
 
         return mapper.writeValueAsString(response);
     }
@@ -120,7 +120,7 @@ public final class AdminService {
         } else if ("ACCEPT_REQUEST".equals(cmd.action)) {
             RequestLogDAO.RequestRecord request = requestLogDAODB.findByRequestId(cmd.targetId);
             if (request != null) {
-                Createitempayload payload = GSON.fromJson(request.requestInfo(), Createitempayload.class);
+                CreateItemPayload payload = GSON.fromJson(request.requestInfo(), CreateItemPayload.class);
                 ItemType itemType = ItemType.valueOf(payload.getItemType());
 
                 Item item = ItemFactory.createItem(
@@ -130,7 +130,7 @@ public final class AdminService {
                         payload.getItemInfo()
                 );
 
-                inventoryDAODB.saveItem(item, request.userId(), request.id());
+                inventoryDAODB.saveItem(item, request.userId(), request.requestId());
                 requestLogDAODB.removeRequest(cmd.targetId);
                 myRequestDAO.updateRequestStatus(cmd.targetId, RequestLogDAO.STATUS_WAITING);
 

@@ -135,8 +135,8 @@ public class ClientHandler implements Runnable {
 
 account_service = """package backends.server.service;
 
-import com.bidding_system.backends.common.messages.Common.Change_infopayload;
-import com.bidding_system.backends.common.messages.Common.Depositpayload;
+import com.bidding_system.backends.common.messages.Common.ChangeInfoPayload;
+import com.bidding_system.backends.common.messages.Common.DepositPayload;
 import com.bidding_system.backends.common.messages.Common.Message;
 import com.bidding_system.backends.server.database.UserDAO;
 import com.bidding_system.backends.server.handler.ClientHandler;
@@ -195,7 +195,7 @@ public class AccountService {
 
 admin_service = """package backends.server.service;
 
-import com.bidding_system.backends.common.messages.Common.Createitempayload;
+import com.bidding_system.backends.common.messages.Common.CreateItemPayload;
 import com.bidding_system.backends.common.messages.MsgAuction.AdminActionCommand;
 import com.bidding_system.backends.common.messages.MsgData.InventoryDataResponse;
 import com.bidding_system.backends.common.messages.MsgData.RequestListDataResponse;
@@ -441,12 +441,12 @@ public class AuctionProcessors {
 
 user_service = """package backends.server.service;
 
-import com.bidding_system.backends.common.messages.Common.Createitempayload;
+import com.bidding_system.backends.common.messages.Common.CreateItemPayload;
 import com.bidding_system.backends.common.messages.Common.Message;
-import com.bidding_system.backends.common.messages.Common.RemoveRequestpayload;
+import com.bidding_system.backends.common.messages.Common.RemoveRequestPayload;
 import com.bidding_system.backends.common.messages.Common.SigninPayload;
 import com.bidding_system.backends.common.messages.Common.SigninResponsePayload;
-import com.bidding_system.backends.common.messages.Common.SignupPayload;
+import com.bidding_system.backends.common.messages.Common.SignUpPayload;
 import com.bidding_system.backends.common.messages.MsgData.InventoryDataResponse;
 import com.bidding_system.backends.common.messages.MsgData.RequestListDataResponse;
 import com.bidding_system.backends.common.models.accounts.User;

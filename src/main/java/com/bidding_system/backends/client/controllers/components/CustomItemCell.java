@@ -1,10 +1,10 @@
 package com.bidding_system.backends.client.controllers.components;
 
 import com.bidding_system.backends.client.session.UserSession;
-import com.bidding_system.backends.common.messages.Common.Createitempayload;
+import com.bidding_system.backends.common.messages.Common.CreateItemPayload;
 import com.bidding_system.backends.common.messages.Common.Message;
 import com.bidding_system.backends.common.messages.Common.MessageType;
-import com.bidding_system.backends.common.messages.Common.RemoveRequestpayload;
+import com.bidding_system.backends.common.messages.Common.RemoveRequestPayload;
 import com.bidding_system.backends.common.messages.MsgData.RequestRecordDto;
 import com.google.gson.Gson;
 import javafx.geometry.Pos;
@@ -15,8 +15,6 @@ import javafx.scene.control.ListCell;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
-
-import java.io.IOException;
 
 public class CustomItemCell extends ListCell<RequestRecordDto> {
     private HBox content;
@@ -46,7 +44,7 @@ public class CustomItemCell extends ListCell<RequestRecordDto> {
             if (request == null) {
                 return;
             }
-                Createitempayload payload = gson.fromJson(request.requestInfo, Createitempayload.class);
+                CreateItemPayload payload = gson.fromJson(request.requestInfo, CreateItemPayload.class);
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Thong tin item");
                 alert.setHeaderText(payload.getItem_name());
@@ -65,12 +63,12 @@ public class CustomItemCell extends ListCell<RequestRecordDto> {
             RequestRecordDto item = getItem();// trả về dạng request record lưu các thông tin cơ bản của request và item đó
 
             Gson gson = new Gson();
-            RemoveRequestpayload payload = new RemoveRequestpayload(item.requestId , item.status);
+            RemoveRequestPayload payload = new RemoveRequestPayload(item.requestId , item.status);
             String payloadJson = gson.toJson(payload);
 
             Message msg = new Message();
             msg.Id_user = UserSession.getCurrentUser().getId();
-            msg.messageType = MessageType.REMOVEITEM.getValue();
+            msg.messageType = MessageType.REMOVE_ITEM.getValue();
             msg.payloadJson = payloadJson;
 
             UserSession.getConnection().send(msg);
@@ -83,7 +81,7 @@ public class CustomItemCell extends ListCell<RequestRecordDto> {
     protected void updateItem(RequestRecordDto request , boolean empty){// javafx AUTO call it
         super.updateItem(request, empty);
         if (request != null && !empty) {
-            Createitempayload payload = gson.fromJson(request.requestInfo, Createitempayload.class);
+            CreateItemPayload payload = gson.fromJson(request.requestInfo, CreateItemPayload.class);
             itemName.setText(payload.getItem_name());
             setGraphic(content);
         } else {

@@ -1,6 +1,6 @@
 package com.bidding_system.backends.common.messages.Common;
 
-public class RemoveRequestpayload {
+public class RemoveRequestPayload {
     private String request_id;
     private String status;
 
@@ -19,10 +19,10 @@ public class RemoveRequestpayload {
         this.status = status;
     }
 
-    public RemoveRequestpayload(String request_id, String status) {
+    public RemoveRequestPayload(String request_id, String status) {
         this.request_id = request_id;
         this.status = status;
     }
-    public  RemoveRequestpayload() {
+    public RemoveRequestPayload() {
     }
 }

@@ -27,6 +27,8 @@ public class BidTransactionDAO {
                 bidderId TEXT NOT NULL,
                 itemId TEXT NOT NULL,
                 amount DOUBLE NOT NULL,
+                isAuto    BOOLEAN NOT NULL DEFAULT 0,
+                maxBid    DOUBLE NOT NULL DEFAULT 0,
                 bidTime TEXT NOT NULL
             )
             """;
@@ -42,37 +44,66 @@ public class BidTransactionDAO {
     public synchronized void saveBid(String auctionId, BidTransaction bid) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
-                     INSERT INTO bid_transactions(auctionId, bidderId, itemId, amount, bidTime)
-                     VALUES(?,?,?,?,?)
-                     """)) {
+                 INSERT INTO bid_transactions(auctionId, bidderId, itemId, amount, isAuto, maxBid, bidTime)
+                 VALUES(?,?,?,?,?,?,?)
+                 """)) {
             statement.setString(1, auctionId);
             statement.setString(2, bid.getBidderId());
             statement.setString(3, bid.item().getId());
             statement.setDouble(4, bid.getAmount());
-            statement.setString(5, bid.getTime().toInstant().toString());
+            statement.setBoolean(5, bid.isAuto());
+            statement.setDouble(6, bid.getMaxBid());
+            statement.setString(7, bid.getTime().toInstant().toString()); // ← 7, không phải 5
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new IOException("Khong the luu lich su bid", e);
         }
     }
 
+    public synchronized void updateMaxBid(String auctionId, String userId, double newMaxBid) throws IOException {
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement("""
+             UPDATE bid_transactions
+             SET maxBid = ?
+             WHERE auctionId = ?
+               AND bidderId = ?
+               AND id = (
+                   SELECT id FROM bid_transactions
+                   WHERE auctionId = ? AND bidderId = ?
+                   ORDER BY amount DESC
+                   LIMIT 1
+               )
+             """)) {
+            statement.setDouble(1, newMaxBid);
+            statement.setString(2, auctionId);
+            statement.setString(3, userId);
+            statement.setString(4, auctionId);
+            statement.setString(5, userId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IOException("Khong the cap nhat maxBid", e);
+        }
+    }
+
     public ServerBidRespond getMaxBidder(String auctionId) throws IOException, SQLException {
         try(Connection connection = openConnection();
             PreparedStatement statement = connection.prepareStatement("""
-                    SELECT bidderId, amount
+                    SELECT bidderId, amount, isAuto, maxBid
                     FROM bid_transactions
                     WHERE auctionId = ?
                     ORDER BY amount DESC 
                     LIMIT 1
                     """)) {
             statement.setString(1, auctionId);
-            try(ResultSet resultSet = statement.executeQuery()) {
-                if (!resultSet.next()) {
-                    return null;
-                }
-                String username = (new UserDAO()).getUser(resultSet.getString("bidderId")).getName();
-                String userId = (new UserDAO()).getUser(resultSet.getString("bidderId")).getId();
-                return new ServerBidRespond(username, resultSet.getDouble("amount"), userId);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (!rs.next()) return null;
+                UserDAO userDAO = new UserDAO();
+                String userId   = userDAO.getUser(rs.getString("bidderId")).getId();
+                String username = userDAO.getUser(rs.getString("bidderId")).getName();
+                ServerBidRespond respond = new ServerBidRespond(username, rs.getDouble("amount"), userId);
+                respond.isAuto = rs.getBoolean("isAuto");
+                respond.maxBid = rs.getDouble("maxBid");
+                return respond;
             } catch (SQLException e) {
                 throw new IOException("Chua co bidder", e);
             }
@@ -174,6 +205,19 @@ public class BidTransactionDAO {
         try (Connection connection = openConnection();
              Statement statement = connection.createStatement()) {
             statement.executeUpdate(CREATE_BID_TRANSACTIONS_TABLE_SQL);
+            ensureColumnExists(connection, "isAuto", "BOOLEAN NOT NULL DEFAULT 0");
+            ensureColumnExists(connection, "maxBid",  "DOUBLE NOT NULL DEFAULT 0");
+        }
+    }
+
+    private void ensureColumnExists(Connection conn, String column, String definition) {
+        try (ResultSet rs = conn.getMetaData().getColumns(null, null, "bid_transactions", column)) {
+            if (!rs.next()) {
+                conn.createStatement().executeUpdate(
+                        "ALTER TABLE bid_transactions ADD COLUMN " + column + " " + definition);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

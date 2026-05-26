@@ -12,7 +12,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import com.bidding_system.backends.common.messages.Common.Depositpayload;
+import com.bidding_system.backends.common.messages.Common.DepositPayload;
 import com.bidding_system.backends.common.messages.Common.Message;
 import com.bidding_system.backends.common.messages.Common.MessageType;
 import java.util.function.Consumer;
@@ -94,7 +94,7 @@ public class DepositController {
             Message msg = new Message();
             msg.Id_user = currentUser.getId();
             msg.messageType = MessageType.DEPOSIT.getValue();
-            msg.payloadJson = gson.toJson(new Depositpayload(moneyIn));
+            msg.payloadJson = gson.toJson(new DepositPayload(moneyIn));
 
             UserSession.getConnection().send(msg);
 

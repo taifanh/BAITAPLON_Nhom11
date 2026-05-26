@@ -2,17 +2,17 @@ package com.bidding_system.backends.common.messages.Common;
 
 public enum MessageType {
     // ======== User Authentication ========
-    SIGNIN("signin"),
-    SIGNUP("signup"),
+    SIGN_IN("SIGN_IN"),
+    SIGN_UP("SIGN_UP"),
     
     // ======== User Account ========
     GET_BALANCE("GET_BALANCE"),
     DEPOSIT("DEPOSIT"),
-    CHANGE_INFO("change_info"),
+    CHANGE_INFO("CHANGE_INFO"),
     
     // ======== Item Management ========
-    ADDITEM("additem"),
-    REMOVEITEM("removeitem"),
+    ADD_ITEM("ADD_ITEM"),
+    REMOVE_ITEM("REMOVE_ITEM"),
     
     // ======== Auction Operations ========
     AUCTION_ITEMS_RESPONSE("AUCTION_ITEMS_RESPONSE"),

@@ -327,6 +327,7 @@ public class BiddingSpaceController extends BaseController {
             fieldHighBidder.setText("No bids yet");
             fieldCurrentAmount.setText(String.valueOf(startingPrice));
             currentHighestBid = startingPrice;
+            currentBidIncrement = msg.increment;
             fieldIncrement.setText(String.valueOf(currentBidIncrement));
             fieldNextMinimumBid.setText(String.valueOf(startingPrice + currentBidIncrement));
         }
@@ -362,6 +363,7 @@ public class BiddingSpaceController extends BaseController {
         resetClock();
         fieldHighBidder.setText("Auction ended");
         fieldCurrentAmount.clear();
+        fieldNextMinimumBid.clear();
         clearBidVisuals("Auction ended.");
         buttonPlaceBid.setDisable(true);
         fieldBidPrice.setDisable(true);

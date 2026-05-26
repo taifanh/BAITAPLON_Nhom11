@@ -4,6 +4,7 @@ import com.bidding_system.backends.common.messages.MsgAuction.AuctionCommandMess
 import com.bidding_system.backends.common.messages.MsgAuction.AuctionStatusMessage;
 import com.bidding_system.backends.common.messages.MsgBid.*;
 import com.bidding_system.backends.common.models.bidding.Auction;
+import com.bidding_system.backends.common.models.bidding.BidTransaction;
 import com.bidding_system.backends.server.database.BidTransactionDAO;
 import com.bidding_system.backends.server.database.InventoryDAO;
 import com.bidding_system.backends.server.database.UserDAO;
@@ -53,9 +54,8 @@ public class AuctionProcessors {
                 // increment tính theo giá cao nhất hiện tại
                 statusMsg.increment = IncrementPolicy.getIncrement(maxBidder.amount);
             } else {
-                // chưa có ai bid → tính increment theo giá khởi điểm của item
                 double startingPrice = managedAuction.getItem().getPrices();
-                statusMsg.increment  = IncrementPolicy.getIncrement(startingPrice);
+                statusMsg.increment  = 0;
             }
         } else if (managedAuction == null) {
             statusMsg.status = "NOT_STARTED";
@@ -106,7 +106,7 @@ public class AuctionProcessors {
             error.put("message", "Không xác định được phiên đấu giá");
             return error.toString();
         }
-        AutoBidEngine.getInstance().register(new AutoBidEngine.AutoBidEntry(msg.userId, msg.auctionId, msg.maxBid, System.currentTimeMillis()));
+        BidProcessor.getInstance().submitAutoBid(msg.userId, msg.auctionId, msg.maxBid);
         ObjectNode ack = mapper.createObjectNode();
         ack.put("type", "AUTO_BID_REGISTERED");
         return ack.toString();
@@ -124,7 +124,7 @@ public class AuctionProcessors {
             error.put("message", "Không xác định được phiên đấu giá");
             return error.toString();
         }
-        AutoBidEngine.getInstance().remove(msg.auctionId, msg.userId);
+
         ObjectNode response = mapper.createObjectNode();
         response.put("type", "AUTO_BID_CANCELLED");
         response.put("message", "Auto bidding mode is cancelled");
@@ -144,7 +144,7 @@ public class AuctionProcessors {
             error.put("message", "Không xác định được phiên đấu giá");
             return error.toString();
         }
-        BidProcessor.getInstance().submit(info.id, auctionId, info.amount);
+        BidProcessor.getInstance().submitManualBid(info.id, auctionId, info.amount);
         return null;
     }
 

@@ -1,5 +1,6 @@
 package com.bidding_system.backends.client.controllers.user;
 
+import com.bidding_system.backends.common.messages.Common.CreateItemPayload;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,11 +19,11 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import com.bidding_system.backends.common.messages.Common.Createitempayload;
 import com.bidding_system.backends.common.messages.Common.Message;
 import com.bidding_system.backends.common.messages.Common.MessageType;
 
 import java.io.IOException;
+import java.sql.SQLOutput;
 import java.util.function.Consumer;
 
 public class CreateItemController {
@@ -33,9 +34,6 @@ public class CreateItemController {
     public TextField basePrice;
 
     @FXML
-    public TextField bidIncrement;
-
-    @FXML
     public ComboBox<String> itemType;
 
     @FXML
@@ -43,23 +41,22 @@ public class CreateItemController {
 
     private Consumer<String> createItemHandler;
 
-    public void handle_create_ok(ActionEvent event) throws IOException {
+    public void handleCreateItem(ActionEvent event) throws IOException {
         String type = itemType.getSelectionModel().getSelectedItem().toString();
         double bidPrice = Double.parseDouble(basePrice.getText());
-        double bidIncrement = Double.parseDouble(this.bidIncrement.getText());
         String itemInfo = this.itemInfo.getText();
         String itemName = this.itemName.getText();
 
         Gson gson = new Gson();
-        Createitempayload createitempayload = new Createitempayload(type, itemName, itemInfo, bidPrice);
+        CreateItemPayload createitempayload = new CreateItemPayload(type, itemName, itemInfo, bidPrice);
         String payload = gson.toJson(createitempayload);
         Message msg = new Message();
         msg.payloadJson = payload;
-        msg.messageType = MessageType.ADDITEM.getValue();
+        msg.messageType = MessageType.ADD_ITEM.getValue();
         msg.Id_user = UserSession.getCurrentUser().getId();
 
         UserSession.getConnection().send(msg);
-
+        System.out.println("ADD_ITEM");
         Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
         window.close();
     }

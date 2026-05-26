@@ -89,9 +89,9 @@ public class SellItemController extends BaseController {
                 String type   = node.path("type").asText();
 
                 if (MSG_REMOVE_ITEM_OK.equals(type) && node.has("payloadJson")) {
-                    RemoveRequestpayload payload = new Gson().fromJson(
+                    RemoveRequestPayload payload = new Gson().fromJson(
                             node.get("payloadJson").asText(),
-                            RemoveRequestpayload.class);
+                            RemoveRequestPayload.class);
                     String requestId = payload.getRequest_id();
                     if (requestId == null || requestId.isBlank()) return;
 

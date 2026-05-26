@@ -290,6 +290,6 @@ public class RequestLogDAO {
         return DriverManager.getConnection(DATABASE_URL);
     }
 
-    public record RequestRecord(String id, String userId, String requestType, String requestInfo,String time, boolean selected, String status) {
+    public record RequestRecord(String requestId, String userId, String requestType, String requestInfo,String time, boolean selected, String status) {
     }
 }

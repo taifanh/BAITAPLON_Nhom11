@@ -1,6 +1,6 @@
 package com.bidding_system.backends.client.controllers.components;
 
-import com.bidding_system.backends.common.messages.Common.Createitempayload;
+import com.bidding_system.backends.common.messages.Common.CreateItemPayload;
 import com.bidding_system.backends.common.messages.MsgData.RequestRecordDto;
 import com.google.gson.Gson;
 import javafx.geometry.Pos;
@@ -33,7 +33,7 @@ public class CustomItemRequestCell extends ListCell<RequestRecordDto> {
         view.setOnAction(event -> {
             RequestRecordDto request = getItem();
             if (request == null) return;
-            Createitempayload payload = gson.fromJson(request.requestInfo, Createitempayload.class);
+            CreateItemPayload payload = gson.fromJson(request.requestInfo, CreateItemPayload.class);
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Thong tin item");
             alert.setHeaderText(payload.getItem_name());
@@ -63,7 +63,7 @@ public class CustomItemRequestCell extends ListCell<RequestRecordDto> {
     protected void updateItem(RequestRecordDto request, boolean empty) {
         super.updateItem(request, empty);
         if (request != null && !empty) {
-            Createitempayload payload = gson.fromJson(request.requestInfo, Createitempayload.class); // ← thêm dòng này
+            CreateItemPayload payload = gson.fromJson(request.requestInfo, CreateItemPayload.class); // ← thêm dòng này
             name_item.setText(payload.getItem_name());
             selected.setSelected(selectedIds.contains(request.requestId)); // ← thêm dòng này
             setGraphic(content);

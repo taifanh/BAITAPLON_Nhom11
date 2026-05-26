@@ -129,7 +129,7 @@ public class AdminRequestController extends BaseController {
 
         for (JsonNode r : requestsNode) {
             RequestRecordDto dto = new RequestRecordDto();
-            dto.requestId   = r.path("id").asText("");
+            dto.requestId = r.path("requestId").asText("");
             dto.userId      = r.path("userId").asText("");
             dto.requestType = r.path("requestType").asText("");
             dto.requestInfo = r.path("requestInfo").asText("");
