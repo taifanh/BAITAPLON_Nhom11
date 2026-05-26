@@ -10,7 +10,6 @@ import java.lang.reflect.Field;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,20 +18,6 @@ class BidProcessorTest {
 
     private BidProcessor processor;
 
-    @SuppressWarnings("unchecked")
-    private LinkedBlockingQueue<BidProcessor.BidRequest> getQueue() throws Exception {
-        Field field = BidProcessor.class.getDeclaredField("queue");
-        field.setAccessible(true);
-        return (LinkedBlockingQueue<BidProcessor.BidRequest>) field.get(processor);
-    }
-
-    private void pauseWorker() throws Exception {
-        Field field = BidProcessor.class.getDeclaredField("workerThread");
-        field.setAccessible(true);
-        Thread worker = (Thread) field.get(processor);
-        if (worker != null) worker.interrupt();
-    }
-
     @BeforeEach
     void setUp() throws Exception {
         Field instanceField = BidProcessor.class.getDeclaredField("instance");
@@ -40,19 +25,11 @@ class BidProcessorTest {
         instanceField.set(null, null);
 
         processor = BidProcessor.getInstance();
-        pauseWorker();
     }
 
     @AfterEach
-    void tearDown() throws Exception {
-        pauseWorker();
-
-        Field field = BidProcessor.class.getDeclaredField("workerThread");
-        field.setAccessible(true);
-        Thread worker = (Thread) field.get(processor);
-        if (worker != null) {
-            worker.join(1000);
-        }
+    void tearDown() {
+        // worker là daemon thread → tự dừng, không cần làm gì
     }
 
     // =========================================================
@@ -106,23 +83,17 @@ class BidProcessorTest {
     }
 
     // =========================================================
-    // NHÓM 2: submitManualBid / submitAutoBid — nạp vào queue
+    // NHÓM 2: submit — nạp vào queue
     // =========================================================
-
-    @Test
-    void submitManual_BidDauTien_KhongThrowException() throws Exception {
-        pauseWorker();
-        assertDoesNotThrow(() -> processor.submitManualBid("user-A", "auction-001", 100.0));
-    }
-
-    @Test
-    void submitAuto_BidDauTien_KhongThrowException() {
-        assertDoesNotThrow(() -> processor.submitAutoBid("user-A", "auction-001", 500.0));
-    }
 
     @Test
     void submitManual_KhongThrowException() {
         assertDoesNotThrow(() -> processor.submitManualBid("user-A", "auction-001", 100.0));
+    }
+
+    @Test
+    void submitAuto_KhongThrowException() {
+        assertDoesNotThrow(() -> processor.submitAutoBid("user-A", "auction-001", 500.0));
     }
 
     @Test
@@ -145,6 +116,7 @@ class BidProcessorTest {
 
     @Test
     void submitManual_AmountAm_KhongThrowException() {
+        // submit không validate — validation nằm trong process()
         assertDoesNotThrow(() -> processor.submitManualBid("user-A", "auction-001", -50.0));
     }
 
@@ -191,7 +163,7 @@ class BidProcessorTest {
                     startLatch.await();
                     processor.submitManualBid("user-" + idx, "auction-001", (idx + 1) * 10.0);
                 } catch (Exception e) {
-                    fail("submitManualBid() ném exception không mong muốn: " + e.getMessage());
+                    fail("submitManualBid() ném exception: " + e.getMessage());
                 } finally {
                     doneLatch.countDown();
                 }
@@ -217,7 +189,7 @@ class BidProcessorTest {
                     startLatch.await();
                     processor.submitAutoBid("user-" + idx, "auction-001", (idx + 1) * 100.0);
                 } catch (Exception e) {
-                    fail("submitAutoBid() ném exception không mong muốn: " + e.getMessage());
+                    fail("submitAutoBid() ném exception: " + e.getMessage());
                 } finally {
                     doneLatch.countDown();
                 }
@@ -248,14 +220,12 @@ class BidProcessorTest {
                         processor.submitManualBid(
                                 "user-" + idx,
                                 "auction-" + (idx % auctionCount),
-                                (idx + 1) * 5.0
-                        );
+                                (idx + 1) * 5.0);
                     } else {
                         processor.submitAutoBid(
                                 "user-" + idx,
                                 "auction-" + (idx % auctionCount),
-                                (idx + 1) * 50.0
-                        );
+                                (idx + 1) * 50.0);
                     }
                 } catch (Exception e) {
                     fail("Exception: " + e.getMessage());
