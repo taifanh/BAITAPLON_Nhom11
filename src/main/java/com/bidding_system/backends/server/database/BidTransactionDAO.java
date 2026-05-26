@@ -60,6 +60,31 @@ public class BidTransactionDAO {
         }
     }
 
+    public synchronized void updateMaxBid(String auctionId, String userId, double newMaxBid) throws IOException {
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement("""
+             UPDATE bid_transactions
+             SET maxBid = ?
+             WHERE auctionId = ?
+               AND bidderId = ?
+               AND id = (
+                   SELECT id FROM bid_transactions
+                   WHERE auctionId = ? AND bidderId = ?
+                   ORDER BY amount DESC
+                   LIMIT 1
+               )
+             """)) {
+            statement.setDouble(1, newMaxBid);
+            statement.setString(2, auctionId);
+            statement.setString(3, userId);
+            statement.setString(4, auctionId);
+            statement.setString(5, userId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IOException("Khong the cap nhat maxBid", e);
+        }
+    }
+
     public ServerBidRespond getMaxBidder(String auctionId) throws IOException, SQLException {
         try(Connection connection = openConnection();
             PreparedStatement statement = connection.prepareStatement("""

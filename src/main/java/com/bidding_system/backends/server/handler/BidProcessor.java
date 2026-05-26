@@ -105,22 +105,15 @@ public class BidProcessor {
             }
         }
         else {
-            if (currentWinner != null
-                    && currentWinner.userId.equals(request.userId())
-                    && request.isAuto) {
+            if (currentWinner != null && currentWinner.userId.equals(request.userId()) && request.isAuto) {
                 // Chỉ cho phép cập nhật maxBid nếu cao hơn
-                if (request.maxBid <= currentWinner.maxBid) {
+                if (request.maxBid < currentWinner.maxBid) {
                     notifyAutoBidFailed(request.userId(),
                             "You are already the highest bidder.");
                     return;
-
                 }
                 // Cập nhật maxBid mới, không tăng giá
-                User bidUser = userDAO.getUser(currentWinner.userId);
-                BidTransaction bid = new BidTransaction(bidUser, dummyItem, currentWinner.amount);
-                bid.setAuto(currentWinner.isAuto);
-                bid.setMaxBid(request.maxBid);
-                bidDAO.saveBid(request.auctionId(), bid);
+                bidDAO.updateMaxBid(request.auctionId(), request.userId(), request.maxBid());
                 return;
             }
             if(request.isAuto && currentWinner.isAuto) {
