@@ -125,10 +125,7 @@ public class AuctionProcessors {
             return error.toString();
         }
 
-        ObjectNode response = mapper.createObjectNode();
-        response.put("type", "AUTO_BID_CANCELLED");
-        response.put("message", "Auto bidding mode is cancelled");
-        return response.toString();
+        return null;
     }
 
     public static String placeBid(ClientHandler handler, JsonNode node) throws Exception {

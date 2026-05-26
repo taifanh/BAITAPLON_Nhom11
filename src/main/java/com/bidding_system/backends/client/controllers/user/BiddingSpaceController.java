@@ -204,7 +204,7 @@ public class BiddingSpaceController extends BaseController {
                     case MSG_BID_QUEUED      -> handleBidQueued(node);
                     case MSG_AUCTION_RESULT  -> handleAuctionResult(raw);
                     case MSG_AUTO_REGISTERED -> Platform.runLater(this::applyAutoBidActive);
-                    case MSG_AUTO_CANCELLED  -> Platform.runLater(this::applyAutoBidInactive);
+                    case MSG_AUTO_CANCELLED  -> handleAutoBidCancelled(raw);
                     case MSG_BID_HISTORY     -> handleBidHistoryData(raw);
                     case MSG_PLACE_BID_FAILED -> handlePlaceBidFailed(raw);
                     case MSG_AUTO_BID_FAILED -> handleAutoBidFailed(raw);
@@ -444,6 +444,17 @@ public class BiddingSpaceController extends BaseController {
                         "-fx-background-radius:12;-fx-border-radius:12;-fx-font-weight:bold;");
     }
 
+    private void handleAutoBidCancelled(String raw) throws Exception {
+        AutoBiddingCancelled msg = MAPPER.readValue(raw, AutoBiddingCancelled.class);
+        Platform.runLater(() -> {
+            applyAutoBidInactive();
+            if (msg.message != null && !msg.message.isBlank()) {
+                showAlert(Alert.AlertType.INFORMATION, msg.message);
+            }
+
+        });
+    }
+
     private void applyAutoBidInactive() {
         isAutoBidActive = false;
         if (currentAuctionId != null)
@@ -534,7 +545,7 @@ public class BiddingSpaceController extends BaseController {
         try {
             PlaceBidFailed message = MAPPER.readValue(raw, PlaceBidFailed.class);
             String reason = message.reason;
-            showAlert(Alert.AlertType.ERROR, reason);
+            Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, reason));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -543,9 +554,12 @@ public class BiddingSpaceController extends BaseController {
     private void handleAutoBidFailed(String raw) {
         try {
             AutoBidFailed message = MAPPER.readValue(raw, AutoBidFailed.class);
-            String reason = message.reason;
-            showAlert(Alert.AlertType.ERROR, reason);
-            applyAutoBidInactive();
+            Platform.runLater(() -> {
+                applyAutoBidInactive();
+                Platform.runLater(() ->
+                        showAlert(Alert.AlertType.ERROR, message.reason)
+                );
+            });
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

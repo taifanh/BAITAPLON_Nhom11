@@ -127,7 +127,7 @@ public class BidProcessor {
                     return;
                 }
                 // Cập nhật maxBid mới, không tăng giá
-                bidDAO.updateMaxBid(request.auctionId(), request.userId(), request.maxBid());
+                bidDAO.updateMaxBid(request.auctionId(), request.userId(), request.maxBid(), true);
                 return;
             }
             if(request.isAuto && currentWinner.isAuto) {
@@ -140,12 +140,16 @@ public class BidProcessor {
                 else if (request.maxBid > currentWinner.maxBid) {
                     double increment = IncrementPolicy.getIncrement(currentWinner.maxBid);
                     double newBidAmount = Math.min(request.maxBid, currentWinner.maxBid + increment);
+                    String json = new Gson().toJson(new AutoBiddingCancelled("Your auto bid has been outbid !"));
+                    AuctionRoom.getInstance().sendToUser(currentWinner.userId, json);
                     saveAndBroadcast(request.userId(), request.auctionId, newBidAmount, true, request.maxBid());
                 }
             }
             else if(!request.isAuto && currentWinner.isAuto) {
                 if(request.amount > currentWinner.maxBid) {
                     double newBidAmount = request.amount;
+                    String json = new Gson().toJson(new AutoBiddingCancelled("Your auto bid has been outbid !"));
+                    AuctionRoom.getInstance().sendToUser(currentWinner.userId, json);
                     saveAndBroadcast(request.userId, request.auctionId, newBidAmount, false, request.maxBid);
                 }
                 else {
