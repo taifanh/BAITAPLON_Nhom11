@@ -13,7 +13,7 @@ import com.bidding_system.backends.common.messages.MsgData.BidHistoryRecordDto;
 import com.bidding_system.backends.common.messages.MsgData.FetchBidHistoryRequest;
 import com.bidding_system.backends.common.messages.MsgData.FetchDataRequest;
 import com.bidding_system.backends.common.models.core.Item;
-import com.bidding_system.backends.common.models.items.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -68,6 +68,9 @@ public class BiddingSpaceController extends BaseController {
     private static final String MSG_AUTO_REGISTERED = "AUTO_BID_REGISTERED";
     private static final String MSG_AUTO_CANCELLED  = "AUTO_BID_CANCELLED";
     private static final String MSG_BID_HISTORY     = "BID_HISTORY_DATA";
+    private static final String MSG_PLACE_BID_FAILED     = "PLACE_BID_FAILED";
+    private static final String MSG_AUTO_BID_FAILED     = "AUTO_BID_FAILED";
+
 
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .registerModule(new JavaTimeModule());
@@ -203,6 +206,8 @@ public class BiddingSpaceController extends BaseController {
                     case MSG_AUTO_REGISTERED -> Platform.runLater(this::applyAutoBidActive);
                     case MSG_AUTO_CANCELLED  -> Platform.runLater(this::applyAutoBidInactive);
                     case MSG_BID_HISTORY     -> handleBidHistoryData(raw);
+                    case MSG_PLACE_BID_FAILED -> handlePlaceBidFailed(raw);
+                    case MSG_AUTO_BID_FAILED -> handleAutoBidFailed(raw);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -364,6 +369,9 @@ public class BiddingSpaceController extends BaseController {
         fieldHighBidder.setText("Auction ended");
         fieldCurrentAmount.clear();
         fieldNextMinimumBid.clear();
+        fieldBasePrice.clear();
+        fieldItemName.clear();
+        fieldIncrement.clear();
         clearBidVisuals("Auction ended.");
         buttonPlaceBid.setDisable(true);
         fieldBidPrice.setDisable(true);
@@ -483,7 +491,7 @@ public class BiddingSpaceController extends BaseController {
     private void registerAutoBid() {
         try {
             validateAuctionActive();
-            double maxLimit  = parsePositive(fieldMaxLimit.getText(), "max limit");
+            double maxLimit  = parsePositive(fieldMaxLimit.getText());
             double balance;
             if (UserSession.getCurrentUser() != null) {
                 balance = UserSession.getCurrentUser().getBalance();
@@ -522,6 +530,27 @@ public class BiddingSpaceController extends BaseController {
         }
     }
 
+    private void handlePlaceBidFailed(String raw) {
+        try {
+            PlaceBidFailed message = MAPPER.readValue(raw, PlaceBidFailed.class);
+            String reason = message.reason;
+            showAlert(Alert.AlertType.ERROR, reason);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void handleAutoBidFailed(String raw) {
+        try {
+            AutoBidFailed message = MAPPER.readValue(raw, AutoBidFailed.class);
+            String reason = message.reason;
+            showAlert(Alert.AlertType.ERROR, reason);
+            applyAutoBidInactive();
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     // ── Validation ────────────────────────────────────────────────
     private void validateAuctionActive() {
         if (selectedItem == null)
@@ -554,13 +583,13 @@ public class BiddingSpaceController extends BaseController {
             throw new IllegalArgumentException("Minimum next bid: " + minimumBid);
     }
 
-    private double parsePositive(String text, String fieldName) {
+    private double parsePositive(String text) {
         try {
             double v = Double.parseDouble(text);
-            if (v <= 0) throw new IllegalArgumentException(fieldName + " must be positive");
+            if (v <= 0) throw new IllegalArgumentException("max limit" + " must be positive");
             return v;
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid " + fieldName);
+            throw new IllegalArgumentException("Invalid " + "max limit");
         }
     }
 

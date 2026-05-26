@@ -135,14 +135,11 @@ public class BidProcessor {
                     saveAndBroadcast(request.userId, request.auctionId, newBidAmount, false, request.maxBid);
                 }
                 else {
-                    User bidUser = userDAO.getUser(request.userId);
-                    BidTransaction bid = new BidTransaction(bidUser, dummyItem, request.amount);
-                    bid.setAuto(request.isAuto);
-                    bid.setMaxBid(request.maxBid);
-                    bidDAO.saveBid(request.auctionId, bid);
                     double increment = IncrementPolicy.getIncrement(request.amount());
                     double autoFinal = Math.min(request.amount() + increment, currentWinner.maxBid);
                     saveAndBroadcast(currentWinner.userId, request.auctionId(), autoFinal, true, currentWinner.maxBid);
+                    notifyPlaceBidFailed(request.userId(),
+                            "Your bid was outbid automatically. Current price: " + autoFinal);
                 }
             }
             else if(request.isAuto && !currentWinner.isAuto) {
@@ -195,7 +192,7 @@ public class BidProcessor {
     }
 
     private void notifyAutoBidFailed(String userId, String reason) {
-        String json = new Gson().toJson(new AutoBiddingCancelled(reason));
+        String json = new Gson().toJson(new AutoBidFailed(reason));
         AuctionRoom.getInstance().sendToUser(userId, json);
     }
 

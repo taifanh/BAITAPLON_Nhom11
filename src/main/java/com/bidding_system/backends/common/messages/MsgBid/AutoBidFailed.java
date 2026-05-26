@@ -1,9 +1,9 @@
 package com.bidding_system.backends.common.messages.MsgBid;
 
-public class PlaceBidFailed {
+public class AutoBidFailed {
     public String type = "PLACE_BID_FAILED";
     public String reason;
-    public PlaceBidFailed(String reason) {
+    public AutoBidFailed(String reason) {
         this.reason = reason;
     }
 }

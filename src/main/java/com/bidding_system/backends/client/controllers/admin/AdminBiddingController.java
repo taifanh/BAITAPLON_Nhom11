@@ -314,6 +314,8 @@ public class AdminBiddingController extends BaseController {
         setTime.setDisable(false);
         fieldHighBidder.setText("-");
         fieldCurrentAmount.setText("-");
+        basePrice.clear();
+        itemName.setText("Item Name");
         clearBidVisuals("Auction ended.");
         UserSession.getConnection().send(new FetchDataRequest("FETCH_INVENTORY"));
     }
