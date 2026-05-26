@@ -26,6 +26,7 @@ public class MyRequestDAOTest {
             Files.copy(DB_PATH, BACKUP_PATH, StandardCopyOption.REPLACE_EXISTING);
         }
         Files.deleteIfExists(DB_PATH);
+        Files.createDirectories(DB_PATH.getParent()); // ← thêm dòng này
         myRequestDAO = new MyRequestDAO();
     }
 
