@@ -117,7 +117,7 @@ public class AuctionProcessors {
         String auctionId = (msg.auctionId != null && !msg.auctionId.isBlank())
                 ? msg.auctionId
                 : handler.watchingAuctionId;
-
+        BidProcessor.getInstance().cancelAutoBid(msg.userId, msg.auctionId);
         if (auctionId == null || auctionId.isBlank()) {
             ObjectNode error = mapper.createObjectNode();
             error.put("type", "ERROR");

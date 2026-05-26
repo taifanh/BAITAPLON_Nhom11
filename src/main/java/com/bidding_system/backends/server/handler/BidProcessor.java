@@ -51,6 +51,10 @@ public class BidProcessor {
         public static BidRequest auto(String userId, String auctionId, double maxBid) {
             return new BidRequest(userId, auctionId, 0, true, maxBid);
         }
+
+        public static BidRequest cancelAuto(String userId, String auctionId) {
+            return new BidRequest(userId, auctionId, 0, false, -1);
+        }
     }
 
     // ── Queue ──────────────────────────────────────────────────────────────────
@@ -59,6 +63,10 @@ public class BidProcessor {
     // ── Public API ─────────────────────────────────────────────────────────────
     public void submitManualBid(String userId, String auctionId, double amount) {
         queue.offer(BidRequest.manual(userId, auctionId, amount));
+    }
+
+    public void cancelAutoBid(String userId, String auctionId) {
+        queue.offer(BidRequest.cancelAuto(userId, auctionId));
     }
 
     public void submitAutoBid(String userId, String auctionId, double maxBid) {
@@ -87,6 +95,12 @@ public class BidProcessor {
         Auction auction = AuctionService.getManagedActiveAuctionByAuctionId(request.auctionId());
         double startingPrice = (auction != null) ? auction.getItem().getPrices() : 0;
         double floorPrice = Math.max(startingPrice, currentMaxAmount);
+        if (!request.isAuto() && request.maxBid() == -1) {
+            bidDAO.cancelAutoBid(request.auctionId(), request.userId());
+            String json = new Gson().toJson(new AutoBiddingCancelled("Auto bid cancelled !"));
+            AuctionRoom.getInstance().sendToUser(request.userId(), json);
+            return;
+        }
         if (currentWinner == null) {
             if (request.isAuto) {
                 if (request.maxBid < startingPrice) {

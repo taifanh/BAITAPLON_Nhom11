@@ -110,6 +110,30 @@ public class BidTransactionDAO {
         }
     }
 
+    public synchronized void cancelAutoBid(String auctionId, String userId) throws IOException {
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement("""
+             UPDATE bid_transactions
+             SET isAuto = 0, maxBid = 0
+             WHERE auctionId = ?
+               AND bidderId = ?
+               AND id = (
+                   SELECT id FROM bid_transactions
+                   WHERE auctionId = ? AND bidderId = ?
+                   ORDER BY amount DESC
+                   LIMIT 1
+               )
+             """)) {
+            statement.setString(1, auctionId);
+            statement.setString(2, userId);
+            statement.setString(3, auctionId);
+            statement.setString(4, userId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new IOException("Khong the huy auto bid", e);
+        }
+    }
+
     public List<BidHistoryRecord> getBidHistory(String auctionId) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
