@@ -1,18 +1,16 @@
 package com.bidding_system.backends.client.controllers.user;
 
-import com.bidding_system.backends.client.controllers.ViewLoader;
+import com.bidding_system.backends.client.controllers.base.BaseController;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.geometry.Rectangle2D;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Screen;
-import javafx.stage.Stage;
 
 import java.io.IOException;
 
-public class HomePageController {
+public class HomePageController extends BaseController {
+    @Override
+    public void cleanup() {
+    }
+
     @FXML
     public void openProfile(ActionEvent event) throws IOException {
         openView(event, "UserProfile.fxml", "User Profile");
@@ -30,31 +28,10 @@ public class HomePageController {
 
     @FXML
     public void openHistory(ActionEvent event) throws IOException {
-        Parent root = ViewLoader.load("History.fxml");
-        switchScene(event, root, "Transaction History");
+        switchScene(event, "History.fxml", "Transaction History");
     }
 
     private void openView(ActionEvent event, String viewFileName, String title) throws IOException {
-        Parent root = ViewLoader.load(viewFileName);
-        switchScene(event, root, title);
-    }
-
-    private void switchScene(ActionEvent event, Parent root, String title) {
-        Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        window.setScene(new Scene(root));
-        window.setTitle(title);
-        fitToVisibleScreen(window);
-        window.show();
-    }
-
-    private void fitToVisibleScreen(Stage stage) {
-        Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
-        stage.setMaximized(false);
-        stage.setMinWidth(1000);
-        stage.setMinHeight(620);
-        stage.setX(bounds.getMinX());
-        stage.setY(bounds.getMinY());
-        stage.setWidth(bounds.getWidth());
-        stage.setHeight(bounds.getHeight());
+        switchScene(event, viewFileName, title);
     }
 }

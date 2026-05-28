@@ -1,7 +1,9 @@
 package com.bidding_system.backends.common.messages.MsgData;
 
+import com.bidding_system.backends.common.messages.Common.MessageType;
+
 public class FetchUserRequestsRequest {
-    public String type = "FETCH_USER_REQUEST";
+    public String type = MessageType.FETCH_USER_REQUEST.getValue();
     public String userId;
     public String requestType;
 

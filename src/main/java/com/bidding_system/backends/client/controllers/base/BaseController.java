@@ -15,6 +15,10 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public abstract class BaseController {
+    public static final double LOGIN_WIDTH = 450;
+    public static final double LOGIN_HEIGHT = 540;
+    public static final double MAIN_WIDTH = 1366;
+    public static final double MAIN_HEIGHT = 720;
 
     /**
      * Mỗi subclass tự unsubscribe MessageBus handlers,
@@ -32,9 +36,15 @@ public abstract class BaseController {
 
         Stage window = getStage(event);
         Parent root  = ViewLoader.load("SignIn.fxml");
-        resetToLoginSize(window);
-        window.setScene(new Scene(root));
+        Scene loginScene = new Scene(root, LOGIN_WIDTH, LOGIN_HEIGHT);
+
+        window.setFullScreen(false);
+        window.setMaximized(false);
+        window.setResizable(false);
+        window.setScene(loginScene);
         window.setTitle("Sign In");
+        window.setWidth(LOGIN_WIDTH);
+        window.setHeight(LOGIN_HEIGHT);
         window.centerOnScreen();
         window.show();
     }
@@ -73,9 +83,14 @@ public abstract class BaseController {
         cleanup();
         Parent root   = ViewLoader.load(fxml);
         Stage  window = getStage(event);
-        window.setScene(new Scene(root));
+        window.setFullScreen(false);
+        window.setMaximized(false);
+        window.setResizable(false);
+        window.setScene(new Scene(root, MAIN_WIDTH, MAIN_HEIGHT));
         window.setTitle(title);
-        fitToScreen(window);
+        window.setWidth(MAIN_WIDTH);
+        window.setHeight(MAIN_HEIGHT);
+        window.centerOnScreen();
         window.show();
     }
 
@@ -83,22 +98,4 @@ public abstract class BaseController {
         return (Stage) ((Node) event.getSource()).getScene().getWindow();
     }
 
-    protected void fitToScreen(Stage stage) {
-        Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
-        stage.setMinWidth(1000);
-        stage.setMinHeight(620);
-        stage.setX(bounds.getMinX());
-        stage.setY(bounds.getMinY());
-        stage.setWidth(bounds.getWidth());
-        stage.setHeight(bounds.getHeight());
-    }
-
-    protected void resetToLoginSize(Stage window) {
-        window.setFullScreen(false);
-        window.setMaximized(false);
-        window.setMinWidth(0);
-        window.setMinHeight(0);
-        window.setWidth(450);
-        window.setHeight(500);
-    }
 }

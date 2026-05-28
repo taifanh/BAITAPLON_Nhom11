@@ -9,6 +9,8 @@ public enum MessageType {
     GET_BALANCE("GET_BALANCE"),
     DEPOSIT("DEPOSIT"),
     CHANGE_INFO("CHANGE_INFO"),
+    FETCH_USER_REQUEST("FETCH_USER_REQUEST"),
+    FETCH_USER_BID_HISTORY("FETCH_USER_BID_HISTORY"),
     
     // ======== Item Management ========
     ADD_ITEM("ADD_ITEM"),

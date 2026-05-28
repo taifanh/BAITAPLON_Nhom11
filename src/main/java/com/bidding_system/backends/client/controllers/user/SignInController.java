@@ -10,11 +10,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.bidding_system.backends.client.session.UserSession;
 import com.bidding_system.backends.client.controllers.ViewLoader;
+import com.bidding_system.backends.client.controllers.base.BaseController;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -22,7 +22,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import com.bidding_system.backends.common.messages.Common.Message;
 import com.bidding_system.backends.common.messages.Common.MessageType;
@@ -108,9 +107,11 @@ public class SignInController {
                     try {
                         FXMLLoader loader = ViewLoader.loader(fxml);
                         Parent root       = loader.load();
-                        pendingStage.setScene(new Scene(root));
+                        pendingStage.setScene(new Scene(root, BaseController.MAIN_WIDTH, BaseController.MAIN_HEIGHT));
                         pendingStage.setTitle(title);
-                        fitToVisibleScreen(pendingStage);
+                        pendingStage.setWidth(BaseController.MAIN_WIDTH);
+                        pendingStage.setHeight(BaseController.MAIN_HEIGHT);
+                        pendingStage.centerOnScreen();
                         pendingStage.show();
                     } catch (IOException e) {
                         e.printStackTrace(); // xem stack trace trong console
@@ -179,16 +180,4 @@ public class SignInController {
             MessageBus.getInstance().unsubscribe(signInResultHandler);
         }
     }
-
-    private void fitToVisibleScreen(Stage stage) {
-        Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
-        stage.setMaximized(false);
-        stage.setMinWidth(1000);
-        stage.setMinHeight(620);
-        stage.setX(bounds.getMinX());
-        stage.setY(bounds.getMinY());
-        stage.setWidth(bounds.getWidth());
-        stage.setHeight(bounds.getHeight());
-    }
-
 }

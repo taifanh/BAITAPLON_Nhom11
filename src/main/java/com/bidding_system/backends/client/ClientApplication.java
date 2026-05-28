@@ -2,6 +2,7 @@ package com.bidding_system.backends.client;
 
 import com.bidding_system.backends.client.session.UserSession;
 import com.bidding_system.backends.client.controllers.ViewLoader;
+import com.bidding_system.backends.client.controllers.base.BaseController;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -12,9 +13,12 @@ public class ClientApplication extends Application {
     public void start(Stage stage) throws Exception {
         try {
             UserSession.initConnection(Launcher.serverIp, 9999);
-            Scene scene = new Scene(ViewLoader.load("SignIn.fxml"));
+            Scene scene = new Scene(ViewLoader.load("SignIn.fxml"), BaseController.LOGIN_WIDTH, BaseController.LOGIN_HEIGHT);
             stage.setTitle("sign in!");
+            stage.setResizable(false);
             stage.setScene(scene);
+            stage.setWidth(BaseController.LOGIN_WIDTH);
+            stage.setHeight(BaseController.LOGIN_HEIGHT);
             stage.centerOnScreen();
             stage.show();
         } catch (Exception e) {

@@ -7,6 +7,7 @@ import com.bidding_system.backends.client.network.MessageBus;
 import com.bidding_system.backends.client.session.UserSession;
 import com.bidding_system.backends.common.constants.Statuses;
 import com.bidding_system.backends.common.messages.Common.*;
+import com.bidding_system.backends.common.messages.Common.MessageType;
 import com.bidding_system.backends.common.messages.MsgData.FetchUserRequestsRequest;
 import com.bidding_system.backends.common.messages.MsgData.RequestRecordDto;
 import com.bidding_system.backends.common.messages.MsgData.UserRequestListResponse;
@@ -48,11 +49,11 @@ public class SellItemController extends BaseController {
     private Consumer<String> loadUserHandler;
     @FXML
     public void initialize() throws IOException {
-        loadUserRequest();
         subsribeloadPendingRequests();
         subscribeAddItem();
         subscribeRemoveItem();
         subscribeAccepted();
+        loadUserRequest();
 
     }
 
@@ -170,8 +171,9 @@ public class SellItemController extends BaseController {
         }
         Message msg = new Message();
         msg.Id_user = currentUser.getId();
-        msg.messageType = "FETCH_USER_REQUEST";
-        msg.payloadJson = MAPPER.writeValueAsString(new FetchUserRequestsRequest(currentUser.getId(), "additem"));
+        msg.messageType = MessageType.FETCH_USER_REQUEST.getValue();
+        msg.payloadJson = MAPPER.writeValueAsString(
+                new FetchUserRequestsRequest(currentUser.getId(), MessageType.ADD_ITEM.getValue()));
         UserSession.getConnection().send(msg);
     }
 

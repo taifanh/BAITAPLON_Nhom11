@@ -134,7 +134,7 @@ public final class UserService {
             AuctionRoom.getInstance().broadcast(mapper.writeValueAsString(inventoryResponse));
 
             RequestListDataResponse requestResponse = new RequestListDataResponse();
-            requestResponse.requests = requestlog.getRequestsByType("additem");
+            requestResponse.requests = requestlog.getRequestsByType(MessageType.ADD_ITEM.getValue());
             AuctionRoom.getInstance().broadcast(mapper.writeValueAsString(requestResponse));
             return null;
         }
@@ -145,9 +145,19 @@ public final class UserService {
         MyRequestDAO myrequestDAO = new MyRequestDAO();
         UserRequestListResponse response = new UserRequestListResponse();
 
-        response.requests = myrequestDAO.getMyRequestsByType(
-                        request.requestType == null ? "additem" : request.requestType
-                ).stream()
+        String requestType = request.requestType;
+        if (requestType == null || requestType.isBlank()) {
+            requestType = MessageType.ADD_ITEM.getValue();
+        } else if ("additem".equalsIgnoreCase(requestType)) {
+            requestType = MessageType.ADD_ITEM.getValue();
+        }
+
+        var requestRecords = myrequestDAO.getMyRequestsByType(requestType);
+        if (requestRecords.isEmpty() && "ADD_ITEM".equals(requestType)) {
+            requestRecords = myrequestDAO.getMyRequestsByType("additem");
+        }
+
+        response.requests = requestRecords.stream()
                 .filter(record -> request.userId != null && request.userId.equals(record.userId()))
                 .map(record -> {
                     RequestRecordDto dto = new RequestRecordDto();

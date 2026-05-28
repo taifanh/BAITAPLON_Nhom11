@@ -48,7 +48,8 @@ public class ClientHandler implements Runnable {
         processors.put(MessageType.REGISTER_AUTO_BIDDING.getValue(), AuctionProcessors::registerAutoBid);
         processors.put(MessageType.CANCEL_AUTO_BIDDING.getValue(), AuctionProcessors::cancelAutoBid);
         processors.put(MessageType.SIGN_UP.getValue(), UserService::signup);
-        processors.put("FETCH_USER_REQUEST", UserService::fetchUserRequest);
+        processors.put(MessageType.FETCH_USER_REQUEST.getValue(), UserService::fetchUserRequest);
+        processors.put(MessageType.FETCH_USER_BID_HISTORY.getValue(), UserService::fetchUserBidHistory);
         processors.put(MessageType.FETCH_INVENTORY.getValue(), AdminService::fetchInventory);
         processors.put(MessageType.FETCH_BID_HISTORY.getValue(), AdminService::fetchBidHistory);
         processors.put(MessageType.FETCH_AUCTION_STATUS.getValue(), AuctionProcessors::fetchAuctionStatus);

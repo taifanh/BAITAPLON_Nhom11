@@ -16,6 +16,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -115,8 +116,17 @@ public class UserProfileController extends BaseController {
         FXMLLoader loader = ViewLoader.loader("Deposite.fxml");
         Parent root = loader.load();
         Stage popup = new Stage();
-        popup.setScene(new Scene(root));
+        double width = root instanceof Region region && region.getPrefWidth() > 0
+                ? region.getPrefWidth()
+                : 372;
+        double height = root instanceof Region region && region.getPrefHeight() > 0
+                ? region.getPrefHeight()
+                : 514;
+        popup.setResizable(false);
+        popup.setScene(new Scene(root, width, height));
         popup.setTitle("Deposit");
+        popup.setWidth(width);
+        popup.setHeight(height);
         popup.centerOnScreen();
         popup.show();
     }

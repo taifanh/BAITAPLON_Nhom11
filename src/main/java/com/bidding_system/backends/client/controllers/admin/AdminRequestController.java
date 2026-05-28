@@ -56,21 +56,8 @@ public class AdminRequestController extends BaseController {
     }
 
     @FXML
-    public void handleSignOut(ActionEvent e) {
-        UserSession.setCurrentAccount(null);
-        navigate("SignIn.fxml", "Dang nhap", e.getSource());
-    }
-
-    private void navigate(String fxml, String title, Object source) {
-        try {
-            Parent root = ViewLoader.load(fxml);
-            Stage stage = (Stage) ((Node) source).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle(title);
-            stage.centerOnScreen();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+    public void handleSignOut(ActionEvent e) throws IOException {
+        super.handleSignOut(e);
     }
 
     public void cleanup() {

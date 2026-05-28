@@ -1,6 +1,7 @@
 package com.bidding_system.backends.server.service;
 
 import com.bidding_system.backends.common.messages.Common.CreateItemPayload;
+import com.bidding_system.backends.common.messages.Common.MessageType;
 import com.bidding_system.backends.common.messages.MsgAuction.AdminActionCommand;
 import com.bidding_system.backends.common.messages.MsgData.BidHistoryDataResponse;
 import com.bidding_system.backends.common.messages.MsgData.BidHistoryRecordDto;
@@ -29,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class AdminService {
-    private static final String ADD_ITEM_REQUEST_TYPE = "additem";
+    private static final String ADD_ITEM_REQUEST_TYPE = MessageType.ADD_ITEM.getValue();
     private static final Gson GSON = new Gson();
     private static final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
@@ -59,7 +60,7 @@ public final class AdminService {
         RequestLogDAO requestLogDAODB = new RequestLogDAO();
         RequestListDataResponse response = new RequestListDataResponse();
 
-        response.requests = requestLogDAODB.getRequestsByType("ADD_ITEM");
+        response.requests = requestLogDAODB.getRequestsByType(ADD_ITEM_REQUEST_TYPE);
 
         return mapper.writeValueAsString(response);
     }
