@@ -10,7 +10,7 @@
             style="-fx-background:transparent;-fx-background-color:transparent;"
             xmlns="http://javafx.com/javafx/25"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.bidding_system.backends.client.controllers.admin.AdminBiddingController">
+            fx:controller="backends.client.controllers.admin.AdminBiddingController">
     <content>
         <VBox spacing="20.0" style="-fx-padding: 16 28 34 28;">
             <children>

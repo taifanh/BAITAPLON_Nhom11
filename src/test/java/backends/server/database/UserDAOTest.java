@@ -1,9 +1,8 @@
 package backends.server.database;
 
-import com.bidding_system.backends.common.models.accounts.Admin;
-import com.bidding_system.backends.common.models.accounts.User;
-import com.bidding_system.backends.common.models.core.Account;
-import com.bidding_system.backends.server.database.UserDAO;
+import backends.common.models.accounts.Admin;
+import backends.common.models.accounts.User;
+import backends.common.models.core.Account;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
