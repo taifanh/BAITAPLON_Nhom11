@@ -10,7 +10,6 @@ import backends.common.messages.MsgAuction.AuctionResultMessage;
 import backends.common.messages.MsgAuction.AuctionStatusMessage;
 import backends.common.messages.MsgAuction.StartAuctionMessage;
 import backends.common.messages.MsgBid.*;
-import backends.common.messages.MsgBid.*;
 import backends.common.messages.MsgAuction.*;
 import backends.common.messages.MsgData.BidHistoryDataResponse;
 import backends.common.messages.MsgData.BidHistoryRecordDto;
@@ -74,6 +73,13 @@ public class BiddingSpaceController extends BaseController {
     private static final String MSG_BID_HISTORY     = "BID_HISTORY_DATA";
     private static final String MSG_PLACE_BID_FAILED     = "PLACE_BID_FAILED";
     private static final String MSG_AUTO_BID_FAILED     = "AUTO_BID_FAILED";
+    private static final String STYLE_BTN_AUTO_ACTIVE =
+            "-fx-background-color:#dc2626;-fx-text-fill:white;" +
+                    "-fx-background-radius:12;-fx-border-radius:12;-fx-font-weight:bold;";
+
+    private static final String STYLE_BTN_AUTO_INACTIVE =
+            "-fx-background-color:#ea580c;-fx-text-fill:white;" +
+                    "-fx-background-radius:12;-fx-border-radius:12;-fx-font-weight:bold;";
 
 
     private static final ObjectMapper MAPPER = new ObjectMapper()
@@ -83,8 +89,6 @@ public class BiddingSpaceController extends BaseController {
     private final ObservableList<Item> auctionItems = FXCollections.observableArrayList();
     private final Map<String, Long>   endTimeByItemId    = new HashMap<>();
     private final Map<String, String> auctionIdByItemId  = new HashMap<>();
-    private final Map<String, Boolean> autoBidStateByAuctionId = new HashMap<>();
-    private final Map<String, Double> maxLimitByAuctionId = new HashMap<>();
 
     private Item   selectedItem;
     private String currentAuctionId;
@@ -191,6 +195,8 @@ public class BiddingSpaceController extends BaseController {
         var req = MAPPER.createObjectNode();
         req.put("type",   "FETCH_AUCTION_STATUS");
         req.put("itemId", itemId);
+        if (UserSession.getCurrentUser() != null)
+            req.put("userId", UserSession.getCurrentUser().getId());
         UserSession.getConnection().send(req);
     }
 
@@ -336,14 +342,13 @@ public class BiddingSpaceController extends BaseController {
             fieldHighBidder.setText("No bids yet");
             fieldCurrentAmount.setText(String.valueOf(startingPrice));
             currentHighestBid = startingPrice;
-            currentBidIncrement = msg.increment;
             fieldIncrement.setText(String.valueOf(currentBidIncrement));
             fieldNextMinimumBid.setText(String.valueOf(startingPrice + currentBidIncrement));
         }
-        boolean wasAutoBidActive = autoBidStateByAuctionId.getOrDefault(currentAuctionId, false);
-        if (wasAutoBidActive) {
-            Double savedLimit = maxLimitByAuctionId.get(currentAuctionId);
-            if (savedLimit != null) fieldMaxLimit.setText(String.valueOf(savedLimit));
+        boolean serverSaysAuto = msg.userHasAutoBid;
+        if (serverSaysAuto) {
+            // Server là nguồn sự thật — restore đầy đủ kể cả sau khi restart app
+            fieldMaxLimit.setText(String.valueOf(msg.userMaxBid));
             applyAutoBidActive();
         } else {
             fieldMaxLimit.clear();
@@ -439,15 +444,11 @@ public class BiddingSpaceController extends BaseController {
 
     private void applyAutoBidActive() {
         isAutoBidActive = true;
-        if (currentAuctionId != null)
-            autoBidStateByAuctionId.put(currentAuctionId, true);
         buttonPlaceBid.setDisable(true);
         fieldBidPrice.setDisable(true);
         fieldMaxLimit.setEditable(false);
         buttonAutoBid.setText("STOP");
-        buttonAutoBid.setStyle(
-                "-fx-background-color:#dc2626;-fx-text-fill:white;" +
-                        "-fx-background-radius:12;-fx-border-radius:12;-fx-font-weight:bold;");
+        buttonAutoBid.setStyle(STYLE_BTN_AUTO_ACTIVE);
     }
 
     private void handleAutoBidCancelled(String raw) throws Exception {
@@ -463,15 +464,11 @@ public class BiddingSpaceController extends BaseController {
 
     private void applyAutoBidInactive() {
         isAutoBidActive = false;
-        if (currentAuctionId != null)
-            autoBidStateByAuctionId.put(currentAuctionId, false);
         buttonPlaceBid.setDisable(false);
         fieldBidPrice.setDisable(false);
         fieldMaxLimit.setEditable(true);
         buttonAutoBid.setText("AUTO");
-        buttonAutoBid.setStyle(
-                "-fx-background-color:#ea580c;-fx-text-fill:white;" +
-                        "-fx-background-radius:12;-fx-border-radius:12;-fx-font-weight:bold;");
+        buttonAutoBid.setStyle(STYLE_BTN_AUTO_INACTIVE);
     }
 
     // ── Button actions ────────────────────────────────────────────
@@ -522,7 +519,6 @@ public class BiddingSpaceController extends BaseController {
                 throw new IllegalArgumentException("Max limit too low");
             if (UserSession.getCurrentUser().getId().equals(currentSellerId))
                 throw new IllegalArgumentException("Cannot bid on your own item");
-            maxLimitByAuctionId.put(currentAuctionId, maxLimit);
             String userId = UserSession.getCurrentUser().getId();
             UserSession.getConnection().send(new RegisterAutoBidding(currentAuctionId, userId , maxLimit));
         } catch (RuntimeException e) {
@@ -562,9 +558,7 @@ public class BiddingSpaceController extends BaseController {
             AutoBidFailed message = MAPPER.readValue(raw, AutoBidFailed.class);
             Platform.runLater(() -> {
                 applyAutoBidInactive();
-                Platform.runLater(() ->
-                        showAlert(Alert.AlertType.ERROR, message.reason)
-                );
+                showAlert(Alert.AlertType.ERROR, message.reason);
             });
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);

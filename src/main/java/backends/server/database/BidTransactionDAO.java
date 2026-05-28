@@ -111,6 +111,29 @@ public class BidTransactionDAO {
         }
     }
 
+    public synchronized ServerBidRespond getAutoBidByUser(String auctionId, String userId) throws IOException {
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement("""
+             SELECT bidderId, amount, isAuto, maxBid
+             FROM bid_transactions
+             WHERE auctionId = ? AND bidderId = ? AND isAuto = 1
+             ORDER BY amount DESC
+             LIMIT 1
+             """)) {
+            statement.setString(1, auctionId);
+            statement.setString(2, userId);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (!rs.next()) return null;
+                ServerBidRespond respond = new ServerBidRespond("", rs.getDouble("amount"), userId);
+                respond.isAuto = rs.getBoolean("isAuto");
+                respond.maxBid = rs.getDouble("maxBid");
+                return respond;
+            }
+        } catch (SQLException e) {
+            throw new IOException("Khong the doc auto bid cua user", e);
+        }
+    }
+
     public synchronized void cancelAutoBid(String auctionId, String userId) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
