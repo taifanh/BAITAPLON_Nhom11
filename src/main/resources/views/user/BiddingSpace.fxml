@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="1300.0" prefWidth="1366.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bidding_system.backends.client.controllers.user.BiddingSpaceController">
+<AnchorPane prefHeight="1300.0" prefWidth="1366.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="backends.client.controllers.user.BiddingSpaceController">
     <children>
         <HBox alignment="CENTER_LEFT" prefHeight="82.0" spacing="16.0" style="-fx-background-color: white; -fx-padding: 0 40 0 40; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.10), 18, 0.10, 0, 4);" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>

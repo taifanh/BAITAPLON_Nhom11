@@ -7,7 +7,7 @@
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="600.0" prefWidth="677.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bidding_system.backends.client.controllers.user.CreateItemController">
+<AnchorPane prefHeight="600.0" prefWidth="677.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="backends.client.controllers.user.CreateItemController">
     <children>
         <VBox alignment="TOP_CENTER" layoutX="132.0" layoutY="41.0" prefWidth="400.0" spacing="22.0" style="-fx-background-color: #FFFFFF; -fx-background-radius: 25; -fx-padding: 40;">
             <effect>

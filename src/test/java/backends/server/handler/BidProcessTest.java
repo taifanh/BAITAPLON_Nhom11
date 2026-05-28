@@ -1,6 +1,5 @@
 package backends.server.handler;
 
-import com.bidding_system.backends.server.handler.BidProcessor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

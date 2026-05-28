@@ -1,8 +1,7 @@
 package backends.server.database;
 
-import com.bidding_system.backends.common.messages.Common.Message;
-import com.bidding_system.backends.common.messages.Common.MessageType;
-import com.bidding_system.backends.server.database.MyRequestDAO;
+import backends.common.messages.Common.Message;
+import backends.common.messages.Common.MessageType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

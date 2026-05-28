@@ -1,10 +1,8 @@
 package backends.server.database;
 
-import com.bidding_system.backends.common.models.bidding.Auction;
-import com.bidding_system.backends.common.models.core.Item;
-import com.bidding_system.backends.common.models.items.Art;
-import com.bidding_system.backends.server.database.AuctionDAO;
-import com.bidding_system.backends.server.database.InventoryDAO;
+import backends.common.models.bidding.Auction;
+import backends.common.models.core.Item;
+import backends.common.models.items.Art;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
