@@ -20,23 +20,28 @@ echo " Auction Bidding System - Server"
 echo "===================================================="
 echo ""
 
-# Build
-echo "===== Building project ====="
-if [ -f "mvnw" ]; then
-    chmod +x mvnw
-    ./mvnw -q -DskipTests package
+# Build (only if JAR doesn't exist)
+echo ""
+if [ -f "target/BiddingSystem-server.jar" ]; then
+    echo "===== JAR exists, skipping build ====="
 else
-    mvn -q -DskipTests package
-fi
+    echo "===== Building project (first run) ====="
+    if [ -f "mvnw" ]; then
+        chmod +x mvnw
+        ./mvnw -q -DskipTests package
+    else
+        mvn -q -DskipTests package
+    fi
 
-if [ $? -ne 0 ]; then
-    echo "BUILD FAILED!"
-    exit 1
-fi
+    if [ $? -ne 0 ]; then
+        echo "BUILD FAILED!"
+        exit 1
+    fi
 
-if [ ! -f "target/BiddingSystem-server.jar" ]; then
-    echo "ERROR: target/BiddingSystem-server.jar not found"
-    exit 1
+    if [ ! -f "target/BiddingSystem-server.jar" ]; then
+        echo "ERROR: target/BiddingSystem-server.jar not found"
+        exit 1
+    fi
 fi
 
 echo ""
