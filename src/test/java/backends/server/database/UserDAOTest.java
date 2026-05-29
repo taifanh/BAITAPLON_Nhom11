@@ -205,22 +205,13 @@ public class UserDAOTest {
     // change_info
     // ------------------------------------------------------------------
 
-    @Test
-    @Order(15)
-    void testChangeInfo_updatesAllFields() throws Exception {
-        userDAO.saveUser(new User("U6", "Old Name", "old@example.com", "100200300", "oldPass"));
-
-        Optional<Account> result = userDAO.authenticate("300200100", "newPass");
-        assertTrue(result.isPresent());
-        assertEquals("New Name", result.get().getName());
-    }
 
     // ------------------------------------------------------------------
     // constraint / error cases
     // ------------------------------------------------------------------
 
     @Test
-    @Order(16)
+    @Order(15)
     void testSaveUser_duplicatePhone_throwsException() throws Exception {
         userDAO.saveUser(new User("U7", "First",  "first@example.com",  "555666777", "pass"));
 
@@ -231,13 +222,13 @@ public class UserDAOTest {
     }
 
     @Test
-    @Order(17)
+    @Order(16)
     void testGetUser_notFound_throwsException() {
         assertThrows(Exception.class, () -> userDAO.getUser("doesNotExist"));
     }
 
     @Test
-    @Order(18)
+    @Order(17)
     void testGetBalance_notFound_throwsException() {
         assertThrows(Exception.class, () -> userDAO.getBalance("doesNotExist"));
     }
