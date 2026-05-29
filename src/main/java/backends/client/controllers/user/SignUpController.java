@@ -2,6 +2,7 @@ package backends.client.controllers.user;
 
 import backends.client.network.MessageBus;
 import backends.client.session.UserSession;
+import backends.client.controllers.base.BaseController;
 import backends.common.messages.Common.Message;
 import backends.common.messages.Common.MessageType;
 import backends.common.messages.Common.SignUpPayload;
@@ -27,6 +28,9 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 public class SignUpController {
+    public static final double SIGNUP_WIDTH = 540;
+    public static final double SIGNUP_HEIGHT = 590;
+
     @FXML
     public TextField signUpName;
 
@@ -50,19 +54,26 @@ public class SignUpController {
     @FXML
     public void initialize() {
         receiveSuccessfulSignUp();
-
-        Platform.runLater(() -> {
-            Stage stage = (Stage) signUpComplete.getScene().getWindow();
-            stage.setOnHidden(e -> cleanup());
+        signUpComplete.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene == null) {
+                return;
+            }
+            newScene.windowProperty().addListener((windowObs, oldWindow, newWindow) -> {
+                if (newWindow instanceof Stage stage) {
+                    stage.setOnHidden(e -> cleanup());
+                }
+            });
         });
     }
     public void handleSignIn(ActionEvent event) throws IOException {
         Parent signinRoot = ViewLoader.load("SignIn.fxml");
-        Scene sceneSignin = new Scene(signinRoot);
+        Scene sceneSignin = new Scene(signinRoot, BaseController.LOGIN_WIDTH, BaseController.LOGIN_HEIGHT);
 
         Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
         window.setScene(sceneSignin);
         window.setTitle("Sign in");
+        window.setWidth(BaseController.LOGIN_WIDTH);
+        window.setHeight(BaseController.LOGIN_HEIGHT);
         window.centerOnScreen();
         window.show();
     }
@@ -97,16 +108,35 @@ public class SignUpController {
                     showAlert(Alert.AlertType.WARNING, "Error", null, "Your phone number has been registered !");
                 }
                 else if (type.equals("SIGNUP_OK")){
-                    Parent signinRoot = ViewLoader.load("SignIn.fxml");
-                    Scene sceneMain = new Scene(signinRoot);
-
                     Platform.runLater(() ->{
-                        showAlert(Alert.AlertType.INFORMATION, "Successful !", null, "sign up successful !");
+                        try {
+                            if (pendingStage == null) {
+                                pendingStage = (Stage) signUpComplete.getScene().getWindow();
+                            }
+                            if (pendingStage == null) {
+                                showAlert(Alert.AlertType.ERROR, "Error", null, "Cannot find current window.");
+                                return;
+                            }
 
-                        pendingStage.setScene(sceneMain);
-                        pendingStage.setTitle("Sign in");
-                        pendingStage.centerOnScreen();
-                        pendingStage.show();
+                            Parent signinRoot = ViewLoader.load("SignIn.fxml");
+                            Scene sceneMain = new Scene(signinRoot, BaseController.LOGIN_WIDTH, BaseController.LOGIN_HEIGHT);
+
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle("Successful !");
+                            alert.setHeaderText(null);
+                            alert.setContentText("sign up successful !");
+                            alert.setOnHidden(e -> {
+                                pendingStage.setScene(sceneMain);
+                                pendingStage.setTitle("Sign in");
+                                pendingStage.setWidth(BaseController.LOGIN_WIDTH);
+                                pendingStage.setHeight(BaseController.LOGIN_HEIGHT);
+                                pendingStage.centerOnScreen();
+                                pendingStage.show();
+                            });
+                            alert.show();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                     });
                 }
             } catch (JsonMappingException e) {

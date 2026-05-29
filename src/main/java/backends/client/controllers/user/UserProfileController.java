@@ -31,6 +31,7 @@ public class UserProfileController extends BaseController {
     @FXML private Label labelPhoneNumber;
     @FXML private Label labelBalance;
     @FXML private CheckBox checkShowPassword;
+    @FXML private TextField changable_infoname;
 
     // ── Constants ─────────────────────────────────────────────────
     private static final String MSG_BALANCE_OK  = "BALANCE_OK";
@@ -63,7 +64,11 @@ public class UserProfileController extends BaseController {
 
     // ── UI helpers ────────────────────────────────────────────────
     private void displayUserInfo(User user) {
-        labelName.setText(user.getName());
+        String name = user.getName() == null ? "" : user.getName();
+        labelName.setText(name);
+        if (changable_infoname != null) {
+            changable_infoname.setText(name);
+        }
         labelEmail.setText(user.getEmail());
         labelPhoneNumber.setText(user.getPhoneNumber());
         labelBalance.setText(String.valueOf(user.getBalance()));
