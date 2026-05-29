@@ -12,33 +12,41 @@
     <children>
 
         <!-- Content -->
-        <VBox layoutY="6.4" prefHeight="762.0" prefWidth="1366.0" spacing="18.0" style="-fx-padding: 24 44 28 44;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="6.0">
+        <VBox layoutY="6.4" prefHeight="762.0" prefWidth="1366.0" spacing="14.0" style="-fx-padding: 20 40 22 40;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="6.0">
             <children>
-                <VBox spacing="6.0">
+                <VBox spacing="4.0">
                     <Label text="Inventory Management" textFill="#1e293b">
-                        <font><Font size="28.0" /></font>
+                        <font><Font size="25.0" /></font>
                     </Label>
-                    <Label text="Approved items appear here and can be promoted into the bidding queue." textFill="#64748b" />
+                    <Label text="Approved items appear here and can be promoted into the bidding queue." textFill="#64748b">
+                        <font><Font size="13.0" /></font>
+                    </Label>
                 </VBox>
 
-                <VBox spacing="6.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5);                              -fx-background-radius: 24; -fx-padding: 18 28 18 28;                              -fx-effect: dropshadow(gaussian, rgba(234,88,12,0.10), 18, 0.12, 0, 6);">
+                <VBox spacing="4.0" style="-fx-background-color: linear-gradient(to bottom right, #fff7ed, #ffedd5);                              -fx-background-radius: 24; -fx-padding: 14 24 14 24;                              -fx-effect: dropshadow(gaussian, rgba(234,88,12,0.10), 18, 0.12, 0, 6);">
                     <Label text="Auction staging" textFill="#9a3412">
-                        <font><Font size="15.0" /></font>
+                        <font><Font size="14.0" /></font>
                     </Label>
-                    <Label text="Select one inventory item, then send it to the bidding queue when ready." textFill="#c2410c" />
+                    <Label text="Select one inventory item, then send it to the bidding queue when ready." textFill="#c2410c">
+                        <font><Font size="13.0" /></font>
+                    </Label>
                 </VBox>
 
-                <VBox spacing="14.0" style="-fx-background-color: white; -fx-background-radius: 24;                              -fx-padding: 24 26 24 26;                              -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 22, 0.12, 0, 8);" VBox.vgrow="ALWAYS">
+                <VBox spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 24;                              -fx-padding: 20 22 20 22;                              -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 22, 0.12, 0, 8);" VBox.vgrow="ALWAYS">
                     <Label text="Inventory" textFill="#0f172a">
-                        <font><Font size="20.0" /></font>
+                        <font><Font size="18.0" /></font>
                     </Label>
-                    <Label text="Choose one approved item to push into the auction workflow." textFill="#64748b" />
+                    <Label text="Choose one approved item to push into the auction workflow." textFill="#64748b">
+                        <font><Font size="13.0" /></font>
+                    </Label>
                     <ListView fx:id="inventory" style="-fx-background-color: #f8fafc; -fx-background-radius: 18;                                      -fx-border-radius: 18; -fx-border-color: #dbe4f0;" VBox.vgrow="ALWAYS" />
                 </VBox>
 
-                <HBox alignment="CENTER_LEFT" spacing="18.0" style="-fx-background-color: white; -fx-background-radius: 22;                              -fx-padding: 14 24 14 24;                              -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 18, 0.10, 0, 6);">
+                <HBox alignment="CENTER_LEFT" spacing="14.0" style="-fx-background-color: white; -fx-background-radius: 22;                              -fx-padding: 11 20 11 20;                              -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 18, 0.10, 0, 6);">
                     <children>
-                        <Label text="Selected inventory item will be inserted into the upcoming auction list." textFill="#64748b" HBox.hgrow="ALWAYS" />
+                        <Label text="Selected inventory item will be inserted into the upcoming auction list." textFill="#64748b" HBox.hgrow="ALWAYS">
+                            <font><Font size="13.0" /></font>
+                        </Label>
                         <Label fx:id="errorCreateAuction" text="Please select an item" textFill="#fc0101" visible="false" />
                         <Button onAction="#handleCreateAuction" prefHeight="42.0" prefWidth="170.0" style="-fx-background-color: #0f172a; -fx-background-radius: 18;" text="Create auction" textFill="WHITE" />
                     </children>
