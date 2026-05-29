@@ -41,10 +41,23 @@ public class CreateItemController {
     private Consumer<String> createItemHandler;
 
     public void handleCreateItem(ActionEvent event) throws IOException {
-        String type = itemType.getSelectionModel().getSelectedItem().toString();
-        double bidPrice = Double.parseDouble(basePrice.getText());
-        String itemInfo = this.itemInfo.getText();
-        String itemName = this.itemName.getText();
+        String type = itemType.getValue() == null ? "" : itemType.getValue().trim();
+        String priceText = basePrice.getText() == null ? "" : basePrice.getText().trim();
+        String itemInfo = this.itemInfo.getText() == null ? "" : this.itemInfo.getText().trim();
+        String itemName = this.itemName.getText() == null ? "" : this.itemName.getText().trim();
+
+        if (type.isEmpty() || priceText.isEmpty() || itemInfo.isEmpty() || itemName.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Error", "Please enter all the information !");
+            return;
+        }
+
+        double bidPrice;
+        try {
+            bidPrice = Double.parseDouble(priceText);
+        } catch (NumberFormatException e) {
+            showAlert(Alert.AlertType.WARNING, "Error", "Please enter a valid price !");
+            return;
+        }
 
         Gson gson = new Gson();
         CreateItemPayload createitempayload = new CreateItemPayload(type, itemName, itemInfo, bidPrice);
