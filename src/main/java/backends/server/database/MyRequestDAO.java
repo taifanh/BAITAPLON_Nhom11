@@ -36,14 +36,14 @@ public class MyRequestDAO {
 
     public MyRequestDAO(){
         try{
-            initializeRequest_Log();
+            initializeRequestLog();
 
         } catch (SQLException | IOException e) {
             throw new IllegalStateException(" KHONG THE KHOI TAO request database");
         }
     }
     // DÙNG HÀM này khi tạo mới 1 request
-    public synchronized static void save_myrequest(Message message, String requestId) throws  IOException {
+    public synchronized static void saveRequest(Message message, String requestId) throws  IOException {
         try(Connection connection = openConnection();
             PreparedStatement statement = connection.prepareStatement("""
             INSERT INTO my_request (request_id, id_user , request_type , request_info , status) VALUES (?, ? , ? , ?  , ?)""")
@@ -143,26 +143,7 @@ public class MyRequestDAO {
         }
     }
 
-    public synchronized void deleteMyRequests(List<Integer> requestIds) throws IOException {
-        if (requestIds == null || requestIds.isEmpty()) {
-            return;
-        }
-
-        try (Connection connection = openConnection();
-             PreparedStatement statement = connection.prepareStatement("""
-                     DELETE FROM my_request
-                     WHERE STT = ?
-                     """)) {
-            for (Integer requestId : requestIds) {
-                statement.setInt(1, requestId);
-                statement.addBatch();
-            }
-            statement.executeBatch();
-        } catch (SQLException e) {
-            throw new IOException("Khong the xoa request", e);
-        }
-    }
-    public synchronized void remove_request(String requestId) throws  IOException {
+    public synchronized void removeRequest(String requestId) throws  IOException {
         try(Connection connection = openConnection();
             PreparedStatement statement = connection.prepareStatement("""
               DELETE FROM my_request
@@ -177,7 +158,7 @@ public class MyRequestDAO {
 
     }
 
-    private synchronized void initializeRequest_Log() throws IOException, SQLException {
+    private synchronized void initializeRequestLog() throws IOException, SQLException {
         ensureDataDirectoryExists();
         try(Connection conn = openConnection();
             Statement statement = conn.createStatement()){

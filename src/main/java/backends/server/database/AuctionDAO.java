@@ -94,24 +94,6 @@ public class AuctionDAO {
         }
     }
 
-    public boolean existsActiveAuctionForItem(String itemId) throws IOException {
-        try (Connection connection = openConnection();
-             PreparedStatement statement = connection.prepareStatement("""
-                     SELECT 1
-                     FROM auction
-                     WHERE ItemId = ? AND status = ?
-                     LIMIT 1
-                     """)) {
-            statement.setString(1, itemId);
-            statement.setString(2, Auction.Status.ACTIVE.name());
-            try (ResultSet resultSet = statement.executeQuery()) {
-                return resultSet.next();
-            }
-        } catch (SQLException e) {
-            throw new IOException("Khong the kiem tra auction dang hoat dong", e);
-        }
-    }
-
     public List<Auction> getActiveAuctions() throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
@@ -134,26 +116,6 @@ public class AuctionDAO {
         }
     }
 
-    public Auction findById(String auctionId) throws IOException {
-        try (Connection connection = openConnection();
-             PreparedStatement statement = connection.prepareStatement("""
-                     SELECT auctionId, startAt, endAt, status, ItemId, highestBid, highestBidderId
-                     FROM auction
-                     WHERE auctionId = ?
-                     LIMIT 1
-                     """)) {
-            statement.setString(1, auctionId);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (!resultSet.next()) {
-                    return null;
-                }
-                InventoryDAO inventoryDAO = new InventoryDAO();
-                return mapAuction(resultSet, inventoryDAO);
-            }
-        } catch (SQLException e) {
-            throw new IOException("Khong the doc auction theo id", e);
-        }
-    }
     // cập nhật đếm giờ mới ===>> dùng cho anti sniping
     public synchronized void updateEndTime(String auctionId, LocalDateTime endAt) throws IOException {
         try (Connection connection = openConnection();

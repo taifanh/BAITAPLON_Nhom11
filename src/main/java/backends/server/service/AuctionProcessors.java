@@ -34,6 +34,7 @@ public class AuctionProcessors {
 
     public static String fetchAuctionStatus(ClientHandler handler, JsonNode node) throws Exception {
         String itemId = node.get("itemId").asText();
+        String requestingUserId = node.has("userId") ? node.get("userId").asText() : null;
         Auction managedAuction = AuctionService.getManagedActiveAuction(itemId);
         java.time.Duration remaining = AuctionService.getDuration(itemId);
         AuctionStatusMessage statusMsg = new AuctionStatusMessage();
@@ -63,6 +64,14 @@ public class AuctionProcessors {
             } else {
                 double startingPrice = managedAuction.getItem().getPrices();
                 statusMsg.increment  = 0;
+            }
+            if (requestingUserId != null && !requestingUserId.isBlank()) {
+                ServerBidRespond userAutoBid =
+                        bidDb.getAutoBidByUser(managedAuction.getAuctionId(), requestingUserId);
+                if (userAutoBid != null && userAutoBid.isAuto) {
+                    statusMsg.userHasAutoBid = true;
+                    statusMsg.userMaxBid     = userAutoBid.maxBid;
+                }
             }
         } else if (managedAuction == null) {
             statusMsg.status = "NOT_STARTED";

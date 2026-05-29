@@ -1,7 +1,6 @@
 package backends.server.handler;
 
 import backends.common.messages.MsgBid.*;
-import backends.common.messages.MsgBid.*;
 import backends.common.models.accounts.User;
 import backends.common.models.bidding.Auction;
 import backends.common.models.bidding.BidTransaction;
@@ -12,6 +11,7 @@ import backends.server.database.BidTransactionDAO;
 import backends.server.database.UserDAO;
 import backends.server.policy.IncrementPolicy;
 import backends.server.service.AuctionService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -19,10 +19,10 @@ import java.sql.SQLException;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class BidProcessor {
-    BidTransactionDAO bidDAO = new BidTransactionDAO();
-    UserDAO userDAO = new UserDAO();
-    Item dummyItem = ItemFactory.createItem(ItemType.Art, "auction-item", 0, "");
-
+    private final BidTransactionDAO bidDAO = new BidTransactionDAO();
+    private final UserDAO userDAO = new UserDAO();
+    private final Item dummyItem = ItemFactory.createItem(ItemType.Art, "auction-item", 0, "");
+    private static final ObjectMapper MAPPER = new ObjectMapper();
     // ── Singleton ──────────────────────────────────────────────────────────────
     private static BidProcessor instance;
 
@@ -98,7 +98,7 @@ public class BidProcessor {
         double floorPrice = Math.max(startingPrice, currentMaxAmount);
         if (!request.isAuto() && request.maxBid() == -1) {
             bidDAO.cancelAutoBid(request.auctionId(), request.userId());
-            String json = new Gson().toJson(new AutoBiddingCancelled("Auto bid cancelled !"));
+            String json = MAPPER.writeValueAsString(new AutoBiddingCancelled("Auto bid cancelled !"));
             AuctionRoom.getInstance().sendToUser(request.userId(), json);
             return;
         }

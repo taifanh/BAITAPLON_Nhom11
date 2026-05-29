@@ -2,7 +2,6 @@ package backends.server.service;
 
 import backends.common.messages.Common.*;
 import backends.common.messages.MsgData.*;
-import backends.common.messages.Common.*;
 import backends.common.models.accounts.User;
 import backends.common.models.core.Account;
 import backends.server.database.InventoryDAO;
@@ -12,7 +11,6 @@ import backends.server.database.BidTransactionDAO;
 import backends.server.database.UserDAO;
 import backends.server.handler.AuctionRoom;
 import backends.server.handler.ClientHandler;
-import backends.common.messages.MsgData.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -94,7 +92,7 @@ public final class UserService {
         responseNode.put("payloadJson", gson.toJson(payload));
 
         String requestId = RequestLogDAO.save_request(msg);
-        MyRequestDAO.save_myrequest(msg, requestId);
+        MyRequestDAO.saveRequest(msg, requestId);
         responseNode.put("request_id", requestId);
         
         handler.send(responseNode.toString());
@@ -119,7 +117,7 @@ public final class UserService {
         } else {
             inventoryDAODB.removeItem(payload.getRequest_id());
             requestlog.removeRequest(payload.getRequest_id());
-            requestDAO.remove_request(payload.getRequest_id());
+            requestDAO.removeRequest(payload.getRequest_id());
 
             ObjectNode response = mapper.createObjectNode();
             response.put("type", "remove_item_OK");

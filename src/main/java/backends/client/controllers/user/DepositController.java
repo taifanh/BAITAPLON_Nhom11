@@ -65,8 +65,8 @@ public class DepositController {
                     Platform.runLater(() -> {
                         showAlert(
                                 Alert.AlertType.INFORMATION,
-                                "thành công",
-                                "Nạp tiền thành công!\n: " + String.format("%.2f", latestBalance)
+                                "Successful",
+                                "Deposited successful!\n New balance: " + String.format("%.2f", latestBalance)
                         );
                         closeWindow();
                     });
@@ -99,7 +99,7 @@ public class DepositController {
             UserSession.getConnection().send(msg);
 
         } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Lỗi", "Số tiền không hợp lệ");
+            showAlert(Alert.AlertType.ERROR, "Error", "Your input amount is invalid");
         }
     }
 

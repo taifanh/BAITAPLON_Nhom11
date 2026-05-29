@@ -11,6 +11,8 @@ public class AuctionStatusMessage {
     public String maxBidderName;
     public double maxBidderAmount;
     public String startingPrice;
+    public boolean userHasAutoBid = false;   // user này đang có auto bid không?
+    public double  userMaxBid = 0;
 
     public AuctionStatusMessage() {}
 }

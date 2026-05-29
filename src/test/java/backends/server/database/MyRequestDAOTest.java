@@ -44,7 +44,7 @@ public class MyRequestDAOTest {
         msg.messageType = MessageType.ADD_ITEM.getValue();
         msg.payloadJson = "{\"name\": \"test item\"}";
 
-        MyRequestDAO.save_myrequest(msg, "REQ123");
+        MyRequestDAO.saveRequest(msg, "REQ123");
 
         MyRequestDAO.RequestRecord record = myRequestDAO.findByRequestId("REQ123");
         assertNotNull(record);
@@ -58,7 +58,7 @@ public class MyRequestDAOTest {
         Message msg = new Message();
         msg.Id_user = "USER2";
         msg.messageType = "withdraw"; // Note: "withdraw" type không được định nghĩa trong enum, sử dụng cho test
-        MyRequestDAO.save_myrequest(msg, "REQ999");
+        MyRequestDAO.saveRequest(msg, "REQ999");
 
         myRequestDAO.updateRequestStatus("REQ999", MyRequestDAO.STATUS_ACCEPTED);
 

@@ -135,7 +135,7 @@ public class ServerAuctionManager {
                 UserDAO userDAO = new UserDAO();
                 User winner = userDAO.getUser(maxBidder.userId);
                 result.winnerName = (winner != null) ? winner.getName() : maxBidder.userId;
-                userDAO.update_balance(-result.winningAmount, result.winnerId);
+                userDAO.updateBalance(-result.winningAmount, result.winnerId);
             } else {
                 result.hasBidder = false;
                 result.winnerName = "Không có người thắng";

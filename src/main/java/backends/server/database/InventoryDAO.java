@@ -138,22 +138,6 @@ public class InventoryDAO {
         }
     }
 
-    //Lấy sản phẩm theo Id user ( dùng để làm bảng riêng cho mỗi user )
-    public List<Item> getItemsByUserId(String userId) throws IOException {
-        try (Connection connection = openConnection();
-             PreparedStatement statement = connection.prepareStatement("""
-                     SELECT ItemId, type, name, price, bidIncrement, itemDescription
-                     FROM inventory
-                     WHERE userId = ?
-                     """)) {
-            statement.setString(1, userId);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                return getListItems(resultSet);
-            }
-        } catch (SQLException e) {
-            throw new IOException("Khong the lay san pham theo user", e);
-        }
-    }
 
     public String getUserIdByItemId(String itemId) {
         String sql = "SELECT userId FROM inventory WHERE ItemId = ?";
@@ -175,47 +159,6 @@ public class InventoryDAO {
         return null;
     }
 
-    public String getStatusById(String request_id) {
-        String sql = "SELECT status FROM inventory WHERE request_id = ?";
-        try (Connection conn = openConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, request_id);
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                return rs.getString("status");
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    // Cập nhât status cho Item (Waiting -> InAuction -> Sold)
-    public synchronized void updateItemStatus(List<String> itemIds, String status) throws IOException {
-        if (itemIds == null || itemIds.isEmpty()) {
-            return;
-        }
-
-        try (Connection connection = openConnection();
-             PreparedStatement statement = connection.prepareStatement("""
-                     UPDATE inventory
-                     SET status = ?
-                     WHERE ItemId = ?
-                     """)) {
-            for (String itemId : itemIds) {
-                statement.setString(1, status);
-                statement.setString(2, itemId);
-                statement.addBatch();
-            }
-            statement.executeBatch();
-        } catch (SQLException e) {
-            throw new IOException("Khong the cap nhat trang thai danh sach san pham", e);
-        }
-    }
 
     public synchronized void updateItemStatus(String itemId, String status) throws IOException {
         if (itemId == null) {

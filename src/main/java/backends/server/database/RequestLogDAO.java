@@ -166,49 +166,7 @@ public class RequestLogDAO {
             throw new IOException("Khong the xoa request", e);
         }
     }
-    public synchronized void set_selected_request(String request_id,boolean selected){
-        try(Connection connection = openConnection();
-            PreparedStatement statement = connection.prepareStatement("""
-            UPDATE request_log
-            SET selected = ?
-            WHERE request_id = ?
-""")){
-            statement.setBoolean(1,selected);
-            statement.setString(2,request_id);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
-    }
-    public List<RequestLogDAO.RequestRecord> selected_requests() throws IOException{
-        try(Connection connection = openConnection();
-            PreparedStatement statement = connection.prepareStatement("""
-                    SELECT request_id, id_user, request_type, request_info ,send_at, selected, status
-                     FROM request_log
-                     WHERE selected = true AND status = ?
-                    ORDER  BY send_at ASC
-                    """)){
-            statement.setString(1, STATUS_PENDING);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                List<RequestRecord> requests = new ArrayList<>();
-                while(resultSet.next()){
-                    requests.add(new RequestRecord(
-                            resultSet.getString("request_id"),
-                            resultSet.getString("id_user"),
-                            resultSet.getString("request_type"),
-                            resultSet.getString("request_info"),
-                            resultSet.getString("send_at"),
-                            resultSet.getBoolean("selected"),
-                            resultSet.getString("status")
-                    ));
-            }
-                return requests;
-            }
-        } catch (Exception e){
-            throw new IOException("cannot load requests", e);
-        }
-    }
     public String getUserbyRequestId(String requestId) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
