@@ -213,7 +213,7 @@ public class UserDAO {
             throw new IOException("Khong the lay name theo id", e);
         }
     }
-    public synchronized void update_balance(double new_balance, String userId) throws IOException {
+    public synchronized void updateBalance(double new_balance, String userId) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
                      UPDATE users
@@ -231,7 +231,7 @@ public class UserDAO {
             throw new IOException("Khong the cập nhật balance trong SQLite.", e);
         }
     }
-    public double get_balance(String userId) throws IOException {
+    public double getBalance(String userId) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
                  SELECT balance
@@ -250,28 +250,6 @@ public class UserDAO {
 
         } catch (SQLException e) {
             throw new IOException("Khong the lay balance tu SQLite.", e);
-        }
-    }
-    public synchronized void change_info(String new_name , String new_email , String new_phonenumber ,String new_password ,  String id) throws IOException {
-        try(Connection connection = openConnection();
-            PreparedStatement statement = connection.prepareStatement("""
-                  UPDATE users
-                  SET name = ?, email = ?, phone_number = ?, password = ?
-                  WHERE id = ?
-""")) {
-            statement.setString(1, new_name);
-            statement.setString(2, new_email);
-            statement.setString(3, new_phonenumber);
-            statement.setString(4, new_password);
-            statement.setString(5, id );
-
-            try{
-                statement.executeUpdate();
-            } catch(SQLException e) {
-                throw new IOException("khong the thay doi thong tin. " ,e );
-            }
-        } catch (SQLException e) {
-            throw new IOException("khong the thay doi thong tin." ,e);
         }
     }
 
@@ -316,9 +294,6 @@ public class UserDAO {
         if (Files.notExists(DATA_DIRECTORY)) {
             Files.createDirectories(DATA_DIRECTORY);
         }
-    }
-    private boolean looksLikeEmail(String value) {
-        return value != null && value.contains("@");
     }
 
     private Connection openConnection() throws SQLException {

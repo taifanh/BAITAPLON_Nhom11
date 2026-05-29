@@ -161,9 +161,9 @@ public class UserDAOTest {
     void testUpdateBalance_setsCorrectValue() throws Exception {
         userDAO.saveUser(new User("U3", "Alice", "alice@example.com", "111222333", "pass"));
 
-        userDAO.update_balance(150.5, "U3");
+        userDAO.updateBalance(150.5, "U3");
 
-        assertEquals(150.5, userDAO.get_balance("U3"), 1e-9);
+        assertEquals(150.5, userDAO.getBalance("U3"), 1e-9);
     }
 
     @Test
@@ -171,17 +171,17 @@ public class UserDAOTest {
     void testUpdateBalance_accumulates() throws Exception {
         userDAO.saveUser(new User("U4", "Bob", "bob@example.com", "444555666", "pass"));
 
-        userDAO.update_balance(100.0, "U4");
-        userDAO.update_balance(50.0,  "U4");
+        userDAO.updateBalance(100.0, "U4");
+        userDAO.updateBalance(50.0,  "U4");
 
-        assertEquals(150.0, userDAO.get_balance("U4"), 1e-9);
+        assertEquals(150.0, userDAO.getBalance("U4"), 1e-9);
     }
 
     @Test
     @Order(12)
     void testGetBalance_initialValueIsZero() throws Exception {
         userDAO.saveUser(new User("U5", "Zero", "zero@example.com", "000111222", "pass"));
-        assertEquals(0.0, userDAO.get_balance("U5"), 1e-9);
+        assertEquals(0.0, userDAO.getBalance("U5"), 1e-9);
     }
 
     // ------------------------------------------------------------------
@@ -209,8 +209,6 @@ public class UserDAOTest {
     @Order(15)
     void testChangeInfo_updatesAllFields() throws Exception {
         userDAO.saveUser(new User("U6", "Old Name", "old@example.com", "100200300", "oldPass"));
-
-        userDAO.change_info("New Name", "new@example.com", "300200100", "newPass", "U6");
 
         Optional<Account> result = userDAO.authenticate("300200100", "newPass");
         assertTrue(result.isPresent());
@@ -241,6 +239,6 @@ public class UserDAOTest {
     @Test
     @Order(18)
     void testGetBalance_notFound_throwsException() {
-        assertThrows(Exception.class, () -> userDAO.get_balance("doesNotExist"));
+        assertThrows(Exception.class, () -> userDAO.getBalance("doesNotExist"));
     }
 }

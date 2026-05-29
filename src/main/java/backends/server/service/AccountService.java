@@ -19,7 +19,7 @@ public class AccountService {
     public static String getBalance(ClientHandler handler, JsonNode node) throws Exception {
         Message msg = mapper.treeToValue(node, Message.class);
         UserDAO userDAO = new UserDAO();
-        double currentBalance = userDAO.get_balance(msg.Id_user);
+        double currentBalance = userDAO.getBalance(msg.Id_user);
         
         ObjectNode responseNode = mapper.createObjectNode();
         responseNode.put("type", "BALANCE_OK");
@@ -35,8 +35,8 @@ public class AccountService {
         System.out.println("[Server] DEPOSIT received | userId=" + userId + " | amount=" + payload.getAmount());
 
         UserDAO userDAO = new UserDAO();
-        userDAO.update_balance(payload.getAmount(), userId);
-        payload.setAmount(userDAO.get_balance(userId));
+        userDAO.updateBalance(payload.getAmount(), userId);
+        payload.setAmount(userDAO.getBalance(userId));
         
         ObjectNode responseNode = mapper.createObjectNode();
         responseNode.put("type", "deposit_OK");

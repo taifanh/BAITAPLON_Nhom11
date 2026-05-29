@@ -158,32 +158,6 @@ public class BidTransactionDAO {
         }
     }
 
-    public List<BidHistoryRecord> getBidHistory(String auctionId) throws IOException {
-        try (Connection connection = openConnection();
-             PreparedStatement statement = connection.prepareStatement("""
-                     SELECT auctionId, bidderId, itemId, amount, bidTime
-                     FROM bid_transactions
-                     WHERE auctionId = ?
-                     ORDER BY bidTime ASC, id ASC
-                     """)) {
-            statement.setString(1, auctionId);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                List<BidHistoryRecord> history = new ArrayList<>();
-                while (resultSet.next()) {
-                    history.add(new BidHistoryRecord(
-                            resultSet.getString("auctionId"),
-                            resultSet.getString("bidderId"),
-                            resultSet.getString("itemId"),
-                            resultSet.getDouble("amount"),
-                            Instant.parse(resultSet.getString("bidTime"))
-                    ));
-                }
-                return history;
-            }
-        } catch (SQLException e) {
-            throw new IOException("Khong the doc lich su bid", e);
-        }
-    }
 
     public List<BidHistoryDisplayRecord> getBidHistoryForDisplay(String auctionId) throws IOException {
         try (Connection connection = openConnection();

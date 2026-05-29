@@ -35,7 +35,6 @@ public class UserProfileController extends BaseController {
     // ── Constants ─────────────────────────────────────────────────
     private static final String MSG_BALANCE_OK  = "BALANCE_OK";
     private static final String MSG_DEPOSIT_OK  = "deposit_OK";
-    private static final String MSG_GET_BALANCE = "GET_BALANCE";
 
     // ── State ─────────────────────────────────────────────────────
     private static final ObjectMapper MAPPER = new ObjectMapper();

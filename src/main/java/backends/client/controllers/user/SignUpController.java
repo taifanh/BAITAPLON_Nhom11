@@ -74,7 +74,7 @@ public class SignUpController {
         String password = signUpPassword.getText() == null ? "" : signUpPassword.getText().trim();
 
         if (name.isEmpty() || email.isEmpty() || phoneNumber.isEmpty() || password.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Loi", null, "Vui long nhap day du thong tin.");
+            showAlert(Alert.AlertType.WARNING, "Error", null, "Please enter all the information !");
             return;
         }
         // nếu đủ thông tin thì mới gửi tín hiệu cho server
@@ -94,14 +94,14 @@ public class SignUpController {
                 String type = node.path("type").asText("");
 
                 if ( type.equals("SIGNUP_FAIL")){
-                    showAlert(Alert.AlertType.WARNING, "Trung du lieu", null, "So dien thoai da ton tai.");
+                    showAlert(Alert.AlertType.WARNING, "Error", null, "Your phone number has been registered !");
                 }
                 else if (type.equals("SIGNUP_OK")){
                     Parent signinRoot = ViewLoader.load("SignIn.fxml");
                     Scene sceneMain = new Scene(signinRoot);
 
                     Platform.runLater(() ->{
-                        showAlert(Alert.AlertType.INFORMATION, "THÀNH CÔNG", null, "sign up thành công.");
+                        showAlert(Alert.AlertType.INFORMATION, "Successful !", null, "sign up successful !");
 
                         pendingStage.setScene(sceneMain);
                         pendingStage.setTitle("Sign in");

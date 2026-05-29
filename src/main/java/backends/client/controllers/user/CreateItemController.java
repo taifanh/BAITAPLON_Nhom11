@@ -92,10 +92,10 @@ public class CreateItemController {
 
                 Platform.runLater(() -> {
                     if (type.equals("add_item_OK")) {
-                        showAlert(Alert.AlertType.INFORMATION, "Thanh cong", "tao san pham thanh cong!");
+                        showAlert(Alert.AlertType.INFORMATION, "Successful", "add item successful!");
                         closeWindow();
                     } else {
-                        showAlert(Alert.AlertType.WARNING, "Khong thanh cong", "khong the tao san pham");
+                        showAlert(Alert.AlertType.WARNING, "Failed", "cannot add your item!");
                     }
                 });
             } catch (JsonMappingException e) {

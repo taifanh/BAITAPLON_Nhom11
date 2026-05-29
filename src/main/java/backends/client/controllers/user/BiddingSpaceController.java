@@ -347,7 +347,6 @@ public class BiddingSpaceController extends BaseController {
         }
         boolean serverSaysAuto = msg.userHasAutoBid;
         if (serverSaysAuto) {
-            // Server là nguồn sự thật — restore đầy đủ kể cả sau khi restart app
             fieldMaxLimit.setText(String.valueOf(msg.userMaxBid));
             applyAutoBidActive();
         } else {
