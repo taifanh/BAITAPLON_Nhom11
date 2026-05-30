@@ -1,6 +1,6 @@
 package backends.client.session;
 
-import backends.server.handler.ServerConnection;
+import backends.client.network.ServerConnection;
 import backends.common.models.core.Account;
 import backends.common.models.accounts.User;
 
