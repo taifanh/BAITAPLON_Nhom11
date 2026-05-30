@@ -8,17 +8,17 @@
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="768.0" prefWidth="1366.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="backends.client.controllers.admin.AdminProfileController">
+<AnchorPane prefHeight="768.0" prefWidth="1366.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="backends.client.controllers.admin.AdminProfileController">
     <children>
         <HBox alignment="CENTER_LEFT" prefHeight="82.0" spacing="16.0" style="-fx-background-color: white; -fx-padding: 0 40 0 40; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.10), 18, 0.10, 0, 4);" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
@@ -67,12 +67,7 @@
                                                         <Font size="14.0" />
                                                     </font>
                                                 </Label>
-                                                <Pane prefHeight="160.0" prefWidth="210.0" style="-fx-background-color: rgba(255,255,255,0.08); -fx-background-radius: 24;">
-                                                    <children>
-                                                        <ImageView fx:id="UserImange" fitHeight="120.0" fitWidth="120.0" layoutX="45.0" layoutY="20.0" pickOnBounds="true" preserveRatio="true" />
-                                                    </children>
-                                                </Pane>
-                                                <Button alignment="CENTER" mnemonicParsing="false" prefHeight="28.0" prefWidth="128.0" style="-fx-background-color: #20cc6b; -fx-background-radius: 20;" text="UPLOAD IMAGE" textFill="WHITE" />
+                                                <Pane prefHeight="175.0" prefWidth="264.0" style="-fx-background-color: rgba(255,255,255,0.08); -fx-background-radius: 24;" />
                                                 <Region prefHeight="16.0" />
                                                 <Label alignment="CENTER" maxWidth="1.7976931348623157E308" text="Administrator" textAlignment="CENTER" textFill="WHITE">
                                                     <font>
@@ -130,6 +125,12 @@
                                                         <ColumnConstraints minWidth="120.0" prefWidth="140.0" />
                                                         <ColumnConstraints hgrow="ALWAYS" />
                                                     </columnConstraints>
+                                       <rowConstraints>
+                                          <RowConstraints />
+                                          <RowConstraints />
+                                          <RowConstraints />
+                                          <RowConstraints />
+                                       </rowConstraints>
                                                 </GridPane>
                                             </children>
                                         </VBox>
@@ -141,19 +142,19 @@
                 </Tab>
                 <Tab fx:id="adminRequestsTab" closable="false" text="Requests">
                     <content>
-                        <fx:include fx:id="requestsPane" source="AdminRequest.fxml"/>
+                        <fx:include fx:id="requestsPane" source="AdminRequest.fxml" />
                     </content>
                 </Tab>
 
                 <Tab fx:id="adminInventoryTab" closable="false" text="Inventory">
                     <content>
-                        <fx:include fx:id="inventoryPane" source="AdminInventory.fxml"/>
+                        <fx:include fx:id="inventoryPane" source="AdminInventory.fxml" />
                     </content>
                 </Tab>
 
                 <Tab fx:id="adminBiddingTab" closable="false" text="Bidding">
                     <content>
-                        <fx:include fx:id="biddingPane" source="AdminBidding.fxml"/>
+                        <fx:include fx:id="biddingPane" source="AdminBidding.fxml" />
                     </content>
                 </Tab>
             </tabs>

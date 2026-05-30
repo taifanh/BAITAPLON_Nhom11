@@ -1,6 +1,7 @@
 package backends.server.handler;
 
 import backends.common.messages.Common.MessageType;
+import backends.server.service.AvatarService;
 import backends.server.service.AccountService;
 import backends.server.service.AdminService;
 import backends.server.service.AuctionProcessors;
@@ -63,6 +64,8 @@ public class ClientHandler implements Runnable {
         processors.put(MessageType.DEPOSIT.getValue(), AccountService::deposit);
         processors.put(MessageType.ADD_ITEM.getValue(), UserService::addItem);
         processors.put(MessageType.CHANGE_INFO.getValue(), AccountService::changeInfo);
+        processors.put(MessageType.GET_AVATAR.getValue(), AvatarService::getAvatar);
+        processors.put(MessageType.SAVE_AVATAR.getValue(), AvatarService::saveAvatar);
         processors.put(MessageType.REMOVE_ITEM.getValue(), UserService::removeItem);
     }
 
