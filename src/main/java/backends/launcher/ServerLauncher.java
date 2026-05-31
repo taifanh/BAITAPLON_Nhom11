@@ -15,7 +15,7 @@ public class ServerLauncher {
 
     public static void ServerStart() {
         Admin admin = Admin.creating_admin("Admin", "Admin", "12345", "admin");
-        System.out.println(admin.getPhoneNumber());
+//        System.out.println(admin.getPhoneNumber());
         UserDAO userDAO = new UserDAO();
         try {
             if (!userDAO.phoneNumberExists(admin.getPhoneNumber()))

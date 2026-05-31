@@ -120,6 +120,7 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
+                            <outputDirectory>${project.basedir}/dist</outputDirectory>  <!-- THEM DONG NAY -->
                             <finalName>BiddingSystem-server</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                             <descriptorRefs>
@@ -140,6 +141,7 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
+                            <outputDirectory>${project.basedir}/dist</outputDirectory>  <!-- THEM DONG NAY -->
                             <finalName>BiddingSystem-client</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                             <descriptorRefs>
