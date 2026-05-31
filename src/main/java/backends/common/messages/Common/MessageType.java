@@ -13,6 +13,7 @@ public enum MessageType {
     SAVE_AVATAR("SAVE_AVATAR"),
     FETCH_USER_REQUEST("FETCH_USER_REQUEST"),
     FETCH_USER_BID_HISTORY("FETCH_USER_BID_HISTORY"),
+    FETCH_BUYER_ITEM("FETCH_BUYER_ITEM"),
 
     // ======== Item Management ========
     ADD_ITEM("ADD_ITEM"),

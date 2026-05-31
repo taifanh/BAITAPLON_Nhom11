@@ -3,12 +3,10 @@ package backends.server.service;
 import backends.common.messages.Common.*;
 import backends.common.messages.MsgData.*;
 import backends.common.models.accounts.User;
+import backends.common.models.bidding.Auction;
 import backends.common.models.core.Account;
-import backends.server.database.InventoryDAO;
-import backends.server.database.MyRequestDAO;
-import backends.server.database.RequestLogDAO;
-import backends.server.database.BidTransactionDAO;
-import backends.server.database.UserDAO;
+import backends.common.models.core.Item;
+import backends.server.database.*;
 import backends.server.handler.AuctionRoom;
 import backends.server.handler.ClientHandler;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -19,6 +17,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public final class UserService {
@@ -189,6 +189,47 @@ public final class UserService {
                         record.bidTime()
                 ))
                 .toList();
+
+        clientHandler.send(mapper.writeValueAsString(response));
+        return null;
+    }
+    public static String fetchBuyerItemHistory(ClientHandler clientHandler, JsonNode node) throws IOException {
+        String userId = null;
+        JsonNode payloadNode = node.get("payloadJson");
+        if (payloadNode != null) {
+            userId = node.get("Id_user").asText();
+        } else {
+            FetchBuyerToAuctionRequest request = mapper.treeToValue(node, FetchBuyerToAuctionRequest.class);
+            userId = request.UserId;
+        }
+
+        if (userId == null || userId.isBlank()) {
+            ObjectNode error = mapper.createObjectNode();
+            error.put("type", "BUY_ITEM_RESPONSE");
+            error.put("error", "Missing user id");
+            clientHandler.send(mapper.writeValueAsString(error));
+            return null;
+        }
+
+        AuctionDAO auctionDAO = new AuctionDAO();
+        BuyerItemResponse response = new BuyerItemResponse();
+        response.type = "BUY_ITEM_RESPONSE";
+        response.itemlist = new ArrayList<>();
+
+        // lấy item từ auction của người thắng rồi lấy thông tin của item và các thông tin khác ở auction
+        List<Auction> wonAuctions = auctionDAO.getAuctionsByHighestBidder(userId);
+        for (Auction auction : wonAuctions) {
+            ItemRecordDto dto = new ItemRecordDto();
+            Item item = auction.getItem();
+            dto.itemId = item.getId();
+            dto.itemName = item.getName();
+            dto.itemType = item.getType();
+            dto.itemInfo = item.getInfo();
+            dto.bidPrice = auction.getCurrentHighestBid();
+            dto.startAt = auction.getStartAt() != null ? auction.getStartAt().toString() : "";
+            dto.endAt = auction.getEndAt() != null ? auction.getEndAt().toString() : "";
+            response.itemlist.add(dto);
+        }
 
         clientHandler.send(mapper.writeValueAsString(response));
         return null;
