@@ -1,0 +1,109 @@
+/* Search TextField styling */
+#searchField {
+    -fx-font-size: 13;
+    -fx-padding: 10;
+    -fx-font-family: "Segoe UI", "System";
+    -fx-control-inner-background: white;
+    -fx-text-fill: #333;
+    -fx-border-radius: 8;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1;
+    -fx-focus-color: #ea580c;
+}
+
+#searchField:focused {
+    -fx-border-color: #ea580c;
+    -fx-border-width: 2;
+}
+
+#searchField::placeholder {
+    -fx-text-fill: #aaa;
+}
+
+/* Item Count Label */
+#itemCountLabel {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 13;
+    -fx-font-weight: bold;
+}
+
+/* ListView styling */
+#itemListView {
+    -fx-padding: 0;
+    -fx-control-inner-background: transparent;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 12;
+}
+
+#itemListView .list-cell {
+    -fx-padding: 12;
+    -fx-background-color: white;
+    -fx-border-color: transparent;
+    -fx-border-bottom-color: #e2e8f0;
+}
+
+#itemListView .list-cell:filled:selected {
+    -fx-background-color: #fff7ed;
+    -fx-border-color: #ea580c;
+    -fx-border-width: 1;
+}
+
+#itemListView .list-cell:filled:hover {
+    -fx-background-color: #fffaf0;
+}
+
+/* Button styling */
+.item-button {
+    -fx-padding: 8 16;
+    -fx-font-size: 12;
+    -fx-border-radius: 6;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.view-button {
+    -fx-background-color: #ea580c;
+    -fx-text-fill: white;
+    -fx-border-radius: 6;
+}
+
+.view-button:hover {
+    -fx-background-color: #d64a07;
+}
+
+.remove-button {
+    -fx-background-color: #f5f5f5;
+    -fx-text-fill: #d32f2f;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+}
+
+.remove-button:hover {
+    -fx-background-color: #ffebee;
+    -fx-text-fill: #b71c1c;
+}
+
+/* Item name label styling */
+.item-name-label {
+    -fx-font-size: 13;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+.item-info-label {
+    -fx-font-size: 11;
+    -fx-text-fill: #64748b;
+    -fx-wrap-text: true;
+}
+
+.item-price-label {
+    -fx-font-size: 12;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ea580c;
+}
+
+.item-status-label {
+    -fx-font-size: 10;
+    -fx-text-fill: #94a3b8;
+}
