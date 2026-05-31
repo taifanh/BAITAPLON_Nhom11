@@ -28,7 +28,7 @@ Phạm vi hiện tại của hệ thống gồm:
 - JDK: khuyến nghị `JDK 25`
 - Maven: có thể dùng Maven cài sẵn hoặc Maven Wrapper trong repo
 
-### Yêu cầu cài đặt
+### Yêu cầu cài đặt (với lập trình viên)
 
 1. Cài `JDK 25`.
 2. Cấu hình biến môi trường `JAVA_HOME` trỏ tới thư mục JDK.
@@ -56,6 +56,7 @@ Lưu ý: trong môi trường hiện tại, Maven Wrapper chỉ chạy khi `JAVA
 ```text
 .
 ├── data/                       # SQLite database, được tạo/sử dụng khi chạy server
+├── dist/                       # Thư mục chứa những thứ người dùng chỉ cần tải về
 ├── src/
 │   ├── main/
 │   │   ├── java/com/bidding_system/backends/
@@ -105,21 +106,21 @@ chmod +x mvnw
 ./mvnw clean package
 ```
 
-Sau khi build thành công, thư mục `target/` sẽ có:
+Sau khi build thành công, thư mục `dist/` sẽ có:
 
-- `target/BiddingSystem-server.jar`
-- `target/BiddingSystem-client.jar`
+- `dist/BiddingSystem-server.jar`
+- `dist/BiddingSystem-client.jar`
 
 ## 5. Hướng dẫn chạy Server/Client theo thứ tự cụ thể
 
 ### Cách dùng cho mọi người 
-1. Mở project trong file system
+1. Tải LauncherApp.zip trong mục release
 
-2. Chạy file `click-to-run-server.cmd` để chạy máy chủ (không dành cho user thông thường)
+2. Chạy file `Start-Server.bat` để chạy máy chủ (không dành cho user thông thường)
 
-3. Chạy file `click-to-run-client.cmd` để chạy chương trình đấu giá (dành cho user thông thường tham gia vào hệ thống đáu giá)
+3. Chạy file `Start-Client.bat` để chạy chương trình đấu giá (dành cho user thông thường tham gia vào hệ thống đáu giá)
    
-(`Note`: chọn phiên bản phù hợp với hệ điều hành của máy `Wins` , `Linux / MacOs`)   
+(`Note`: File .bat và .sh đã được tự động cài đặt môi trường cho người dùng nên người dùng không cần cài thêm gì cả. Người dùng chọn phiên bản phù hợp với hệ điều hành của máy `Wins` , `Linux / MacOs`)   
 (`Note`: đảm bảo `server` đã được mở thì `client` mới có thể giao tiếp)
 
 ### Cách chạy khuyến nghị cho coder
@@ -133,7 +134,7 @@ mvn clean package
 2. Mở terminal thứ nhất, chạy server:
 
 ```bash
-java -jar target/BiddingSystem-server.jar
+java -jar dist/BiddingSystem-server.jar
 ```
 
 3. Chờ khi console hiện thông báo server đã khởi động ở cổng `9999`.
@@ -141,7 +142,7 @@ java -jar target/BiddingSystem-server.jar
 4. Mở terminal thứ hai, chạy client:
 
 ```bash
-java -jar target/BiddingSystem-client.jar
+java -jar dist/BiddingSystem-client.jar
 ```
 
 5. Nếu cần mở nhiều người dùng cùng lúc, có thể chạy lệnh client ở nhiều terminal khác nhau trên cùng máy.
