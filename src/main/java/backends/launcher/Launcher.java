@@ -27,12 +27,7 @@ public class Launcher {
             serverIp = "localhost";
         }
 
-        if ("localhost".equals(serverIp)) {
-            ServerStart();
-            ClientStart(args);
-        } else {
-            ClientStart(args);
-        }
+        ClientStart(args);
     }
 
     public static void ServerStart() {

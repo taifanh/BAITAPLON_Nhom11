@@ -147,7 +147,7 @@
                             </descriptorRefs>
                             <archive>
                                 <manifest>
-                                    <mainClass>backends.launcher.ClientLauncher</mainClass>
+                                    <mainClass>backends.launcher.Launcher</mainClass>
                                 </manifest>
                             </archive>
                         </configuration>

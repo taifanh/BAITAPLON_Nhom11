@@ -18,7 +18,6 @@ echo ====================================================
 echo  Auction Bidding System - Client
 echo ====================================================
 echo.
-set /p SERVER_IP=Nhap IP Server (Enter = chay local): 
 
 REM Build (only if JAR doesn't exist)
 echo.
@@ -44,19 +43,21 @@ if exist "target\BiddingSystem-client.jar" (
     )
 )
 
-REM Kiem tra IP
+REM Kiem tra IP (Da them co xoa sach WARNING)
+set "JVM_OPTS=--enable-native-access=ALL-UNNAMED --add-opens=java.base/sun.misc=ALL-UNNAMED -Xlint:none"
+
 if "!SERVER_IP!"=="" (
     echo.
     echo ===== Step 1: Khoi dong Server local =====
-    start "BiddingServer" cmd /c "java -jar target\BiddingSystem-server.jar"
+    start "BiddingServer" cmd /k "java !JVM_OPTS! -jar target\BiddingSystem-server.jar"
     timeout /t 3 /nobreak >nul
     echo.
     echo ===== Step 2: Khoi dong Client (localhost) =====
-    java -jar "target\BiddingSystem-client.jar"
+    java !JVM_OPTS! -jar "target\BiddingSystem-client.jar"
 ) else (
     echo.
     echo ===== Ket noi toi Server: !SERVER_IP! =====
-    java -jar "target\BiddingSystem-client.jar" "!SERVER_IP!"
+    java !JVM_OPTS! -jar "target\BiddingSystem-client.jar" "!SERVER_IP!"
 )
 
 echo.
