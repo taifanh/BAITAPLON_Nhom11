@@ -22,26 +22,30 @@ echo "===================================================="
 echo ""
 read -p "Server IP (Enter for localhost): " SERVER_IP
 
-# Build
+# Build (only if JAR doesn't exist)
 echo ""
-echo "===== Building project ====="
-if [ -f "mvnw" ]; then
-    chmod +x mvnw
-    ./mvnw -q -DskipTests package
+if [ -f "target/BiddingSystem-client.jar" ]; then
+    echo "===== JAR exists, skipping build ====="
 else
-    mvn -q -DskipTests package
-fi
+    echo "===== Building project (first run) ====="
+    if [ -f "mvnw" ]; then
+        chmod +x mvnw
+        ./mvnw -q -DskipTests package
+    else
+        mvn -q -DskipTests package
+    fi
 
-if [ $? -ne 0 ]; then
-    echo "BUILD FAILED! Check JDK 25 and JAVA_HOME."
-    read -p "Press Enter to exit..."
-    exit 1
-fi
+    if [ $? -ne 0 ]; then
+        echo "BUILD FAILED! Check JDK 25 and JAVA_HOME."
+        read -p "Press Enter to exit..."
+        exit 1
+    fi
 
-if [ ! -f "target/BiddingSystem-client.jar" ]; then
-    echo "ERROR: target/BiddingSystem-client.jar not found"
-    read -p "Press Enter to exit..."
-    exit 1
+    if [ ! -f "target/BiddingSystem-client.jar" ]; then
+        echo "ERROR: target/BiddingSystem-client.jar not found"
+        read -p "Press Enter to exit..."
+        exit 1
+    fi
 fi
 
 # Run

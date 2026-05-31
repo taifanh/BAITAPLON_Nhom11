@@ -52,10 +52,15 @@ public class SignInController {
     @FXML
     public void initialize() {
         receiveSuccessfulSignIn();
-
-        Platform.runLater(() -> {
-            Stage stage = (Stage) phoneNumberField.getScene().getWindow();
-            stage.setOnHidden(e -> cleanup());
+        phoneNumberField.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene == null) {
+                return;
+            }
+            newScene.windowProperty().addListener((windowObs, oldWindow, newWindow) -> {
+                if (newWindow instanceof Stage stage) {
+                    stage.setOnHidden(e -> cleanup());
+                }
+            });
         });
     }
 
@@ -105,6 +110,12 @@ public class SignInController {
 
                 Platform.runLater(() -> {
                     try {
+                        if (pendingStage == null) {
+                            pendingStage = (Stage) phoneNumberField.getScene().getWindow();
+                        }
+                        if (pendingStage == null) {
+                            return;
+                        }
                         FXMLLoader loader = ViewLoader.loader(fxml);
                         Parent root       = loader.load();
                         pendingStage.setScene(new Scene(root, BaseController.MAIN_WIDTH, BaseController.MAIN_HEIGHT));
@@ -135,11 +146,13 @@ public class SignInController {
 
     public void handleSignUp(ActionEvent event) throws IOException {
         Parent signupRoot = ViewLoader.load("SignUp.fxml");
-        Scene sceneSignup = new Scene(signupRoot);
+        Scene sceneSignup = new Scene(signupRoot, SignUpController.SIGNUP_WIDTH, SignUpController.SIGNUP_HEIGHT);
 
         Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
         window.setScene(sceneSignup);
         window.setTitle("Dang ky tai khoan");
+        window.setWidth(SignUpController.SIGNUP_WIDTH);
+        window.setHeight(SignUpController.SIGNUP_HEIGHT);
         window.centerOnScreen();
         window.show();
     }

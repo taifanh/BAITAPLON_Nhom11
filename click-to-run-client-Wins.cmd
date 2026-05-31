@@ -20,24 +20,28 @@ echo ====================================================
 echo.
 set /p SERVER_IP=Nhap IP Server (Enter = chay local): 
 
-REM Build
+REM Build (only if JAR doesn't exist)
 echo.
-echo ===== Building project =====
-if exist "mvnw.cmd" (
-    call mvnw.cmd -q -DskipTests package
+if exist "target\BiddingSystem-client.jar" (
+    echo ===== JAR exists, skipping build =====
 ) else (
-    mvn -q -DskipTests package
-)
-if errorlevel 1 (
-    echo BUILD FAILED!
-    echo Kiem tra JDK 25 va JAVA_HOME.
-    pause
-    exit /b 1
-)
-if not exist "target\BiddingSystem-client.jar" (
-    echo ERROR: Khong tim thay target\BiddingSystem-client.jar
-    pause
-    exit /b 1
+    echo ===== Building project (first run) =====
+    if exist "mvnw.cmd" (
+        call mvnw.cmd -q -DskipTests package
+    ) else (
+        mvn -q -DskipTests package
+    )
+    if errorlevel 1 (
+        echo BUILD FAILED!
+        echo Kiem tra JDK 25 va JAVA_HOME.
+        pause
+        exit /b 1
+    )
+    if not exist "target\BiddingSystem-client.jar" (
+        echo ERROR: Khong tim thay target\BiddingSystem-client.jar
+        pause
+        exit /b 1
+    )
 )
 
 REM Kiem tra IP

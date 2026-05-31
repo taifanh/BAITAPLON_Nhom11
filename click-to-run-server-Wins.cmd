@@ -19,22 +19,27 @@ echo  Auction Bidding System - Server
 echo ====================================================
 echo.
 
-REM Build
-echo ===== Building project =====
-if exist "mvnw.cmd" (
-    call mvnw.cmd -q -DskipTests package
+REM Build (only if JAR doesn't exist)
+echo.
+if exist "target\BiddingSystem-server.jar" (
+    echo ===== JAR exists, skipping build =====
 ) else (
-    mvn -q -DskipTests package
-)
-if errorlevel 1 (
-    echo BUILD FAILED!
-    pause
-    exit /b 1
-)
-if not exist "target\BiddingSystem-server.jar" (
-    echo ERROR: Khong tim thay target\BiddingSystem-server.jar
-    pause
-    exit /b 1
+    echo ===== Building project (first run) =====
+    if exist "mvnw.cmd" (
+        call mvnw.cmd -q -DskipTests package
+    ) else (
+        mvn -q -DskipTests package
+    )
+    if errorlevel 1 (
+        echo BUILD FAILED!
+        pause
+        exit /b 1
+    )
+    if not exist "target\BiddingSystem-server.jar" (
+        echo ERROR: Khong tim thay target\BiddingSystem-server.jar
+        pause
+        exit /b 1
+    )
 )
 
 echo.
