@@ -200,8 +200,7 @@ public class BidProcessor {
     private void broadcastMaxBidder(String auctionId, ServerBidRespond max) {
         if (max == null) return;
         max.auctionId = auctionId;
-        String json = new Gson().toJson(
-                new ReceiveMaxBidder(max, IncrementPolicy.getIncrement(max.amount)));
+        String json = new Gson().toJson(new ReceiveMaxBidder(max, IncrementPolicy.getIncrement(max.amount)));
         AuctionRoom.getInstance().broadcast(json);
     }
 

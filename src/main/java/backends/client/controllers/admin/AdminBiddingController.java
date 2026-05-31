@@ -71,7 +71,6 @@ public class AdminBiddingController extends BaseController {
     // ── Auction state ─────────────────────────────────────────────
     private final Set<String>          inProgressItemIds  = new HashSet<>();
     private final Map<String, Long>    endEpochByItemId   = new HashMap<>();
-    private final Map<String, String>  auctionIdByItemId  = new HashMap<>();
 
     private Item            selectedItem;
     private String          currentAuctionId;
@@ -185,6 +184,11 @@ public class AdminBiddingController extends BaseController {
         buttonStartEndAuction.setDisable(true);
     }
 
+    private String resolveItemStatus(String itemId) {
+        if (inProgressItemIds.contains(itemId)) return "🟢 In Progress";
+        return "⏳ Scheduled";
+    }
+
     // ── MessageBus ────────────────────────────────────────────────
 
     private void subscribeMessages() {
@@ -240,8 +244,8 @@ public class AdminBiddingController extends BaseController {
                 case "STARTED" -> {
                     inProgressItemIds.add(msg.itemId);
                     endEpochByItemId.put(msg.itemId, msg.endTimeEpoch);
-                    auctionIdByItemId.put(msg.itemId, msg.auctionId);
                     if (isSelectedItem(msg.itemId)) applyStartedStatus(msg);
+                    upcomingItems.refresh();
                 }
                 case "NOT_STARTED" -> {
                     if (isSelectedItem(msg.itemId)) applyNotStartedStatus();
@@ -249,8 +253,8 @@ public class AdminBiddingController extends BaseController {
                 case "ENDED" -> {
                     inProgressItemIds.remove(msg.itemId);
                     endEpochByItemId.remove(msg.itemId);
-                    auctionIdByItemId.remove(msg.itemId);
                     if (isSelectedItem(msg.itemId)) applyEndedStatus();
+                    upcomingItems.refresh();
                 }
             }
         });
@@ -427,10 +431,11 @@ public class AdminBiddingController extends BaseController {
             protected void updateItem(Item item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) { setText(null); return; }
-                setText("Name: "  + item.getName()   + "\n" +
-                        "Price: " + item.getPrices() + "\n" +
-                        "Type: "  + item.getType()   + "\n" +
-                        "Desc: "  + item.getInfo());
+                setText("Name: "   + item.getName()              + "\n" +
+                        "Price: "  + item.getPrices()            + "\n" +
+                        "Type: "   + item.getType()              + "\n" +
+                        "Desc: "   + item.getInfo()              + "\n" +
+                        "Status: " + resolveItemStatus(item.getId())); // ← thêm
             }
         };
     }

@@ -213,14 +213,14 @@ public class UserDAO {
             throw new IOException("Khong the lay name theo id", e);
         }
     }
-    public synchronized void updateBalance(double new_balance, String userId) throws IOException {
+    public synchronized void updateBalance(double amount, String userId) throws IOException {
         try (Connection connection = openConnection();
              PreparedStatement statement = connection.prepareStatement("""
                      UPDATE users
                      SET balance = balance + ?
                      WHERE id = ?
                      """)) {
-            statement.setDouble(1, new_balance);
+            statement.setDouble(1, amount);
             statement.setString(2,userId);
             try {
                 statement.executeUpdate();

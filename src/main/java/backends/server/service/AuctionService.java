@@ -1,9 +1,6 @@
 package backends.server.service;
 
-import backends.server.database.AuctionDAO;
-import backends.server.database.BidTransactionDAO;
-import backends.server.database.InventoryDAO;
-import backends.server.database.MyRequestDAO;
+import backends.server.database.*;
 import backends.server.handler.ServerAuctionManager;
 import backends.common.messages.MsgBid.ServerBidRespond;
 import backends.common.models.accounts.Admin;
@@ -106,41 +103,6 @@ public final class AuctionService {
         return auction;
     }
 
-    // Dat gia cho mot phien dang active. Method nay dung instance Auction
-    // duoc service quan ly neu da co trong registry, de tranh su dung object stale sau khi restore.
-    public static BidTransaction placeBid(User user, Auction auction, double amount) throws IOException {
-        if (user == null) {
-            throw new IllegalArgumentException("Nguoi dung dau gia khong hop le");
-        }
-        if (auction == null) {
-            throw new IllegalArgumentException("Phien dau gia khong hop le");
-        }
-        if (amount <= 0) {
-            throw new IllegalArgumentException("Gia bid phai lon hon 0");
-        }
-
-        Auction managedAuction = resolveAuction(auction);
-        InventoryDAO inventoryDAO = new InventoryDAO();
-        String sellerId = inventoryDAO.getUserIdByItemId(managedAuction.getItem().getId());
-        if (user.getId().equals(sellerId)) {
-            throw new IllegalArgumentException("Nguoi ban khong duoc dau gia san pham minh ban");
-        }
-
-        BidTransaction bid = new BidTransaction(user, managedAuction.getItem(), amount);
-        managedAuction.addBid(bid);
-
-        AuctionDAO auctionDAORepository = new AuctionDAO();
-        auctionDAORepository.updateHighestBid(
-                managedAuction.getAuctionId(),
-                managedAuction.getCurrentHighestBid(),
-                managedAuction.getCurrentHighestBidderId()
-        );
-
-        BidTransactionDAO bidTransactionDAO = new BidTransactionDAO();
-        bidTransactionDAO.saveBid(managedAuction.getAuctionId(), bid);
-        return bid;
-    }
-
     // Dong phien va dong bo ket qua ve DB. Dong thoi bo phien nay khoi registry active
     // va huy job auto-close neu no con ton tai.
     public static void endAuction(Auction auction, LocalDateTime time) throws IOException {
@@ -150,22 +112,12 @@ public final class AuctionService {
 
         Auction managedAuction = resolveAuction(auction);
         managedAuction.end(time);
+        settleAuctionBalance(managedAuction);
         syncWinnerFromPersistedBids(managedAuction);
         syncAuctionClosure(managedAuction);
         unregisterActiveAuction(managedAuction);
     }
 
-    // Huy phien dang dau gia, dua item ve lai WAITING va bo khoi registry active.
-    public static void cancelAuction(Auction auction) throws IOException {
-        if (auction == null) {
-            throw new IllegalArgumentException("Phien dau gia khong hop le");
-        }
-
-        Auction managedAuction = resolveAuction(auction);
-        managedAuction.cancel();
-        syncAuctionCancellation(managedAuction);
-        unregisterActiveAuction(managedAuction);
-    }
 
     // Khoi phuc cac phien ACTIVE tu DB khi app/server bat lai.
     // Phien qua han se bi dong ngay, phien con han se duoc schedule lai voi thoi gian con lai.
@@ -191,6 +143,26 @@ public final class AuctionService {
 
         restoredOnStartup = true;
     }
+
+    private static void settleAuctionBalance(Auction auction) throws IOException {
+        BidTransactionDAO bidDAO = new BidTransactionDAO();
+        ServerBidRespond maxBidder;
+        try {
+            maxBidder = bidDAO.getMaxBidder(auction.getAuctionId());
+        } catch (SQLException e) {
+            throw new IOException("Khong the doc winner", e);
+        }
+
+        if (maxBidder == null || maxBidder.userId == null) return;
+
+        InventoryDAO inventoryDAO = new InventoryDAO();
+        UserDAO userDAO = new UserDAO();
+        String sellerId = inventoryDAO.getUserIdByItemId(auction.getItem().getId());
+
+        userDAO.updateBalance(-maxBidder.amount, maxBidder.userId);
+        userDAO.updateBalance( maxBidder.amount, sellerId);
+    }
+
     // service sẽ tăng thêm thời gian
     public static boolean extendAuctionIfNeeded(String itemId) throws IOException {
         Auction auction = ACTIVE_AUCTIONS.get(itemId);
@@ -216,6 +188,7 @@ public final class AuctionService {
 
         return false;
     }
+
 
 
     public static Auction getManagedActiveAuctionByAuctionId(String auctionId) {
