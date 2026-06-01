@@ -122,7 +122,7 @@ public class AuctionProcessors {
             error.put("message", "Không xác định được phiên đấu giá");
             return error.toString();
         }
-        BidProcessor.getInstance().submitAutoBid(msg.userId, msg.auctionId, msg.maxBid);
+        BidProcessor.getInstance().submitAutoBid(msg.userId, auctionId, msg.maxBid);
         ObjectNode ack = mapper.createObjectNode();
         ack.put("type", "AUTO_BID_REGISTERED");
         return ack.toString();
@@ -133,7 +133,6 @@ public class AuctionProcessors {
         String auctionId = (msg.auctionId != null && !msg.auctionId.isBlank())
                 ? msg.auctionId
                 : handler.watchingAuctionId;
-        BidProcessor.getInstance().cancelAutoBid(msg.userId, msg.auctionId);
         if (auctionId == null || auctionId.isBlank()) {
             ObjectNode error = mapper.createObjectNode();
             error.put("type", "ERROR");
@@ -141,6 +140,7 @@ public class AuctionProcessors {
             return error.toString();
         }
 
+        BidProcessor.getInstance().cancelAutoBid(msg.userId, msg.auctionId);
         return null;
     }
 
