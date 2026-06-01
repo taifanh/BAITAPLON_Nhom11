@@ -1,17 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.net.URL?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="768.0" prefWidth="1360.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="backends.client.controllers.user.YourItemController">
+<AnchorPane prefHeight="768.0" prefWidth="1360.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="backends.client.controllers.user.YourItemController">
     <stylesheets>
         <URL value="@../../styles/YourItem.css" />
     </stylesheets>
@@ -40,12 +35,12 @@
                 <!-- Title Section -->
                 <VBox spacing="6.0">
                     <children>
-                        <Label text="Your Items" textFill="#ea580c">
+                        <Label text="Your Items Won" textFill="#ea580c">
                             <font>
                                 <Font name="System Bold" size="28.0" />
                             </font>
                         </Label>
-                        <Label text="Manange your item inventory" textFill="#64748b">
+                        <Label text="Manange and review your won items" textFill="#64748b">
                             <font>
                                 <Font size="14.0" />
                             </font>
