@@ -85,7 +85,7 @@ public final class UserService {
         msg.messageType = MessageType.ADD_ITEM.getValue();
 
         CreateItemPayload payload = mapper.readValue(payloadJson, CreateItemPayload.class);
-        
+
 
         ObjectNode responseNode = mapper.createObjectNode();
         responseNode.put("type", "add_item_OK");
@@ -115,6 +115,7 @@ public final class UserService {
             response.put("type", "remove_item_fail");
             return response.toString();
         } else {
+            new ItemImageDAO().deleteByRequestId(payload.getRequest_id());
             inventoryDAODB.removeItem(payload.getRequest_id());
             requestlog.removeRequest(payload.getRequest_id());
             requestDAO.removeRequest(payload.getRequest_id());

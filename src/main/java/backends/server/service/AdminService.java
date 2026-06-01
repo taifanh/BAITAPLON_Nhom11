@@ -14,6 +14,7 @@ import backends.common.models.items.ItemFactory;
 import backends.common.models.items.ItemType;
 import backends.server.database.InventoryDAO;
 import backends.server.database.BidTransactionDAO;
+import backends.server.database.ItemImageDAO;
 import backends.server.database.MyRequestDAO;
 import backends.server.database.RequestLogDAO;
 import backends.server.handler.AuctionRoom;
@@ -132,6 +133,7 @@ public final class AdminService {
                 );
 
                 inventoryDAODB.saveItem(item, request.userId(), request.requestId());
+                new ItemImageDAO().updateItemId(request.requestId(), item.getId());
                 requestLogDAODB.removeRequest(cmd.targetId);
                 myRequestDAO.updateRequestStatus(cmd.targetId, RequestLogDAO.STATUS_WAITING);
 

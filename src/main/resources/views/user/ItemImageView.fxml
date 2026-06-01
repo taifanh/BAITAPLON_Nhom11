@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="620.0" prefWidth="920.0" style="-fx-background-color: linear-gradient(to bottom right, #f8fafc, #eef2ff);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="backends.client.controllers.user.ItemImageViewController">
+    <children>
+        <VBox layoutX="22.0" layoutY="18.0" prefHeight="584.0" prefWidth="876.0" spacing="18.0" style="-fx-background-color: white; -fx-background-radius: 24; -fx-padding: 24; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.10), 22, 0.15, 0, 8);">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="12.0">
+                    <children>
+                        <Label text="Item detail" textFill="#0f172a">
+                            <font>
+                                <Font name="System Bold" size="24.0" />
+                            </font>
+                        </Label>
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button onAction="#handleClose" style="-fx-background-color: transparent; -fx-border-color: #94a3b8; -fx-border-radius: 12; -fx-background-radius: 12; -fx-text-fill: #0f172a;" text="Close" />
+                    </children>
+                </HBox>
+
+                <HBox spacing="22.0" VBox.vgrow="ALWAYS">
+                    <children>
+                        <StackPane prefHeight="480.0" prefWidth="420.0" style="-fx-background-color: #f8fafc; -fx-background-radius: 22; -fx-border-color: #e2e8f0; -fx-border-radius: 22;">
+                            <children>
+                                <ImageView fx:id="itemImageView" fitHeight="460.0" fitWidth="400.0" preserveRatio="true" />
+                                <Label fx:id="labelImageStatus" style="-fx-background-color: rgba(15,23,42,0.75); -fx-text-fill: white; -fx-padding: 8 14 8 14; -fx-background-radius: 999;" text="Loading image..." StackPane.alignment="BOTTOM_CENTER" />
+                            </children>
+                        </StackPane>
+
+                        <VBox spacing="12.0" HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label fx:id="labelItemName" textFill="#0f172a">
+                                    <font>
+                                        <Font name="System Bold" size="22.0" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="labelItemId" textFill="#64748b" />
+                                <Label fx:id="labelItemType" textFill="#ea580c">
+                                    <font>
+                                        <Font name="System Bold" size="14.0" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="labelItemPrice" textFill="#0f172a">
+                                    <font>
+                                        <Font name="System Bold" size="16.0" />
+                                    </font>
+                                </Label>
+                                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
+                                    <content>
+                                        <Label fx:id="labelItemInfo" maxWidth="1.7976931348623157E308" style="-fx-text-fill: #334155; -fx-wrap-text: true; -fx-font-size: 14px;" wrapText="true" />
+                                    </content>
+                                </ScrollPane>
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

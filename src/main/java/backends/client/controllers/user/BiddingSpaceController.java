@@ -1,8 +1,10 @@
 package backends.client.controllers.user;
 
+import backends.client.controllers.ViewLoader;
 import backends.client.controllers.base.BaseController;
 import backends.client.controllers.components.BidHistoryRow;
 import backends.client.controllers.components.CustomBidHistoryCell;
+import backends.client.controllers.components.ItemPreviewCell;
 import backends.client.controllers.util.ItemJsonParser;
 import backends.client.network.MessageBus;
 import backends.client.session.UserSession;
@@ -28,10 +30,13 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
+import javafx.scene.Scene;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.time.Instant;
@@ -132,18 +137,8 @@ public class BiddingSpaceController extends BaseController {
     }
 
     private void setupItemListView() {
-        listAuctionItems.setCellFactory(lv -> new ListCell<>() {
-            @Override
-            protected void updateItem(Item item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) { setText(null); return; }
-                setText("Name: "    + item.getName()   + "\n" +
-                        "Opening: " + item.getPrices() + "\n" +
-                        "Type: "    + item.getType()   + "\n" +
-                        "Desc: "    + item.getInfo()   + "\n" +
-                        "Status: "  + resolveItemStatus(item.getId()));;
-            }
-        });
+        listAuctionItems.setCellFactory(lv -> new ItemPreviewCell(this::openItemDetail));
+        listAuctionItems.setFixedCellSize(88);
         listAuctionItems.setItems(auctionItems);
         listAuctionItems.getSelectionModel()
                 .selectedItemProperty()
@@ -656,6 +651,30 @@ public class BiddingSpaceController extends BaseController {
         fieldItemName.setText(item.getName());
         fieldBasePrice.setText(String.valueOf(item.getPrices()));
         startingPrice       = item.getPrices();
+    }
+
+    private void openItemDetail(Item item) {
+        if (item == null) {
+            return;
+        }
+
+        try {
+            var loader = ViewLoader.loader("ItemImageView.fxml");
+            Parent root = loader.load();
+            ItemImageViewController controller = loader.getController();
+            controller.setItem(item);
+
+            Stage popup = new Stage();
+            popup.setTitle(item.getName());
+            popup.setScene(new Scene(root, 920, 620));
+            popup.setResizable(false);
+            popup.setOnHidden(e -> controller.cleanup());
+            popup.centerOnScreen();
+            popup.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Cannot open item view");
+        }
     }
 
     private String resolveType(JsonNode node) {
