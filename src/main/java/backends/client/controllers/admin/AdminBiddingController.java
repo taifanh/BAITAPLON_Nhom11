@@ -95,7 +95,10 @@ public class AdminBiddingController extends BaseController {
         bidIncrement.setEditable(false);
         setupBidVisuals();
 
-        upcomingItems.setCellFactory(lv -> new ItemPreviewCell(this::openItemDetail));
+        upcomingItems.setCellFactory(lv -> new ItemPreviewCell(
+                this::openItemDetail,
+                this::resolveItemStatus
+                ));
         upcomingItems.setFixedCellSize(88);
         upcomingItems.getSelectionModel()
                 .selectedItemProperty()

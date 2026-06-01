@@ -62,15 +62,15 @@ public class BuyerItemCell extends ListCell<ItemRecordDto> {
         if (item != null && !empty) {
             itemNameLabel.setText(item.itemName != null ? item.itemName : "Unknown");
 
-            itemTypeLabel.setText("Loại: " + (item.itemType != null ? item.itemType : "N/A"));
+            itemTypeLabel.setText("Type: " + (item.itemType != null ? item.itemType : "N/A"));
 
-            String description = item.itemInfo != null ? item.itemInfo : "Không có mô tả";
+            String description = item.itemInfo != null ? item.itemInfo : "no description";
             if (description.length() > 100) {
                 description = description.substring(0, 100) + "...";
             }
-            descriptionLabel.setText("Mô tả: " + description);
+            descriptionLabel.setText("Description: " + description);
 
-            priceLabel.setText(String.format("Giá: %,.0f VND", item.bidPrice));
+            priceLabel.setText(String.format("Price: %,.0f VND", item.bidPrice));
 
             String timeText = formatAuctionTime(item.startAt, item.endAt);
             timeLabel.setText(timeText);
@@ -89,14 +89,14 @@ public class BuyerItemCell extends ListCell<ItemRecordDto> {
                 Duration duration = Duration.between(start, end);
                 long hours = duration.toHours();
                 long minutes = duration.toMinutes() % 60;
-                return String.format("Thời gian: %s → %s (%dh %dm)",
+                return String.format("Time: %s → %s (%dh %dm)",
                         start.toLocalTime().toString(),
                         end.toLocalTime().toString(),
                         hours, minutes);
             }
         } catch (Exception ignored) {
         }
-        return "Thời gian: " + (startAt != null ? startAt : "") + " → " + (endAt != null ? endAt : "");
+        return "Time: " + (startAt != null ? startAt : "") + " → " + (endAt != null ? endAt : "");
     }
 }
 

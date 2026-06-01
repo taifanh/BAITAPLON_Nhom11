@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="768.0" prefWidth="1360.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="backends.client.controllers.user.YourItemController">
+<AnchorPane prefHeight="768.0" prefWidth="1360.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="backends.client.controllers.user.YourItemController">
     <stylesheets>
         <URL value="@../../styles/YourItem.css" />
     </stylesheets>
@@ -40,12 +40,12 @@
                 <!-- Title Section -->
                 <VBox spacing="6.0">
                     <children>
-                        <Label text="Sản Phẩm Của Bạn" textFill="#ea580c">
+                        <Label text="Your Items" textFill="#ea580c">
                             <font>
                                 <Font name="System Bold" size="28.0" />
                             </font>
                         </Label>
-                        <Label text="Quản lý và xem lại các sản phẩm đã mua" textFill="#64748b">
+                        <Label text="Manange your item inventory" textFill="#64748b">
                             <font>
                                 <Font size="14.0" />
                             </font>
@@ -55,7 +55,7 @@
 
                 <!-- Search Section -->
                 <HBox spacing="16.0" style="-fx-alignment: center-left;">
-                    <Label fx:id="itemCountLabel" style="-fx-text-fill: #64748b; -fx-font-size: 13;" text="Tổng: 0 sản phẩm">
+                    <Label fx:id="itemCountLabel" style="-fx-text-fill: #64748b; -fx-font-size: 13;" text="Total: 0 items">
                         <HBox.margin>
                             <Insets left="10.0" />
                         </HBox.margin>

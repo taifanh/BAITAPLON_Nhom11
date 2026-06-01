@@ -137,7 +137,10 @@ public class BiddingSpaceController extends BaseController {
     }
 
     private void setupItemListView() {
-        listAuctionItems.setCellFactory(lv -> new ItemPreviewCell(this::openItemDetail));
+        listAuctionItems.setCellFactory(lv -> new ItemPreviewCell(
+                this::openItemDetail,
+                this::resolveItemStatus
+        ));
         listAuctionItems.setFixedCellSize(88);
         listAuctionItems.setItems(auctionItems);
         listAuctionItems.getSelectionModel()
@@ -248,15 +251,18 @@ public class BiddingSpaceController extends BaseController {
                 case "STARTED" -> {
                     endTimeByItemId.put(msg.itemId, msg.endTimeEpoch);
                     auctionIdByItemId.put(msg.itemId, msg.auctionId);
+                    inProgressItemIds.add(msg.itemId);
                     if (isSelectedItem(msg.itemId)) applyStartedStatus(msg);
                     Platform.runLater(() -> listAuctionItems.refresh());
                 }
                 case "NOT_STARTED" -> {
+                    inProgressItemIds.remove(msg.itemId);
                     if (isSelectedItem(msg.itemId)) applyNotStartedStatus();
                 }
                 case "ENDED" -> {
                     endTimeByItemId.remove(msg.itemId);
                     auctionIdByItemId.remove(msg.itemId);
+                    inProgressItemIds.remove(msg.itemId);
                     if (isSelectedItem(msg.itemId)) applyEndedStatus(msg.itemId);
                     Platform.runLater(() -> listAuctionItems.refresh());
                     UserSession.getConnection().send(new FetchDataRequest("FETCH_INVENTORY"));
