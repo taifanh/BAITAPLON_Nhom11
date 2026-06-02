@@ -4,9 +4,7 @@ import backends.server.database.*;
 import backends.server.handler.ServerAuctionManager;
 import backends.common.messages.MsgBid.ServerBidRespond;
 import backends.common.models.accounts.Admin;
-import backends.common.models.accounts.User;
 import backends.common.models.bidding.Auction;
-import backends.common.models.bidding.BidTransaction;
 import backends.common.models.core.Item;
 
 import java.io.IOException;
@@ -200,11 +198,6 @@ public final class AuctionService {
         return null;
     }
 
-    // Tra ve mot snapshot danh sach phien active dang duoc service quan ly trong RAM.
-    public static List<Auction> getManagedActiveAuctions() {
-        return List.copyOf(ACTIVE_AUCTIONS.values());
-    }
-
     // Tim phien active theo id tu registry trong RAM.
     public static Auction getManagedActiveAuction(String itemId) {
         return ACTIVE_AUCTIONS.get(itemId);
@@ -245,21 +238,6 @@ public final class AuctionService {
         requestDAO.updateRequestStatus(inventoryDAO.getRequestIdbyItem(auction.getItem().getId()), itemStatus);
     }
 
-    // Cap nhat DB khi huy phien va dua item tro lai hang doi WAITING.
-    private static void syncAuctionCancellation(Auction auction) throws IOException {
-        AuctionDAO auctionDAO = new AuctionDAO();
-        InventoryDAO inventoryDAO = new InventoryDAO();
-        MyRequestDAO myrequestDAO =   new MyRequestDAO();
-        auctionDAO.updateAuctionState(
-                auction.getAuctionId(),
-                auction.getStatus(),
-                auction.getEndAt(),
-                auction.getCurrentHighestBid(),
-                null
-        );
-        inventoryDAO.updateItemStatus(auction.getItem().getId(), InventoryDAO.STATUS_WAITING);
-        myrequestDAO.updateRequestStatus(inventoryDAO.getRequestIdbyItem(auction.getItem().getId()), InventoryDAO.STATUS_WAITING);
-    }
 
     // Lay instance Auction dang duoc service quan ly neu da ton tai,
     // nguoc lai dung object duoc truyen vao va dang ky no vao registry neu no dang ACTIVE.
