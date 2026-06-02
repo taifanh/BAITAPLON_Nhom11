@@ -161,14 +161,16 @@ java -jar dist/BiddingSystem-client.jar
 
 - Đăng ký tài khoản.
 - Đăng nhập hệ thống.
-- Cập nhật thông tin cá nhân.
 - Nạp tiền vào tài khoản.
-- Xem danh sách vật phẩm/phòng đấu giá.
+- Tạo và xem danh sách vật phẩm/phòng đấu giá.
 - Tham gia đặt giá trong phiên đấu giá.
-- Đăng ký và hủy auto-bid.
+- Đấu giá nhiều sản phẩm cùng lúc.
+- Đấu giá thủ công
+- Đấu giá auto-bid.
 - Xem lịch sử đấu giá cá nhân.
 - Gửi yêu cầu đăng bán vật phẩm.
 - Xem và quản lý yêu cầu bán của chính mình.
+- Biểu đồ cột real-time.
 
 ### Phía quản trị viên
 

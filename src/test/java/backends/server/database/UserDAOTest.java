@@ -6,52 +6,35 @@ import backends.common.models.core.Account;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Integration tests for UserDAO.
- *
- * Strategy (no reflection, no System.setProperty):
- *  - UserDAO always writes to  <cwd>/data/app.db  (Path.of("data") is relative to OS CWD).
- *  - On CI the directory does not exist yet; UserDAO.initializeStorage() creates it automatically.
- *  - @BeforeEach simply deletes the DB file so every test starts with a clean, empty schema.
- *  - @AfterAll deletes the DB file one final time to leave the workspace tidy.
- *  - No backup / restore is needed because CI runners start from a clean checkout.
- */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @ResourceLock("app.db")
 public class UserDAOTest {
 
-    private static final Path DATA_DIR = Path.of("data");
-    private static final Path DB_FILE  = DATA_DIR.resolve("app.db");
+    private static final String JDBC_URL = "jdbc:sqlite:data/app.db";
 
     private UserDAO userDAO;
 
-    // ------------------------------------------------------------------
-    // Lifecycle
-    // ------------------------------------------------------------------
-
     @BeforeEach
     void setUp() throws Exception {
-        // Delete DB so each test gets a fresh, empty database.
-        Files.deleteIfExists(DB_FILE);
-        // UserDAO constructor calls initializeStorage() → creates data/ and the users table.
-        userDAO = new UserDAO();
+        userDAO = new UserDAO();  // tạo bảng nếu chưa có
+        clearAllUsers();          // xóa sạch data thay vì xóa file → tránh Windows file lock
     }
 
-    @AfterAll
-    static void cleanUp() throws Exception {
-        Files.deleteIfExists(DB_FILE);
+    private void clearAllUsers() throws Exception {
+        Class.forName("org.sqlite.JDBC");
+        try (Connection conn = DriverManager.getConnection(JDBC_URL);
+             Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate("DELETE FROM users");
+        }
     }
-
-    // ------------------------------------------------------------------
-    // saveUser / getUser
-    // ------------------------------------------------------------------
 
     @Test
     @Order(1)
@@ -62,15 +45,11 @@ public class UserDAOTest {
         User fetched = userDAO.getUser("U1");
 
         assertNotNull(fetched);
-        assertEquals("U1",              fetched.getId());
-        assertEquals("John Doe",        fetched.getName());
-        assertEquals("123456789",       fetched.getPhoneNumber());
-        assertEquals("john@example.com",fetched.getEmail());
+        assertEquals("U1",               fetched.getId());
+        assertEquals("John Doe",         fetched.getName());
+        assertEquals("123456789",        fetched.getPhoneNumber());
+        assertEquals("john@example.com", fetched.getEmail());
     }
-
-    // ------------------------------------------------------------------
-    // getAllUsers
-    // ------------------------------------------------------------------
 
     @Test
     @Order(2)
@@ -89,10 +68,6 @@ public class UserDAOTest {
         List<User> users = userDAO.getAllUsers();
         assertTrue(users.isEmpty());
     }
-
-    // ------------------------------------------------------------------
-    // authenticate
-    // ------------------------------------------------------------------
 
     @Test
     @Order(4)
@@ -132,12 +107,8 @@ public class UserDAOTest {
         Optional<Account> result = userDAO.authenticate("999888777", "adminPass");
 
         assertTrue(result.isPresent());
-        assertEquals("Admin", result.get().getRole());
+        assertEquals(Account.ADMIN, result.get().getRole()); // dùng Account.ADMIN thay vì hardcode "Admin"
     }
-
-    // ------------------------------------------------------------------
-    // phoneNumberExists
-    // ------------------------------------------------------------------
 
     @Test
     @Order(8)
@@ -152,12 +123,23 @@ public class UserDAOTest {
         assertFalse(userDAO.phoneNumberExists("999999999"));
     }
 
-    // ------------------------------------------------------------------
-    // balance
-    // ------------------------------------------------------------------
-
     @Test
     @Order(10)
+    void testAdminExists_whenNoAdmin_returnsFalse() throws Exception {
+        assertFalse(userDAO.adminExists());
+    }
+
+    @Test
+    @Order(11)
+    void testAdminExists_whenAdminSaved_returnsTrue() throws Exception {
+        Admin admin = new Admin("A1", "Super Admin", "admin@example.com", "999888777", "adminPass");
+        userDAO.saveAdmin(admin);
+
+        assertTrue(userDAO.adminExists());
+    }
+
+    @Test
+    @Order(12)
     void testUpdateBalance_setsCorrectValue() throws Exception {
         userDAO.saveUser(new User("U3", "Alice", "alice@example.com", "111222333", "pass"));
 
@@ -167,7 +149,7 @@ public class UserDAOTest {
     }
 
     @Test
-    @Order(11)
+    @Order(13)
     void testUpdateBalance_accumulates() throws Exception {
         userDAO.saveUser(new User("U4", "Bob", "bob@example.com", "444555666", "pass"));
 
@@ -178,57 +160,43 @@ public class UserDAOTest {
     }
 
     @Test
-    @Order(12)
+    @Order(14)
     void testGetBalance_initialValueIsZero() throws Exception {
         userDAO.saveUser(new User("U5", "Zero", "zero@example.com", "000111222", "pass"));
         assertEquals(0.0, userDAO.getBalance("U5"), 1e-9);
     }
 
-    // ------------------------------------------------------------------
-    // getNameById
-    // ------------------------------------------------------------------
-
     @Test
-    @Order(13)
+    @Order(15)
     void testGetNameById_found() throws Exception {
         userDAO.saveUser(new User("U5", "Charlie", "charlie@example.com", "777888999", "pass"));
         assertEquals("Charlie", userDAO.getNameById("U5"));
     }
 
     @Test
-    @Order(14)
+    @Order(16)
     void testGetNameById_notFound_returnsNull() throws Exception {
         assertNull(userDAO.getNameById("nonexistent"));
     }
 
-    // ------------------------------------------------------------------
-    // change_info
-    // ------------------------------------------------------------------
-
-
-    // ------------------------------------------------------------------
-    // constraint / error cases
-    // ------------------------------------------------------------------
-
     @Test
-    @Order(15)
+    @Order(17)
     void testSaveUser_duplicatePhone_throwsException() throws Exception {
         userDAO.saveUser(new User("U7", "First",  "first@example.com",  "555666777", "pass"));
 
-        // UNIQUE constraint on phone_number must cause an exception
         assertThrows(Exception.class, () ->
                 userDAO.saveUser(new User("U8", "Second", "second@example.com", "555666777", "pass"))
         );
     }
 
     @Test
-    @Order(16)
+    @Order(18)
     void testGetUser_notFound_throwsException() {
         assertThrows(Exception.class, () -> userDAO.getUser("doesNotExist"));
     }
 
     @Test
-    @Order(17)
+    @Order(19)
     void testGetBalance_notFound_throwsException() {
         assertThrows(Exception.class, () -> userDAO.getBalance("doesNotExist"));
     }

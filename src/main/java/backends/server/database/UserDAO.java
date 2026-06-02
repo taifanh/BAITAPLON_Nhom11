@@ -253,6 +253,23 @@ public class UserDAO {
         }
     }
 
+    public boolean adminExists() throws IOException {
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement("""
+                 SELECT 1
+                 FROM users
+                 WHERE role = ?
+                 LIMIT 1
+                 """)) {
+            statement.setString(1, Account.ADMIN);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next();
+            }
+        } catch (SQLException e) {
+            throw new IOException("Khong the kiem tra admin trong SQLite.", e);
+        }
+    }
+
     private synchronized void initializeStorage() throws IOException, SQLException {
         ensureDataDirectoryExists();
         try (Connection connection = openConnection();
