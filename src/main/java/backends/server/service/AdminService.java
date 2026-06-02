@@ -101,6 +101,21 @@ public final class AdminService {
             inventoryDAODB.updateItemStatus(cmd.targetId, InventoryDAO.STATUS_SCHEDULED);
             myRequestDAO.updateRequestStatus(inventoryDAODB.getRequestIdbyItem(cmd.targetId), MyRequestDAO.STATUS_SCHEDULED);
 
+            String targetUserId = inventoryDAODB.getUserIdByItemId(cmd.targetId);
+            if (targetUserId != null && !targetUserId.isBlank()) {
+                ObjectNode response = mapper.createObjectNode();
+                response.put("type", "SCHEDULED_SUCCESS");
+                response.put("user_id", targetUserId);
+                response.put("item_id", cmd.targetId);
+                response.put("request_id", inventoryDAODB.getRequestIdbyItem(cmd.targetId));
+                response.put("status", InventoryDAO.STATUS_SCHEDULED);
+
+                ClientHandler targetHandler = AuctionRoom.getInstance().connectors.get(targetUserId);
+                if (targetHandler != null) {
+                    targetHandler.send(response.toString());
+                }
+            }
+
             ObjectNode ack = mapper.createObjectNode();
             ack.put("type", "ACTION_SUCCESS");
             handler.send(ack.toString());
@@ -115,6 +130,24 @@ public final class AdminService {
         } else if ("REJECT_REQUEST".equals(cmd.action)) {
             requestLogDAODB.updateRequestStatus(cmd.targetId, RequestLogDAO.STATUS_REJECTED);
             myRequestDAO.updateRequestStatus(cmd.targetId, RequestLogDAO.STATUS_REJECTED);
+
+            RequestLogDAO.RequestRecord request = requestLogDAODB.findByRequestId(cmd.targetId);
+            String targetUserId = (cmd.userId != null && !cmd.userId.isBlank())
+                    ? cmd.userId
+                    : (request != null ? request.userId() : null);
+
+            if (targetUserId != null && !targetUserId.isBlank()) {
+                ObjectNode response = mapper.createObjectNode();
+                response.put("type", "REJECTED_SUCCESS");
+                response.put("user_id", targetUserId);
+                response.put("request_id", cmd.targetId);
+                response.put("status", RequestLogDAO.STATUS_REJECTED);
+
+                ClientHandler targetHandler = AuctionRoom.getInstance().connectors.get(targetUserId);
+                if (targetHandler != null) {
+                    targetHandler.send(response.toString());
+                }
+            }
 
             ObjectNode ack = mapper.createObjectNode();
             ack.put("type", "ACTION_SUCCESS");

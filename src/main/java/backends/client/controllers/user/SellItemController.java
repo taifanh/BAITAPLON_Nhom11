@@ -38,6 +38,8 @@ public class SellItemController extends BaseController {
     private static final String MSG_REMOVE_ITEM_OK = "remove_item_OK";
     private static final String MSG_REMOVE_FAIL    = "remove_item_fail";
     private static final String MSG_ACCEPTED        = "ACCEPTED_SUCCESS";
+    private static final String MSG_REJECTED        = "REJECTED_SUCCESS";
+    private static final String MSG_SCHEDULED       = "SCHEDULED_SUCCESS";
     private static final String MSG_LOADREQUEST     = "USER_REQUEST_LIST_DATA";
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -48,6 +50,8 @@ public class SellItemController extends BaseController {
     private Consumer<String> addItemHandler;
     private Consumer<String> removeItemHandler;
     private Consumer<String> acceptedHandler;
+    private Consumer<String> rejectedHandler;
+    private Consumer<String> scheduledHandler;
     private Consumer<String> loadUserHandler;
     @FXML
     public void initialize() throws IOException {
@@ -55,6 +59,8 @@ public class SellItemController extends BaseController {
         subscribeAddItem();
         subscribeRemoveItem();
         subscribeAccepted();
+        subscribeRejected();
+        subscribeScheduled();
         loadUserRequest();
 
     }
@@ -64,6 +70,8 @@ public class SellItemController extends BaseController {
         if (addItemHandler    != null) MessageBus.getInstance().unsubscribe(addItemHandler);
         if (removeItemHandler != null) MessageBus.getInstance().unsubscribe(removeItemHandler);
         if (acceptedHandler   != null) MessageBus.getInstance().unsubscribe(acceptedHandler);
+        if (rejectedHandler   != null) MessageBus.getInstance().unsubscribe(rejectedHandler);
+        if (scheduledHandler  != null) MessageBus.getInstance().unsubscribe(scheduledHandler);
         if (loadUserHandler   != null) MessageBus.getInstance().unsubscribe(loadUserHandler);
     }
 
@@ -120,19 +128,63 @@ public class SellItemController extends BaseController {
 
                 String requestId = node.path("request_id").asText("");
                 String userId    = node.path("user_id").asText("");
-                String status    = node.path("status").asText(Statuses.WAITING);
 
-                User   current   = UserSession.getCurrentUser();
+                User current   = UserSession.getCurrentUser();
                 if (current == null || requestId.isBlank()) return;
                 if (!userId.isBlank() && !current.getId().equals(userId)) return;
 
                 Platform.runLater(() -> {
                     try { loadUserRequest(); } catch (IOException e) { e.printStackTrace(); }
-                    showAlert(Alert.AlertType.INFORMATION, "Admin accepted your item!");
                 });
             } catch (Exception e) { e.printStackTrace(); }
         };
         MessageBus.getInstance().subscribe(acceptedHandler);
+    }
+
+    private void subscribeRejected() {
+        rejectedHandler = raw -> {
+            try {
+                JsonNode node = MAPPER.readTree(raw);
+                if (!MSG_REJECTED.equals(node.path("type").asText())) return;
+
+                String requestId = node.path("request_id").asText("");
+                String userId = node.path("user_id").asText("");
+
+                User current = UserSession.getCurrentUser();
+                if (current == null || requestId.isBlank()) return;
+                if (!userId.isBlank() && !current.getId().equals(userId)) return;
+
+                Platform.runLater(() -> {
+                    try { loadUserRequest(); } catch (IOException e) { e.printStackTrace(); }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        };
+        MessageBus.getInstance().subscribe(rejectedHandler);
+    }
+
+    private void subscribeScheduled() {
+        scheduledHandler = raw -> {
+            try {
+                JsonNode node = MAPPER.readTree(raw);
+                if (!MSG_SCHEDULED.equals(node.path("type").asText())) return;
+
+                String requestId = node.path("request_id").asText("");
+                String userId = node.path("user_id").asText("");
+
+                User current = UserSession.getCurrentUser();
+                if (current == null || requestId.isBlank()) return;
+                if (!userId.isBlank() && !current.getId().equals(userId)) return;
+
+                Platform.runLater(() -> {
+                    try { loadUserRequest(); } catch (IOException e) { e.printStackTrace(); }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        };
+        MessageBus.getInstance().subscribe(scheduledHandler);
     }
 
     // ── UI helpers ────────────────────────────────────────────────

@@ -7,6 +7,7 @@ import backends.common.messages.Common.MessageType;
 import backends.common.messages.Common.RemoveRequestPayload;
 import backends.common.messages.MsgData.RequestRecordDto;
 import com.google.gson.Gson;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -19,6 +20,7 @@ import javafx.scene.layout.Priority;
 public class CustomItemCell extends ListCell<RequestRecordDto> {
     private HBox content;
     private Label itemName;
+    private Label statusLabel;
     private Button viewInfo;
     private Button removeItem;
     private Pane spacer;
@@ -27,6 +29,13 @@ public class CustomItemCell extends ListCell<RequestRecordDto> {
     public CustomItemCell(){
         super();
         itemName = new Label();
+        itemName.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
+        itemName.setWrapText(true);
+
+        statusLabel = new Label();
+        statusLabel.setPadding(new Insets(2, 8, 2, 8));
+        statusLabel.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 999; -fx-border-radius: 999; -fx-border-width: 1;");
+
         viewInfo = new Button("view");
         removeItem = new Button("remove");
 
@@ -36,7 +45,10 @@ public class CustomItemCell extends ListCell<RequestRecordDto> {
         spacer = new Pane();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        content = new HBox(10, itemName , spacer , viewInfo, removeItem);
+        HBox nameRow = new HBox(8, itemName, statusLabel);
+        nameRow.setAlignment(Pos.CENTER_LEFT);
+
+        content = new HBox(10, nameRow, spacer, viewInfo, removeItem);
         content.setAlignment(Pos.CENTER_LEFT);
 
         viewInfo.setOnAction(event ->{
@@ -83,9 +95,42 @@ public class CustomItemCell extends ListCell<RequestRecordDto> {
         if (request != null && !empty) {
             CreateItemPayload payload = gson.fromJson(request.requestInfo, CreateItemPayload.class);
             itemName.setText(payload.getItem_name());
+            applyStatus(request.status);
             setGraphic(content);
         } else {
             setGraphic(null);
         }
+    }
+
+    private void applyStatus(String status) {
+        String normalized = status == null ? "" : status.trim().toUpperCase();
+        switch (normalized) {
+            case "PENDING" -> {
+                statusLabel.setText("Pending");
+                statusLabel.setStyle(style("#b45309", "#fef3c7", "#f59e0b"));
+            }
+            case "WAITING" -> {
+                statusLabel.setText("Waiting");
+                statusLabel.setStyle(style("#166534", "#dcfce7", "#22c55e"));
+            }
+            case "REJECTED" -> {
+                statusLabel.setText("Rejected");
+                statusLabel.setStyle(style("#991b1b", "#fee2e2", "#ef4444"));
+            }
+            default -> {
+                statusLabel.setText(normalized.isBlank() ? "Unknown" : normalized);
+                statusLabel.setStyle(style("#475569", "#e2e8f0", "#94a3b8"));
+            }
+        }
+    }
+
+    private String style(String textColor, String backgroundColor, String borderColor) {
+        return "-fx-font-size: 12px; -fx-font-weight: bold;"
+                + " -fx-text-fill: " + textColor + ";"
+                + " -fx-background-color: " + backgroundColor + ";"
+                + " -fx-border-color: " + borderColor + ";"
+                + " -fx-background-radius: 999;"
+                + " -fx-border-radius: 999;"
+                + " -fx-border-width: 1;";
     }
 }
