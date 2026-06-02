@@ -80,7 +80,13 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    public String getWatchingAuctionId() { return watchingAuctionId; }
+    public void close() {
+        try {
+            socket.close();
+        } catch (IOException ignored) {
+        }
+    }
+
 
     public String getRole() { return role; }
     public String getUserId() { return userId; }
@@ -143,13 +149,6 @@ public class ClientHandler implements Runnable {
         ObjectNode node = mapper.createObjectNode();
         node.put("type", "ERROR");
         node.put("message", message);
-        return node.toString();
-    }
-
-    private String okJson(Double amount) {
-        ObjectNode node = mapper.createObjectNode();
-        node.put("type", "BALANCE_OK");
-        node.put("amount", amount);
         return node.toString();
     }
 

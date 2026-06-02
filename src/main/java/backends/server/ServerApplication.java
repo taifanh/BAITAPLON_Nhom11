@@ -1,7 +1,10 @@
 package backends.server;
 
+import backends.common.messages.Common.ServerShutdown;
+import backends.server.handler.AuctionRoom;
 import backends.server.service.AuctionService;
 import backends.server.handler.ClientHandler;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -34,7 +37,15 @@ public class ServerApplication {
 
     public static void shutdown() {
         System.out.println("[Server] Shutting down...");
-        AuctionService.shutdown();
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String json = mapper.writeValueAsString(new ServerShutdown("Server is shutting down"));
+            AuctionRoom.getInstance().broadcast(json);
+            Thread.sleep(1000);
+        } catch (Exception ignored) {
+        }
+        AuctionRoom.getInstance().disconnectAll();
         if (executor != null) {
             executor.shutdown();
             try {

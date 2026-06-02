@@ -294,27 +294,4 @@ public final class AuctionService {
 
         auction.syncHighestBidState(maxBidder.amount, maxBidder.userId);
     }
-    public static void shutdown() {
-        System.out.println("[AuctionService] Shutting down...");
-
-        for (ScheduledFuture<?> future : AUTO_CLOSE_TASKS.values()) {
-            future.cancel(false);
-        }
-
-        AUTO_CLOSE_TASKS.clear();
-        ACTIVE_AUCTIONS.clear();
-
-        AUCTION_SCHEDULER.shutdown();
-
-        try {
-            if (!AUCTION_SCHEDULER.awaitTermination(5, TimeUnit.SECONDS)) {
-                AUCTION_SCHEDULER.shutdownNow();
-            }
-        } catch (InterruptedException e) {
-            AUCTION_SCHEDULER.shutdownNow();
-            Thread.currentThread().interrupt();
-        }
-
-        System.out.println("[AuctionService] Shutdown completed.");
-    }
 }

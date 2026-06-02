@@ -1,5 +1,6 @@
 package backends.client;
 
+import backends.client.network.GlobalMessageHandler;
 import backends.client.session.UserSession;
 import backends.client.controllers.ViewLoader;
 import backends.client.controllers.base.BaseController;
@@ -13,6 +14,7 @@ public class ClientApplication extends Application {
     public void start(Stage stage) throws Exception {
         try {
             UserSession.initConnection(Launcher.serverIp, 9999);
+            GlobalMessageHandler.register();;
             Scene scene = new Scene(ViewLoader.load("SignIn.fxml"), BaseController.LOGIN_WIDTH, BaseController.LOGIN_HEIGHT);
             stage.setTitle("sign in!");
             stage.setResizable(false);

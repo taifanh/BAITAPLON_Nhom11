@@ -68,4 +68,17 @@ public class AuctionRoom {
         }
     }
 
+    public void disconnectAll() {
+        for (ClientHandler handler : observers) {
+            try {
+                handler.close();
+            } catch (Exception ignored) {
+            }
+        }
+
+        observers.clear();
+        connectors.clear();
+        watchingMap.clear();
+    }
+
 }
