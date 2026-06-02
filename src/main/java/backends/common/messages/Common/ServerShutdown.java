@@ -1,8 +1,8 @@
 package backends.common.messages.Common;
 
 public class ServerShutdown {
-    String type = "SERVER_SHUTDOWN";
-    String message;
+    public String type = "SERVER_SHUTDOWN";
+    public String message;
     public ServerShutdown(String message) {
         this.message = message;
     }

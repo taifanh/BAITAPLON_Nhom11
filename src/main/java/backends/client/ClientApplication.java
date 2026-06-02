@@ -14,9 +14,9 @@ public class ClientApplication extends Application {
     public void start(Stage stage) throws Exception {
         try {
             UserSession.initConnection(Launcher.serverIp, 9999);
-            GlobalMessageHandler.register();;
+            GlobalMessageHandler.register();
             Scene scene = new Scene(ViewLoader.load("SignIn.fxml"), BaseController.LOGIN_WIDTH, BaseController.LOGIN_HEIGHT);
-            stage.setTitle("sign in!");
+            stage.setTitle("Sign in!");
             stage.setResizable(false);
             stage.setScene(scene);
             stage.setWidth(BaseController.LOGIN_WIDTH);
