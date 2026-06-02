@@ -25,6 +25,8 @@ public class BidProcessor {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     // ── Singleton ──────────────────────────────────────────────────────────────
     private static BidProcessor instance;
+    private final Thread worker;
+    private volatile boolean running = true;
 
     public static synchronized BidProcessor getInstance() throws IOException {
         if (instance == null) instance = new BidProcessor();
@@ -32,7 +34,7 @@ public class BidProcessor {
     }
 
     private BidProcessor() throws IOException {
-        Thread worker = new Thread(this::processLoop, "bid-worker");
+        worker = new Thread(this::processLoop, "bid-worker");
         worker.setDaemon(true);
         worker.start();
     }
@@ -76,13 +78,14 @@ public class BidProcessor {
 
     // ── Worker loop ────────────────────────────────────────────────────────────
     private void processLoop() {
-        while (true) {
+        while (running) {
             try {
                 BidRequest req = queue.take();
                 process(req);
             } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
+                if (!running) {
+                    break;
+                }
             } catch (Exception e) {
                 System.err.println("[BidProcessor] Unexpected error: " + e.getMessage());
             }
@@ -229,5 +232,9 @@ public class BidProcessor {
                         .broadcastAuctionExtended(managed);
             }
         }
+    }
+    public void shutdown() {
+        running = false;
+        worker.interrupt();
     }
 }

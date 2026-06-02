@@ -4,21 +4,32 @@ import backends.common.models.accounts.Admin;
 import backends.server.ServerApplication;
 import backends.server.database.UserDAO;
 
-import java.io.Console;
 import java.io.IOException;
 import java.util.Scanner;
 
 public class ServerLauncher {
+
     public static String serverIp = "localhost";
 
     public static void main(String[] args) {
+
+        Runtime.getRuntime().addShutdownHook(
+                new Thread(() -> {
+                    System.out.println("[ServerLauncher] Shutdown signal received.");
+                    ServerApplication.shutdown();
+                })
+        );
+
         ServerStart();
     }
 
     public static void ServerStart() {
+
         UserDAO userDAO = new UserDAO();
+
         try {
             if (!userDAO.adminExists()) {
+
                 System.out.println("=== KHỞI TẠO TÀI KHOẢN ADMIN ===");
                 System.out.println("Chưa có tài khoản admin trong hệ thống. Vui lòng tạo mới.\n");
 
@@ -43,10 +54,13 @@ public class ServerLauncher {
 
                 Admin admin = Admin.creating_admin(name, email, password, phone);
                 userDAO.saveAdmin(admin);
+
                 System.out.println("[ServerLauncher] Tài khoản admin đã được tạo thành công!\n");
+
             } else {
                 System.out.println("[ServerLauncher] Admin đã tồn tại trong hệ thống, bỏ qua bước tạo admin.");
             }
+
         } catch (IOException e) {
             throw new RuntimeException("Lỗi khi kiểm tra/tạo tài khoản admin.", e);
         }
@@ -55,6 +69,7 @@ public class ServerLauncher {
             System.out.println("[ServerLauncher] Khởi động Server tại IP: " + GetExactIP.getIP());
             ServerApplication.start();
         });
+
         serverThread.start();
     }
 }

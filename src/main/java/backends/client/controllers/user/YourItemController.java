@@ -4,7 +4,6 @@ import backends.client.controllers.base.BaseController;
 import backends.client.controllers.components.BuyerItemCell;
 import backends.client.network.MessageBus;
 import backends.client.session.UserSession;
-import backends.common.messages.Common.MessageType;
 import backends.common.messages.MsgData.BuyerItemResponse;
 import backends.common.messages.MsgData.FetchBuyerToAuctionRequest;
 import backends.common.messages.MsgData.ItemRecordDto;
@@ -17,7 +16,6 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
 
 import java.io.IOException;
 import java.util.function.Consumer;
@@ -38,7 +36,7 @@ public class YourItemController  extends BaseController  {
     @FXML
     private void initialize() throws IOException {
         System.out.println("YourItemController initialize");
-        send_getItem_request();
+        sendGetItemRequest();
         handleGetItemOk();
     }
 
@@ -72,7 +70,7 @@ public class YourItemController  extends BaseController  {
         // Navigate to history
     }
 
-    public void send_getItem_request() throws IOException {
+    public void sendGetItemRequest() throws IOException {
         User currentUser = UserSession.getCurrentUser();
         if(currentUser ==null){
             System.out.println("Current user is null");
@@ -129,6 +127,6 @@ public class YourItemController  extends BaseController  {
     private void updateItemCount() {
         int count = bought_item.size();
         System.out.println("Updating item count: " + count);
-        itemCountLabel.setText(String.format("Tổng: %d sản phẩm", count));
+        itemCountLabel.setText(String.format("Total: %d items", count));
     }
 }
