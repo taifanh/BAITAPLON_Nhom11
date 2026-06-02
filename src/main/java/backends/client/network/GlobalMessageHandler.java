@@ -12,8 +12,9 @@ public final class GlobalMessageHandler {
         MessageBus.getInstance().subscribe(rawJson -> {
             try {
                 JsonNode node = MAPPER.readTree(rawJson);
-                String type = node.path("messageType").asText("");
+                String type = node.path("type").asText("");
                 if ("SERVER_SHUTDOWN".equals(type)) {
+                    System.out.println("SHUTDOWN");
                     Platform.runLater(() -> {
                         Alert alert =
                                 new Alert(Alert.AlertType.INFORMATION);
