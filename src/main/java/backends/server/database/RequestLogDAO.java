@@ -1,6 +1,6 @@
 package backends.server.database;
 
-import backends.common.Extra.IdGenerator;
+import backends.common.models.Extra.IdGenerator;
 import backends.common.messages.Common.Message;
 
 import java.io.IOException;

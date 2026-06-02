@@ -4,7 +4,7 @@ import backends.common.models.core.Entity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import backends.common.Extra.IdGenerator;
+import backends.common.models.Extra.IdGenerator;
 import backends.common.models.core.Item;
 
 import java.time.Duration;

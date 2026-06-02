@@ -1,6 +1,6 @@
 package backends.common.models.core;
 
-import backends.common.Extra.IdGenerator;
+import backends.common.models.Extra.IdGenerator;
 import backends.common.models.items.ItemType;
 
 public abstract class Item extends Entity {

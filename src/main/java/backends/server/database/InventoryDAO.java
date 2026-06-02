@@ -1,6 +1,5 @@
 package backends.server.database;
 
-import backends.common.constants.Statuses;
 import backends.common.models.core.Item;
 import backends.common.models.items.Art;
 import backends.common.models.items.Electronics;
@@ -67,7 +66,7 @@ public class InventoryDAO {
             statement.setString(6, item.getInfo());
             statement.setString(7, request_id);
             statement.setString(8, userId);
-            statement.setString(9, Statuses.WAITING);
+            statement.setString(9, STATUS_WAITING);
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new IOException("Khong the luu san pham", e);

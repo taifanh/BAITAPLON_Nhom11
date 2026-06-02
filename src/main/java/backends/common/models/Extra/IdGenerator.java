@@ -1,4 +1,4 @@
-package backends.common.Extra;
+package backends.common.models.Extra;
 
 import backends.common.models.items.ItemType;
 

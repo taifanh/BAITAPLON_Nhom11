@@ -5,7 +5,6 @@ import backends.client.controllers.base.BaseController;
 import backends.client.controllers.components.CustomItemCell;
 import backends.client.network.MessageBus;
 import backends.client.session.UserSession;
-import backends.common.constants.Statuses;
 import backends.common.messages.Common.Message;
 import backends.common.messages.Common.RemoveRequestPayload;
 import backends.common.messages.Common.*;

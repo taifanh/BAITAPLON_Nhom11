@@ -1,15 +1,11 @@
 package backends.common.models.accounts;
 
-import backends.common.models.bidding.Auction;
-import backends.common.models.bidding.CanBidding;
 import backends.common.models.core.Account;
 import backends.common.models.core.Item;
-import backends.common.selling.CanSelling;
 
-import java.io.IOException;
 import java.util.HashSet;
 
-public class User extends Account implements CanBidding, CanSelling {
+public class User extends Account {
     HashSet<Item> items = new HashSet<>();
     private double balance;
 
@@ -42,29 +38,5 @@ public class User extends Account implements CanBidding, CanSelling {
             return "USER";
         }
         return "USER" + normalizedPhoneNumber;
-    }
-
-    public void deposit(double amount) {
-
-        this.balance += amount;
-
-    }
-
-    public void withdraw(double amount) {
-        this.balance -= amount;
-    }
-
-    @Override
-    public void sellItem(Item item) {// lúc đã giao dịch xong
-
-        if (items.contains(item)) {
-            items.remove(item);
-        }
-        else  {
-            throw new IllegalArgumentException("Not exist item in this user");
-        }
-    }
-    public void bids(Auction auction,double amount) throws IOException {
-        //AuctionService.placeBid(this,auction,amount);
     }
 }

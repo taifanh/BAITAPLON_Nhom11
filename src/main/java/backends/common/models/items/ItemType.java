@@ -1,6 +1,6 @@
 package backends.common.models.items;
 
-import backends.common.Extra.IdGenerator;
+import backends.common.models.Extra.IdGenerator;
 import backends.common.models.core.Entity;
 import backends.common.models.core.Item;
 
