@@ -1,10 +1,8 @@
 package backends.server;
 
-import backends.server.handler.BidProcessor;
 import backends.server.service.AuctionService;
 import backends.server.handler.ClientHandler;
 
-import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
@@ -37,11 +35,6 @@ public class ServerApplication {
     public static void shutdown() {
         System.out.println("[Server] Shutting down...");
         AuctionService.shutdown();
-        try {
-            BidProcessor.getInstance().shutdown();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         if (executor != null) {
             executor.shutdown();
             try {
