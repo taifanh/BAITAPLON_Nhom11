@@ -52,7 +52,7 @@ public class ServerLauncher {
                     return;
                 }
 
-                Admin admin = Admin.creating_admin(name, email, password, phone);
+                Admin admin = Admin.creating_admin(name, email, phone, password);
                 userDAO.saveAdmin(admin);
 
                 System.out.println("[ServerLauncher] Tài khoản admin đã được tạo thành công!\n");
