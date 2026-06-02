@@ -23,6 +23,7 @@
                 <Button mnemonicParsing="false" onAction="#openProfile" prefHeight="40.0" prefWidth="116.0" style="-fx-background-color: transparent; -fx-border-color: #ea580c; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #ea580c; -fx-font-weight: bold;" text="Profile" />
                 <Button mnemonicParsing="false" onAction="#openBiddingSpace" prefHeight="40.0" prefWidth="138.0" style="-fx-background-color: transparent; -fx-border-color: #ea580c; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #ea580c; -fx-font-weight: bold;" text="Bidding space" />
                 <Button mnemonicParsing="false" onAction="#openSellItem" prefHeight="40.0" prefWidth="116.0" style="-fx-background-color: transparent; -fx-border-color: #ea580c; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #ea580c; -fx-font-weight: bold;" text="Sell item" />
+                <Button mnemonicParsing="false" onAction="#openYourItem" prefHeight="40.0" prefWidth="116.0" style="-fx-background-color: transparent; -fx-border-color: #ea580c; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #ea580c; -fx-font-weight: bold;" text="Your Item" />
                 <Button mnemonicParsing="false" onAction="#openHistory" prefHeight="40.0" prefWidth="116.0" style="-fx-background-color: transparent; -fx-border-color: #0f172a; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #0f172a; -fx-font-weight: bold;" text="History" />
             </children>
         </HBox>

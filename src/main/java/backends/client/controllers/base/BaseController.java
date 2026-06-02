@@ -74,6 +74,11 @@ public abstract class BaseController {
         switchScene(event, "History.fxml", "Transaction History");
     }
 
+    @FXML
+    public void openYourItem(ActionEvent event) throws IOException {
+        switchScene(event, "YourItem.fxml", "Your Items");
+    }
+
     // ── Shared utilities ──────────────────────────────────────────
 
     protected void switchScene(ActionEvent event, String fxml, String title)

@@ -123,6 +123,8 @@ public class ServerAuctionManager {
             AuctionRoom.getInstance().broadcast(mapper.writeValueAsString(statusMsg));
             //broadcast kết quả của phien đấu giá
             AuctionResultMessage result = new AuctionResultMessage();
+            InventoryDAO inventoryDAO = new InventoryDAO();
+            result.sellerId = inventoryDAO.getUserIdByItemId(itemId);
             result.itemId = itemId;
             result.itemName = auction.getItem().getName();
             BidTransactionDAO bidDb = new BidTransactionDAO();
@@ -131,11 +133,10 @@ public class ServerAuctionManager {
                 result.hasBidder = true;
                 result.winnerId = maxBidder.userId;
                 result.winningAmount = maxBidder.amount;
-
                 UserDAO userDAO = new UserDAO();
+                result.sellerId = inventoryDAO.getUserIdByItemId(itemId);
                 User winner = userDAO.getUser(maxBidder.userId);
                 result.winnerName = (winner != null) ? winner.getName() : maxBidder.userId;
-                userDAO.updateBalance(-result.winningAmount, result.winnerId);
             } else {
                 result.hasBidder = false;
                 result.winnerName = "Không có người thắng";

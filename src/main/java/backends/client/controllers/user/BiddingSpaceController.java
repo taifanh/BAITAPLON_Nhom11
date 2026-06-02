@@ -1,8 +1,10 @@
 package backends.client.controllers.user;
 
+import backends.client.controllers.ViewLoader;
 import backends.client.controllers.base.BaseController;
 import backends.client.controllers.components.BidHistoryRow;
 import backends.client.controllers.components.CustomBidHistoryCell;
+import backends.client.controllers.components.ItemPreviewCell;
 import backends.client.controllers.util.ItemJsonParser;
 import backends.client.network.MessageBus;
 import backends.client.session.UserSession;
@@ -28,19 +30,19 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
+import javafx.scene.Scene;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class BiddingSpaceController extends BaseController {
@@ -89,6 +91,8 @@ public class BiddingSpaceController extends BaseController {
     private final ObservableList<Item> auctionItems = FXCollections.observableArrayList();
     private final Map<String, Long>   endTimeByItemId    = new HashMap<>();
     private final Map<String, String> auctionIdByItemId  = new HashMap<>();
+    private final Set<String> inProgressItemIds = new HashSet<>();
+
 
     private Item   selectedItem;
     private String currentAuctionId;
@@ -133,17 +137,11 @@ public class BiddingSpaceController extends BaseController {
     }
 
     private void setupItemListView() {
-        listAuctionItems.setCellFactory(lv -> new ListCell<>() {
-            @Override
-            protected void updateItem(Item item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) { setText(null); return; }
-                setText("Name: "    + item.getName()   + "\n" +
-                        "Opening: " + item.getPrices() + "\n" +
-                        "Type: "    + item.getType()   + "\n" +
-                        "Desc: "    + item.getInfo());
-            }
-        });
+        listAuctionItems.setCellFactory(lv -> new ItemPreviewCell(
+                this::openItemDetail,
+                this::resolveItemStatus
+        ));
+        listAuctionItems.setFixedCellSize(88);
         listAuctionItems.setItems(auctionItems);
         listAuctionItems.getSelectionModel()
                 .selectedItemProperty()
@@ -154,6 +152,11 @@ public class BiddingSpaceController extends BaseController {
         countdownTimeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> tickCountdown()));
         countdownTimeline.setCycleCount(Animation.INDEFINITE);
         countdownTimeline.play();
+    }
+
+    private String resolveItemStatus(String itemId) {
+        if (inProgressItemIds.contains(itemId)) return "🟢 In Progress";
+        return "⏳ Scheduled";
     }
 
     // ── Item selection ────────────────────────────────────────────
@@ -227,10 +230,18 @@ public class BiddingSpaceController extends BaseController {
     }
 
     private void handleInventoryData(JsonNode node) {
-        List<Item> items = new ArrayList<>();
-        items.addAll(ItemJsonParser.parse(node.path("scheduledItems")));
-        items.addAll(ItemJsonParser.parse(node.path("inProgressItems")));
-        Platform.runLater(() -> auctionItems.setAll(items));
+        List<Item> scheduled  = ItemJsonParser.parse(node.path("scheduledItems"));
+        List<Item> inProgress = ItemJsonParser.parse(node.path("inProgressItems"));
+
+        inProgressItemIds.clear();
+        inProgress.forEach(i -> inProgressItemIds.add(i.getId()));
+
+        List<Item> items = new ArrayList<>(scheduled);
+        items.addAll(inProgress);
+        Platform.runLater(() -> {
+            auctionItems.setAll(items);
+            listAuctionItems.refresh();
+        });
     }
 
     private void handleAuctionStatus(String raw) throws Exception {
@@ -240,15 +251,21 @@ public class BiddingSpaceController extends BaseController {
                 case "STARTED" -> {
                     endTimeByItemId.put(msg.itemId, msg.endTimeEpoch);
                     auctionIdByItemId.put(msg.itemId, msg.auctionId);
+                    inProgressItemIds.add(msg.itemId);
                     if (isSelectedItem(msg.itemId)) applyStartedStatus(msg);
+                    Platform.runLater(() -> listAuctionItems.refresh());
                 }
                 case "NOT_STARTED" -> {
+                    inProgressItemIds.remove(msg.itemId);
                     if (isSelectedItem(msg.itemId)) applyNotStartedStatus();
                 }
                 case "ENDED" -> {
                     endTimeByItemId.remove(msg.itemId);
                     auctionIdByItemId.remove(msg.itemId);
+                    inProgressItemIds.remove(msg.itemId);
                     if (isSelectedItem(msg.itemId)) applyEndedStatus(msg.itemId);
+                    Platform.runLater(() -> listAuctionItems.refresh());
+                    UserSession.getConnection().send(new FetchDataRequest("FETCH_INVENTORY"));
                 }
             }
         });
@@ -300,6 +317,7 @@ public class BiddingSpaceController extends BaseController {
 
     private void handleAuctionResult(String raw) throws Exception {
         AuctionResultMessage result = MAPPER.readValue(raw, AuctionResultMessage.class);
+        if(!result.auctionId.equals(currentAuctionId)) return;
         Platform.runLater(() -> {
             String userId = UserSession.getCurrentUser() != null ? UserSession.getCurrentUser().getId() : null;
             if (!result.hasBidder) {
@@ -311,6 +329,11 @@ public class BiddingSpaceController extends BaseController {
                         "Congratulations! You won!\n" +
                                 "Item: "   + result.itemName     + "\n" +
                                 "Amount: " + result.winningAmount);
+            } else if(result.sellerId.equals(userId)) {
+                showAlert(Alert.AlertType.INFORMATION,
+                        "Your item has been successfully sold at auction !\n" +
+                                "Item: "   + result.itemName     + "\n" +
+                                "Amount received: " + result.winningAmount);
             } else {
                 showAlert(Alert.AlertType.INFORMATION,
                         "Winner: " + result.winnerName   + "\n" +
@@ -385,7 +408,6 @@ public class BiddingSpaceController extends BaseController {
         clearBidVisuals("Auction ended.");
         buttonPlaceBid.setDisable(true);
         fieldBidPrice.setDisable(true);
-        UserSession.getConnection().send(new FetchDataRequest("FETCH_INVENTORY"));
     }
 
     private void setupBidVisuals() {
@@ -635,6 +657,30 @@ public class BiddingSpaceController extends BaseController {
         fieldItemName.setText(item.getName());
         fieldBasePrice.setText(String.valueOf(item.getPrices()));
         startingPrice       = item.getPrices();
+    }
+
+    private void openItemDetail(Item item) {
+        if (item == null) {
+            return;
+        }
+
+        try {
+            var loader = ViewLoader.loader("ItemImageView.fxml");
+            Parent root = loader.load();
+            ItemImageViewController controller = loader.getController();
+            controller.setItem(item);
+
+            Stage popup = new Stage();
+            popup.setTitle(item.getName());
+            popup.setScene(new Scene(root, 920, 620));
+            popup.setResizable(false);
+            popup.setOnHidden(e -> controller.cleanup());
+            popup.centerOnScreen();
+            popup.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Cannot open item view");
+        }
     }
 
     private String resolveType(JsonNode node) {

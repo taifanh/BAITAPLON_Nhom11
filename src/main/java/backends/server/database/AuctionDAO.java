@@ -116,6 +116,29 @@ public class AuctionDAO {
         }
     }
 
+    public List<Auction> getAuctionsByHighestBidder(String bidderId) throws IOException {
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement("""
+                     SELECT auctionId, startAt, endAt, status, ItemId, highestBid, highestBidderId
+                     FROM auction
+                     WHERE highestBidderId = ? AND status = ?
+                     ORDER BY endAt DESC
+                     """)) {
+            statement.setString(1, bidderId);
+            statement.setString(2, Auction.Status.ENDED.name());
+            try (ResultSet resultSet = statement.executeQuery()) {
+                List<Auction> auctions = new ArrayList<>();
+                InventoryDAO inventoryDAO = new InventoryDAO();
+                while (resultSet.next()) {
+                    auctions.add(mapAuction(resultSet, inventoryDAO));
+                }
+                return auctions;
+            }
+        } catch (SQLException e) {
+            throw new IOException("Khong the doc danh sach auction theo bidder", e);
+        }
+    }
+
     // cập nhật đếm giờ mới ===>> dùng cho anti sniping
     public synchronized void updateEndTime(String auctionId, LocalDateTime endAt) throws IOException {
         try (Connection connection = openConnection();

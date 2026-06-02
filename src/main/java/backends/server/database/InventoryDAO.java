@@ -214,6 +214,26 @@ public class InventoryDAO {
             throw new RuntimeException(e);
         }
     }
+
+    public synchronized String getItemIdByRequestId(String requestId) throws IOException {
+        try (Connection connection = openConnection();
+             PreparedStatement statement = connection.prepareStatement("""
+                     SELECT ItemId
+                     FROM inventory
+                     WHERE request_id = ?
+                     LIMIT 1
+                     """)) {
+            statement.setString(1, requestId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (!resultSet.next()) {
+                    return null;
+                }
+                return resultSet.getString("ItemId");
+            }
+        } catch (SQLException e) {
+            throw new IOException("Khong the lay item id theo request id", e);
+        }
+    }
     public synchronized void removeItem(String requestId) throws IOException {
         try(Connection connection = openConnection();
             PreparedStatement statement = connection.prepareStatement("""

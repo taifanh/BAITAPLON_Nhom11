@@ -5,6 +5,7 @@ import backends.server.service.AvatarService;
 import backends.server.service.AccountService;
 import backends.server.service.AdminService;
 import backends.server.service.AuctionProcessors;
+import backends.server.service.ItemImageService;
 import backends.server.service.UserService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,6 +52,7 @@ public class ClientHandler implements Runnable {
         processors.put(MessageType.SIGN_UP.getValue(), UserService::signup);
         processors.put(MessageType.FETCH_USER_REQUEST.getValue(), UserService::fetchUserRequest);
         processors.put(MessageType.FETCH_USER_BID_HISTORY.getValue(), UserService::fetchUserBidHistory);
+        processors.put(MessageType.FETCH_BUYER_ITEM.getValue(), UserService::fetchBuyerItemHistory);
         processors.put(MessageType.FETCH_INVENTORY.getValue(), AdminService::fetchInventory);
         processors.put(MessageType.FETCH_BID_HISTORY.getValue(), AdminService::fetchBidHistory);
         processors.put(MessageType.FETCH_AUCTION_STATUS.getValue(), AuctionProcessors::fetchAuctionStatus);
@@ -66,6 +68,8 @@ public class ClientHandler implements Runnable {
         processors.put(MessageType.CHANGE_INFO.getValue(), AccountService::changeInfo);
         processors.put(MessageType.GET_AVATAR.getValue(), AvatarService::getAvatar);
         processors.put(MessageType.SAVE_AVATAR.getValue(), AvatarService::saveAvatar);
+        processors.put(MessageType.GET_ITEM_IMAGE.getValue(), ItemImageService::getItemImage);
+        processors.put(MessageType.SAVE_ITEM_IMAGE.getValue(), ItemImageService::saveItemImage);
         processors.put(MessageType.REMOVE_ITEM.getValue(), UserService::removeItem);
     }
 

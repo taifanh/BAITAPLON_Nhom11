@@ -1,12 +1,6 @@
 package backends.client.controllers.user;
 
-import backends.common.messages.Common.CreateItemPayload;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.gson.Gson;
-import backends.client.network.MessageBus;
+import backends.server.service.CreateItemService;
 import backends.client.session.UserSession;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -16,14 +10,13 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import backends.common.messages.Common.Message;
-import backends.common.messages.Common.MessageType;
 
 import java.io.IOException;
-import java.util.function.Consumer;
 
 public class CreateItemController {
     @FXML
@@ -38,7 +31,10 @@ public class CreateItemController {
     @FXML
     public TextField itemName;
 
-    private Consumer<String> createItemHandler;
+    @FXML
+    public Label selectedImageLabel;
+
+    private final CreateItemService createItemService = new CreateItemService();
 
     public void handleCreateItem(ActionEvent event) throws IOException {
         String type = itemType.getValue() == null ? "" : itemType.getValue().trim();
@@ -59,18 +55,13 @@ public class CreateItemController {
             return;
         }
 
-        Gson gson = new Gson();
-        CreateItemPayload createitempayload = new CreateItemPayload(type, itemName, itemInfo, bidPrice);
-        String payload = gson.toJson(createitempayload);
-        Message msg = new Message();
-        msg.payloadJson = payload;
-        msg.messageType = MessageType.ADD_ITEM.getValue();
-        msg.Id_user = UserSession.getCurrentUser().getId();
-
-        UserSession.getConnection().send(msg);
-        System.out.println("ADD_ITEM");
-        Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        window.close();
+        createItemService.submitCreateItem(
+                UserSession.getCurrentUser().getId(),
+                type,
+                itemName,
+                itemInfo,
+                bidPrice
+        );
     }
 
     @FXML
@@ -80,14 +71,26 @@ public class CreateItemController {
         );
         itemType.setItems(categories);
 
-        subscribeCreateResult();
-        if (createItemHandler != null) {
-            MessageBus.getInstance().subscribe(createItemHandler);
-        }
+        createItemService.setListener(new CreateItemService.Listener() {
+            @Override
+            public void onCreateSuccess() {
+                Platform.runLater(() -> {
+                    showAlert(Alert.AlertType.INFORMATION, "Successful", "add item successful!");
+                    closeWindow();
+                });
+            }
+
+            @Override
+            public void onCreateFailure(String message) {
+                Platform.runLater(() ->
+                        showAlert(Alert.AlertType.WARNING, "Failed", message));
+            }
+        });
 
         Platform.runLater(() -> {
-            Stage stage = (Stage) itemInfo.getScene().getWindow();
-            stage.setOnHidden(e -> cleanup());
+            if (itemInfo.getScene() != null && itemInfo.getScene().getWindow() instanceof Stage stage) {
+                stage.setOnHidden(e -> cleanup());
+            }
         });
     }
 
@@ -96,33 +99,28 @@ public class CreateItemController {
         window.close();
     }
 
-    public void subscribeCreateResult() {
-        createItemHandler = rawJson -> {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                ObjectNode node = (ObjectNode) mapper.readTree(rawJson);
-                String type = node.get("type").asText();
+    @FXML
+    public void handleChooseImage(ActionEvent event) throws IOException {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Choose item image");
+        chooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Image files", "*.png", "*.jpg", "*.jpeg", "*.gif")
+        );
 
-                Platform.runLater(() -> {
-                    if (type.equals("add_item_OK")) {
-                        showAlert(Alert.AlertType.INFORMATION, "Successful", "add item successful!");
-                        closeWindow();
-                    } else {
-                        showAlert(Alert.AlertType.WARNING, "Failed", "cannot add your item!");
-                    }
-                });
-            } catch (JsonMappingException e) {
-                throw new RuntimeException(e);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-        };
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        var selectedFile = chooser.showOpenDialog(stage);
+        if (selectedFile == null) {
+            return;
+        }
+
+        String selectedImageFileName = createItemService.selectImage(selectedFile.toPath());
+        if (selectedImageLabel != null) {
+            selectedImageLabel.setText(selectedImageFileName);
+        }
     }
 
     public void cleanup() {
-        if (createItemHandler != null) {
-            MessageBus.getInstance().unsubscribe(createItemHandler);
-        }
+        createItemService.cleanup();
     }
 
     private void showAlert(Alert.AlertType type, String title, String content) {

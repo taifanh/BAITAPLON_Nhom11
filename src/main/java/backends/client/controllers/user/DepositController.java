@@ -66,7 +66,7 @@ public class DepositController {
                         showAlert(
                                 Alert.AlertType.INFORMATION,
                                 "Successful",
-                                "Deposited successful!\n New balance: " + String.format("%.2f", latestBalance)
+                                "Deposited successful!\nNew balance: " + String.format("%.2f", latestBalance)
                         );
                         closeWindow();
                     });

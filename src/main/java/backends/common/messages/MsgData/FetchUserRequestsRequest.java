@@ -7,9 +7,9 @@ public class FetchUserRequestsRequest {
     public String userId;
     public String requestType;
 
-    public FetchUserRequestsRequest() {
-    }
 
+    public FetchUserRequestsRequest(){
+    }
     public FetchUserRequestsRequest(String userId, String requestType) {
         this.userId = userId;
         this.requestType = requestType;

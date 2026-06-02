@@ -1,8 +1,10 @@
 package backends.client.controllers.admin;
 
+import backends.client.controllers.ViewLoader;
 import backends.client.controllers.base.BaseController;
 import backends.client.controllers.components.BidHistoryRow;
 import backends.client.controllers.components.CustomBidHistoryCell;
+import backends.client.controllers.components.ItemPreviewCell;
 import backends.client.network.MessageBus;
 import backends.client.session.UserSession;
 import backends.client.controllers.util.ItemJsonParser;
@@ -28,9 +30,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
@@ -71,7 +76,6 @@ public class AdminBiddingController extends BaseController {
     // ── Auction state ─────────────────────────────────────────────
     private final Set<String>          inProgressItemIds  = new HashSet<>();
     private final Map<String, Long>    endEpochByItemId   = new HashMap<>();
-    private final Map<String, String>  auctionIdByItemId  = new HashMap<>();
 
     private Item            selectedItem;
     private String          currentAuctionId;
@@ -91,7 +95,11 @@ public class AdminBiddingController extends BaseController {
         bidIncrement.setEditable(false);
         setupBidVisuals();
 
-        upcomingItems.setCellFactory(lv -> createItemCell());
+        upcomingItems.setCellFactory(lv -> new ItemPreviewCell(
+                this::openItemDetail,
+                this::resolveItemStatus
+                ));
+        upcomingItems.setFixedCellSize(88);
         upcomingItems.getSelectionModel()
                 .selectedItemProperty()
                 .addListener((obs, old, selected) -> {
@@ -185,6 +193,11 @@ public class AdminBiddingController extends BaseController {
         buttonStartEndAuction.setDisable(true);
     }
 
+    private String resolveItemStatus(String itemId) {
+        if (inProgressItemIds.contains(itemId)) return "🟢 In Progress";
+        return "⏳ Scheduled";
+    }
+
     // ── MessageBus ────────────────────────────────────────────────
 
     private void subscribeMessages() {
@@ -240,8 +253,8 @@ public class AdminBiddingController extends BaseController {
                 case "STARTED" -> {
                     inProgressItemIds.add(msg.itemId);
                     endEpochByItemId.put(msg.itemId, msg.endTimeEpoch);
-                    auctionIdByItemId.put(msg.itemId, msg.auctionId);
                     if (isSelectedItem(msg.itemId)) applyStartedStatus(msg);
+                    upcomingItems.refresh();
                 }
                 case "NOT_STARTED" -> {
                     if (isSelectedItem(msg.itemId)) applyNotStartedStatus();
@@ -249,8 +262,8 @@ public class AdminBiddingController extends BaseController {
                 case "ENDED" -> {
                     inProgressItemIds.remove(msg.itemId);
                     endEpochByItemId.remove(msg.itemId);
-                    auctionIdByItemId.remove(msg.itemId);
                     if (isSelectedItem(msg.itemId)) applyEndedStatus();
+                    upcomingItems.refresh();
                 }
             }
         });
@@ -416,22 +429,41 @@ public class AdminBiddingController extends BaseController {
         currentStartingPrice = item.getPrices();
     }
 
+    private void openItemDetail(Item item) {
+        if (item == null) {
+            return;
+        }
+
+        try {
+            var loader = ViewLoader.loader("ItemImageView.fxml");
+            Parent root = loader.load();
+            backends.client.controllers.user.ItemImageViewController controller =
+                    loader.getController();
+            controller.setItem(item);
+
+            Stage popup = new Stage();
+            popup.setTitle(item.getName());
+            popup.setScene(new Scene(root, 920, 620));
+            popup.setResizable(false);
+            popup.setOnHidden(e -> controller.cleanup());
+            popup.centerOnScreen();
+            popup.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Cannot open item view");
+        }
+    }
+
     private String resolveType(JsonNode node) {
         String t = node.path("messageType").asText("");
         return t.isBlank() ? node.path("type").asText("") : t;
     }
 
-    private ListCell<Item> createItemCell() {
-        return new ListCell<>() {
-            @Override
-            protected void updateItem(Item item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) { setText(null); return; }
-                setText("Name: "  + item.getName()   + "\n" +
-                        "Price: " + item.getPrices() + "\n" +
-                        "Type: "  + item.getType()   + "\n" +
-                        "Desc: "  + item.getInfo());
-            }
-        };
+    private void showAlert(Alert.AlertType type, String message) {
+        Alert alert = new Alert(type);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
+
 }

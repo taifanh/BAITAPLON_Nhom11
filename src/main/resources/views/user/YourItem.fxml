@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="768.0" prefWidth="1366.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="backends.client.controllers.user.HistoryController">
+<AnchorPane prefHeight="768.0" prefWidth="1360.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="backends.client.controllers.user.YourItemController">
+    <stylesheets>
+        <URL value="@../../styles/YourItem.css" />
+    </stylesheets>
     <children>
+        <!-- Navigation Bar -->
         <HBox alignment="CENTER_LEFT" prefHeight="82.0" spacing="16.0" style="-fx-background-color: white; -fx-padding: 0 40 0 40; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.10), 18, 0.10, 0, 4);" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
-                <Label text="Transaction History" textFill="#0f172a">
+                <Label text="Your Items" textFill="#0f172a">
                     <font>
                         <Font name="System Bold" size="24.0" />
                     </font>
@@ -25,36 +24,42 @@
                 <Button mnemonicParsing="false" onAction="#openProfile" prefHeight="38.0" prefWidth="106.0" style="-fx-background-color: transparent; -fx-border-color: #ea580c; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #ea580c; -fx-font-weight: bold;" text="Profile" />
                 <Button mnemonicParsing="false" onAction="#openBiddingSpace" prefHeight="38.0" prefWidth="132.0" style="-fx-background-color: transparent; -fx-border-color: #ea580c; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #ea580c; -fx-font-weight: bold;" text="Bidding space" />
                 <Button mnemonicParsing="false" onAction="#openSellItem" prefHeight="38.0" prefWidth="104.0" style="-fx-background-color: transparent; -fx-border-color: #ea580c; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #ea580c; -fx-font-weight: bold;" text="Sell item" />
-                <Button mnemonicParsing="false" onAction="#openYourItem" prefHeight="38.0" prefWidth="104.0" style="-fx-background-color: transparent; -fx-border-color: #ea580c; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #ea580c; -fx-font-weight: bold;" text="Your Item" />
-                <Button mnemonicParsing="false" onAction="#openHistory" prefHeight="38.0" prefWidth="104.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-weight: bold;" text="History" />
+                <Button mnemonicParsing="false" prefHeight="38.0" prefWidth="104.0" style="-fx-background-color: #ea580c; -fx-background-radius: 14; -fx-text-fill: white; -fx-font-weight: bold;" text="Your Item" />
+                <Button mnemonicParsing="false" onAction="#openHistory" prefHeight="38.0" prefWidth="104.0" style="-fx-background-color: transparent; -fx-border-color: #0f172a; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #0f172a; -fx-font-weight: bold;" text="History" />
             </children>
         </HBox>
 
+        <!-- Main Content -->
         <VBox spacing="18.0" style="-fx-background-color: white; -fx-background-radius: 24; -fx-padding: 26 32 30 32; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 24, 0.12, 0, 10);" AnchorPane.bottomAnchor="28.0" AnchorPane.leftAnchor="44.0" AnchorPane.rightAnchor="44.0" AnchorPane.topAnchor="110.0">
             <children>
+                <!-- Title Section -->
                 <VBox spacing="6.0">
                     <children>
-                        <Label text="Your activity" textFill="#0f172a">
+                        <Label text="Your Items Won" textFill="#ea580c">
                             <font>
                                 <Font name="System Bold" size="28.0" />
                             </font>
                         </Label>
-                        <Label fx:id="summaryLabel" text="0 transaction records" textFill="#64748b">
+                        <Label text="Manange and review your won items" textFill="#64748b">
                             <font>
                                 <Font size="14.0" />
                             </font>
                         </Label>
                     </children>
                 </VBox>
-                <TableView fx:id="historyTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-radius: 18; -fx-border-color: #dbe4f0; -fx-border-radius: 18;" VBox.vgrow="ALWAYS">
-                    <columns>
-                        <TableColumn fx:id="typeColumn" prefWidth="170.0" text="Type" />
-                        <TableColumn fx:id="itemColumn" prefWidth="410.0" text="Item" />
-                        <TableColumn fx:id="amountColumn" prefWidth="190.0" text="Amount" />
-                        <TableColumn fx:id="statusColumn" prefWidth="170.0" text="Status" />
-                        <TableColumn fx:id="timeColumn" prefWidth="260.0" text="Time" />
-                    </columns>
-                </TableView>
+
+                <!-- Search Section -->
+                <HBox spacing="16.0" style="-fx-alignment: center-left;">
+                    <Label fx:id="itemCountLabel" style="-fx-text-fill: #64748b; -fx-font-size: 13;" text="Total: 0 items">
+                        <HBox.margin>
+                            <Insets left="10.0" />
+                        </HBox.margin>
+                    </Label>
+                    <Region HBox.hgrow="ALWAYS" />
+                </HBox>
+
+                <!-- Items ListView -->
+                <ListView fx:id="itemListView" prefHeight="400.0" prefWidth="300.0" style="-fx-padding: 0; -fx-control-inner-background: transparent; -fx-border-color: #e2e8f0; -fx-border-radius: 12;" VBox.vgrow="ALWAYS" />
             </children>
         </VBox>
     </children>
