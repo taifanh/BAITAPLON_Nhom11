@@ -114,7 +114,7 @@ Sau khi build thành công, thư mục `dist/` sẽ có:
 ## 5. Hướng dẫn chạy Server/Client theo thứ tự cụ thể
 
 ### Cách dùng cho mọi người 
-1. Tải LauncherApp.zip trong mục release
+1. Tải LauncherApp.zip trong mục release (https://github.com/taifanh/BAITAPLON_Nhom11/releases/tag/BiddingSystem)
 
 2. Chạy file `Start-Server.bat` để chạy máy chủ (không dành cho user thông thường)
 
