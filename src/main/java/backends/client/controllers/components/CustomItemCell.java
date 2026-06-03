@@ -113,6 +113,14 @@ public class CustomItemCell extends ListCell<RequestRecordDto> {
                 statusLabel.setText("Waiting");
                 statusLabel.setStyle(style("#166534", "#dcfce7", "#22c55e"));
             }
+            case "SCHEDULED" -> {
+                statusLabel.setText("Scheduled");
+                statusLabel.setStyle(style("#1d4ed8", "#dbeafe", "#3b82f6"));
+            }
+            case "IN_PROGRESS" -> {
+                statusLabel.setText("In Progress");
+                statusLabel.setStyle(style("#0f766e", "#ccfbf1", "#14b8a6"));
+            }
             case "REJECTED" -> {
                 statusLabel.setText("Rejected");
                 statusLabel.setStyle(style("#991b1b", "#fee2e2", "#ef4444"));

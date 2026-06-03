@@ -1,11 +1,13 @@
 package backends.server.service;
 
+import backends.common.messages.MsgAuction.AdminActionCommand;
 import backends.server.database.*;
 import backends.server.handler.ServerAuctionManager;
 import backends.common.messages.MsgBid.ServerBidRespond;
 import backends.common.models.accounts.Admin;
 import backends.common.models.bidding.Auction;
 import backends.common.models.core.Item;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -67,9 +69,12 @@ public final class AuctionService {
         MyRequestDAO myRequestDAO = new MyRequestDAO();
         String requestId = inventoryDAO.getRequestIdbyItem(itemAuction.getId());
         if (requestId != null) {
+            // Start auction = đổi trạng thái request/item + phát event cho seller-side list.
             myRequestDAO.updateRequestStatus(requestId, MyRequestDAO.STATUS_IN_PROGRESS);
+            RequestStatusNotifier.notifyByRequestId(requestId, itemAuction.getId(), MyRequestDAO.STATUS_IN_PROGRESS);
         }
-        
+
+
         return auction;
     }
 
@@ -92,7 +97,9 @@ public final class AuctionService {
         MyRequestDAO myRequestDAO = new MyRequestDAO();
         String requestId = inventoryDAO.getRequestIdbyItem(item.getId());
         if (requestId != null) {
+            // Cùng một luồng status cho cả nhánh start từ admin và nhánh start theo item chỉ định.
             myRequestDAO.updateRequestStatus(requestId, MyRequestDAO.STATUS_IN_PROGRESS);
+            RequestStatusNotifier.notifyByRequestId(requestId, item.getId(), MyRequestDAO.STATUS_IN_PROGRESS);
         }
 
         Auction auction = new Auction(item);
@@ -246,7 +253,10 @@ public final class AuctionService {
                 ? InventoryDAO.STATUS_UNSOLD
                 : InventoryDAO.STATUS_SOLD;
         inventoryDAO.updateItemStatus(auction.getItem().getId(), itemStatus);
-        requestDAO.updateRequestStatus(inventoryDAO.getRequestIdbyItem(auction.getItem().getId()), itemStatus);
+        String requestId = inventoryDAO.getRequestIdbyItem(auction.getItem().getId());
+        // Kết phiên cũng dùng cùng cơ chế: update DB trước, notify sau để UI không phải reload toàn list.
+        requestDAO.updateRequestStatus(requestId, itemStatus);
+        RequestStatusNotifier.notifyByRequestId(requestId, auction.getItem().getId(), itemStatus);
     }
 
 
@@ -305,4 +315,5 @@ public final class AuctionService {
 
         auction.syncHighestBidState(maxBidder.amount, maxBidder.userId);
     }
+
 }

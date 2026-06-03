@@ -9,9 +9,9 @@ import backends.common.messages.Common.Message;
 import backends.common.messages.Common.RemoveRequestPayload;
 import backends.common.messages.Common.*;
 import backends.common.messages.Common.MessageType;
-import backends.common.messages.MsgAuction.AuctionResultMessage;
 import backends.common.messages.MsgData.FetchUserRequestsRequest;
 import backends.common.messages.MsgData.RequestRecordDto;
+import backends.common.messages.MsgData.RequestStatusUpdateMessage;
 import backends.common.messages.MsgData.UserRequestListResponse;
 import backends.common.models.accounts.User;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -37,11 +37,8 @@ public class SellItemController extends BaseController {
     private static final String MSG_ADD_ITEM_OK    = "add_item_OK";
     private static final String MSG_REMOVE_ITEM_OK = "remove_item_OK";
     private static final String MSG_REMOVE_FAIL    = "remove_item_fail";
-    private static final String MSG_ACCEPTED        = "ACCEPTED_SUCCESS";
-    private static final String MSG_REJECTED        = "REJECTED_SUCCESS";
-    private static final String MSG_SCHEDULED       = "SCHEDULED_SUCCESS";
     private static final String MSG_LOADREQUEST     = "USER_REQUEST_LIST_DATA";
-    private static final String MSG_AUCTION_RESULT  = "AUCTION_RESULT";
+    private static final String MSG_REQUEST_STATUS_UPDATED = "REQUEST_STATUS_UPDATED";
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -50,20 +47,17 @@ public class SellItemController extends BaseController {
 
     private Consumer<String> addItemHandler;
     private Consumer<String> removeItemHandler;
-    private Consumer<String> acceptedHandler;
-    private Consumer<String> rejectedHandler;
-    private Consumer<String> scheduledHandler;
-    private Consumer<String> auctionResultHandler;
+    private Consumer<String> requestStatusUpdatedHandler;
     private Consumer<String> loadUserHandler;
     @FXML
     public void initialize() throws IOException {
+        // ListView chỉ bind 1 lần; các lần cập nhật sau chỉ thay đổi ObservableList bên dưới.
+        listPendingItems.setItems(pendingRequestIds);
+        listPendingItems.setCellFactory(lv -> new CustomItemCell());
         subsribeloadPendingRequests();
         subscribeAddItem();
         subscribeRemoveItem();
-        subscribeAccepted();
-        subscribeRejected();
-        subscribeScheduled();
-        subscribeAuctionResult();
+        subscribeRequestStatusUpdated();
         loadUserRequest();
 
     }
@@ -72,10 +66,7 @@ public class SellItemController extends BaseController {
     public void cleanup() {
         if (addItemHandler    != null) MessageBus.getInstance().unsubscribe(addItemHandler);
         if (removeItemHandler != null) MessageBus.getInstance().unsubscribe(removeItemHandler);
-        if (acceptedHandler   != null) MessageBus.getInstance().unsubscribe(acceptedHandler);
-        if (rejectedHandler   != null) MessageBus.getInstance().unsubscribe(rejectedHandler);
-        if (scheduledHandler  != null) MessageBus.getInstance().unsubscribe(scheduledHandler);
-        if (auctionResultHandler != null) MessageBus.getInstance().unsubscribe(auctionResultHandler);
+        if (requestStatusUpdatedHandler != null) MessageBus.getInstance().unsubscribe(requestStatusUpdatedHandler);
         if (loadUserHandler   != null) MessageBus.getInstance().unsubscribe(loadUserHandler);
     }
 
@@ -124,97 +115,44 @@ public class SellItemController extends BaseController {
         MessageBus.getInstance().subscribe(removeItemHandler);
     }
 
-    private void subscribeAccepted() {
-        acceptedHandler = raw -> {
-            try {
-                JsonNode node    = MAPPER.readTree(raw);
-                if (!MSG_ACCEPTED.equals(node.path("type").asText())) return;
-
-                String requestId = node.path("request_id").asText("");
-                String userId    = node.path("user_id").asText("");
-
-                User current   = UserSession.getCurrentUser();
-                if (current == null || requestId.isBlank()) return;
-                if (!userId.isBlank() && !current.getId().equals(userId)) return;
-
-                Platform.runLater(() -> {
-                    try { loadUserRequest(); } catch (IOException e) { e.printStackTrace(); }
-                });
-            } catch (Exception e) { e.printStackTrace(); }
-        };
-        MessageBus.getInstance().subscribe(acceptedHandler);
-    }
-
-    private void subscribeRejected() {
-        rejectedHandler = raw -> {
+    private void subscribeRequestStatusUpdated() {
+        requestStatusUpdatedHandler = raw -> {
             try {
                 JsonNode node = MAPPER.readTree(raw);
-                if (!MSG_REJECTED.equals(node.path("type").asText())) return;
+                if (!MSG_REQUEST_STATUS_UPDATED.equals(node.path("type").asText())) return;
 
-                String requestId = node.path("request_id").asText("");
-                String userId = node.path("user_id").asText("");
-
-                User current = UserSession.getCurrentUser();
-                if (current == null || requestId.isBlank()) return;
-                if (!userId.isBlank() && !current.getId().equals(userId)) return;
+                RequestStatusUpdateMessage msg = MAPPER.readValue(raw, RequestStatusUpdateMessage.class);
+                if (msg.requestId == null || msg.requestId.isBlank()) return;
 
                 Platform.runLater(() -> {
-                    try { loadUserRequest(); } catch (IOException e) { e.printStackTrace(); }
-                });
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        };
-        MessageBus.getInstance().subscribe(rejectedHandler);
-    }
+                    boolean updated = false;
+                    for (int i = 0; i < pendingRequestIds.size(); i++) {
+                        RequestRecordDto record = pendingRequestIds.get(i);
+                        if (msg.requestId.equals(record.requestId)) {
+                            // Chỉ patch đúng record đổi trạng thái, tránh fetch lại toàn bộ list.
+                            record.status = msg.status;
+                            pendingRequestIds.set(i, record);
+                            updated = true;
+                            break;
+                        }
+                    }
 
-    private void subscribeScheduled() {
-        scheduledHandler = raw -> {
-            try {
-                JsonNode node = MAPPER.readTree(raw);
-                if (!MSG_SCHEDULED.equals(node.path("type").asText())) return;
-
-                String requestId = node.path("request_id").asText("");
-                String userId = node.path("user_id").asText("");
-
-                User current = UserSession.getCurrentUser();
-                if (current == null || requestId.isBlank()) return;
-                if (!userId.isBlank() && !current.getId().equals(userId)) return;
-
-                Platform.runLater(() -> {
-                    try { loadUserRequest(); } catch (IOException e) { e.printStackTrace(); }
-                });
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        };
-        MessageBus.getInstance().subscribe(scheduledHandler);
-    }
-
-    private void subscribeAuctionResult() {
-        auctionResultHandler = raw -> {
-            try {
-                JsonNode node = MAPPER.readTree(raw);
-                if (!MSG_AUCTION_RESULT.equals(node.path("type").asText())) return;
-
-                AuctionResultMessage result = MAPPER.readValue(raw, AuctionResultMessage.class);
-                User current = UserSession.getCurrentUser();
-                if (current == null || result.sellerId == null || !current.getId().equals(result.sellerId)) {
-                    return;
-                }
-
-                Platform.runLater(() -> {
-                    try {
-                        loadUserRequest();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    if (updated) {
+                        sortNewestFirst();
+                        listPendingItems.refresh();
+                    } else {
+                        try {
+                            loadUserRequest();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 });
             } catch (Exception e) {
                 e.printStackTrace();
             }
         };
-        MessageBus.getInstance().subscribe(auctionResultHandler);
+        MessageBus.getInstance().subscribe(requestStatusUpdatedHandler);
     }
 
     // ── UI helpers ────────────────────────────────────────────────
@@ -233,8 +171,9 @@ public class SellItemController extends BaseController {
                     if (response.requests != null) {
                         pendingRequestIds.addAll(response.requests);
                     }
-
-                    refreshListView();
+                    // Sau khi load xong, sort để item mới nhất luôn nằm trên cùng.
+                    sortNewestFirst();
+                    listPendingItems.refresh();
                 });
             } catch (Exception e) {
                 e.printStackTrace();
@@ -243,11 +182,18 @@ public class SellItemController extends BaseController {
         MessageBus.getInstance().subscribe(loadUserHandler);
     }
 
-
-    private void refreshListView() {
-        listPendingItems.setItems(pendingRequestIds);
-        listPendingItems.setCellFactory(lv -> new CustomItemCell());
+    private void sortNewestFirst() {
+        // time đang là chuỗi timestamp từ server, so sánh giảm dần để hiển thị item mới nhất trước.
+        pendingRequestIds.sort((left, right) -> {
+            String leftTime = left == null ? null : left.time;
+            String rightTime = right == null ? null : right.time;
+            if (leftTime == null && rightTime == null) return 0;
+            if (leftTime == null) return 1;
+            if (rightTime == null) return -1;
+            return rightTime.compareTo(leftTime);
+        });
     }
+
     public void loadUserRequest() throws IOException {
         User currentUser = UserSession.getCurrentUser();
         if (currentUser == null) {

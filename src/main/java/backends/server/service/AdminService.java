@@ -99,22 +99,10 @@ public final class AdminService {
 
         if ("SCHEDULE_ITEM".equals(cmd.action)) {
             inventoryDAODB.updateItemStatus(cmd.targetId, InventoryDAO.STATUS_SCHEDULED);
-            myRequestDAO.updateRequestStatus(inventoryDAODB.getRequestIdbyItem(cmd.targetId), MyRequestDAO.STATUS_SCHEDULED);
-
-            String targetUserId = inventoryDAODB.getUserIdByItemId(cmd.targetId);
-            if (targetUserId != null && !targetUserId.isBlank()) {
-                ObjectNode response = mapper.createObjectNode();
-                response.put("type", "SCHEDULED_SUCCESS");
-                response.put("user_id", targetUserId);
-                response.put("item_id", cmd.targetId);
-                response.put("request_id", inventoryDAODB.getRequestIdbyItem(cmd.targetId));
-                response.put("status", InventoryDAO.STATUS_SCHEDULED);
-
-                ClientHandler targetHandler = AuctionRoom.getInstance().connectors.get(targetUserId);
-                if (targetHandler != null) {
-                    targetHandler.send(response.toString());
-                }
-            }
+            String requestId = inventoryDAODB.getRequestIdbyItem(cmd.targetId);
+            // Đồng bộ DB rồi phát 1 event chung để seller-side list tự cập nhật.
+            myRequestDAO.updateRequestStatus(requestId, MyRequestDAO.STATUS_SCHEDULED);
+            RequestStatusNotifier.notifyByRequestId(requestId, cmd.targetId, MyRequestDAO.STATUS_SCHEDULED);
 
             ObjectNode ack = mapper.createObjectNode();
             ack.put("type", "ACTION_SUCCESS");
@@ -129,25 +117,9 @@ public final class AdminService {
             return null; // Already sent ack
         } else if ("REJECT_REQUEST".equals(cmd.action)) {
             requestLogDAODB.updateRequestStatus(cmd.targetId, RequestLogDAO.STATUS_REJECTED);
+            // Reject chỉ cần đổi trạng thái request và thông báo lại cho đúng user.
             myRequestDAO.updateRequestStatus(cmd.targetId, RequestLogDAO.STATUS_REJECTED);
-
-            RequestLogDAO.RequestRecord request = requestLogDAODB.findByRequestId(cmd.targetId);
-            String targetUserId = (cmd.userId != null && !cmd.userId.isBlank())
-                    ? cmd.userId
-                    : (request != null ? request.userId() : null);
-
-            if (targetUserId != null && !targetUserId.isBlank()) {
-                ObjectNode response = mapper.createObjectNode();
-                response.put("type", "REJECTED_SUCCESS");
-                response.put("user_id", targetUserId);
-                response.put("request_id", cmd.targetId);
-                response.put("status", RequestLogDAO.STATUS_REJECTED);
-
-                ClientHandler targetHandler = AuctionRoom.getInstance().connectors.get(targetUserId);
-                if (targetHandler != null) {
-                    targetHandler.send(response.toString());
-                }
-            }
+            RequestStatusNotifier.notifyByRequestId(cmd.targetId, null, RequestLogDAO.STATUS_REJECTED);
 
             ObjectNode ack = mapper.createObjectNode();
             ack.put("type", "ACTION_SUCCESS");
@@ -168,21 +140,9 @@ public final class AdminService {
                 inventoryDAODB.saveItem(item, request.userId(), request.requestId());
                 new ItemImageDAO().updateItemId(request.requestId(), item.getId());
                 requestLogDAODB.removeRequest(cmd.targetId);
+                // Khi accept, item mới được tạo và chuyển sang WAITING; notifier giúp list seller phản ánh ngay.
                 myRequestDAO.updateRequestStatus(cmd.targetId, RequestLogDAO.STATUS_WAITING);
-
-                ObjectNode response = mapper.createObjectNode();
-                response.put("type", "ACCEPTED_SUCCESS");
-                String targetUserId = (cmd.userId != null && !cmd.userId.isBlank())
-                        ? cmd.userId
-                        : request.userId();
-                response.put("user_id", targetUserId);
-                response.put("request_id", cmd.targetId);
-                response.put("status", RequestLogDAO.STATUS_WAITING);
-
-                ClientHandler targetHandler = AuctionRoom.getInstance().connectors.get(targetUserId);
-                if (targetHandler != null) {
-                    targetHandler.send(String.valueOf(response));
-                }
+                RequestStatusNotifier.notifyByRequestId(cmd.targetId, item.getId(), RequestLogDAO.STATUS_WAITING);
 
                 ObjectNode ack = mapper.createObjectNode();
                 ack.put("type", "ACTION_SUCCESS");
