@@ -117,6 +117,14 @@ public class CustomItemCell extends ListCell<RequestRecordDto> {
                 statusLabel.setText("Rejected");
                 statusLabel.setStyle(style("#991b1b", "#fee2e2", "#ef4444"));
             }
+            case "SOLD" -> {
+                statusLabel.setText("Sold");
+                statusLabel.setStyle(style("#14532d", "#dcfce7", "#22c55e"));
+            }
+            case "UNSOLD" -> {
+                statusLabel.setText("Unsold");
+                statusLabel.setStyle(style("#7c2d12", "#ffedd5", "#f97316"));
+            }
             default -> {
                 statusLabel.setText(normalized.isBlank() ? "Unknown" : normalized);
                 statusLabel.setStyle(style("#475569", "#e2e8f0", "#94a3b8"));
