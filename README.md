@@ -201,3 +201,10 @@ Nếu muốn chạy test:
 ```bash
 mvn test
 ```
+## 8. Video Demo và Báo cáo dự án PDF
+
+### Video demo
+[Video demo](https://drive.google.com/file/d/1qtW49C_exPqWpYeOgFfCZAtpT5PFRL9f/view?fbclid=IwY2xjawSNE4ZleHRuA2FlbQIxMQBzcnRjBmFwcF9pZAwzNTA2ODU1MzE3MjgAAR4YAU6tTcJVtXAFUeNh9hgWhzuHgTPhvVR0wTQQM8Uv3thxooXrM8B_SgkAug_aem_D9uYoMC2ZVJJaaekuMcMGQ)
+  
+### Báo cáo dự án
+[Báo Cáo](https://cdn.fbsbx.com/v/t59.2708-21/714630301_990859720342524_4135930558296720307_n.docx/baocao_dau_gia-1-1.docx?_nc_cat=100&ccb=1-7&_nc_sid=2b0e22&_nc_eui2=AeHbqaPOKIDuYKDSXMwF-fFB1iNURGAbzhbWI1REYBvOFoXrXA7-fFqIZa3u4cP_1PY-_mUczI67YEaL1HQCUEq_&_nc_ohc=3WrfA6V76dsQ7kNvwEXvnLy&_nc_oc=AdoJXN8q4tN_dXkcYSYaVhgVRHrKyDQaGx6JFdmjMcs0BgyLUB1v-ZIkRTSr6Od9ZrZbf_CDGSqwEcsv3A6AcSkN&_nc_ad=z-m&_nc_cid=0&_nc_zt=7&_nc_ht=cdn.fbsbx.com&_nc_gid=TnpyQszP1qgz3lNWhoCdlQ&_nc_ss=7a338&oh=03_Q7cD5gFzqJWlmgiiDt-kJo8pGCQk09-dmr5b2erpidgKQKuIjw&oe=6A21FF9D&dl=1)
