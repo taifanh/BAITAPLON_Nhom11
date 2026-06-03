@@ -8,7 +8,7 @@
 
 <AnchorPane prefHeight="768.0" prefWidth="1360.0" style="-fx-background-color: linear-gradient(to bottom right, #f5f7fb, #e7eef8);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="backends.client.controllers.user.YourItemController">
     <stylesheets>
-        <URL value="@../../styles/YourItem.css" />
+        <URL value="@../../css/YourItem.css" />
     </stylesheets>
     <children>
         <!-- Navigation Bar -->
@@ -20,7 +20,7 @@
                     </font>
                 </Label>
                 <Region HBox.hgrow="ALWAYS" />
-                <Button mnemonicParsing="false" onAction="#backHome" prefHeight="38.0" prefWidth="92.0" style="-fx-background-color: transparent; -fx-border-color: #0f172a; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #0f172a; -fx-font-weight: bold;" text="Home" />
+                <Button mnemonicParsing="false" onAction="#handleHome" prefHeight="38.0" prefWidth="92.0" style="-fx-background-color: transparent; -fx-border-color: #0f172a; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #0f172a; -fx-font-weight: bold;" text="Home" />
                 <Button mnemonicParsing="false" onAction="#openProfile" prefHeight="38.0" prefWidth="106.0" style="-fx-background-color: transparent; -fx-border-color: #ea580c; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #ea580c; -fx-font-weight: bold;" text="Profile" />
                 <Button mnemonicParsing="false" onAction="#openBiddingSpace" prefHeight="38.0" prefWidth="132.0" style="-fx-background-color: transparent; -fx-border-color: #ea580c; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #ea580c; -fx-font-weight: bold;" text="Bidding space" />
                 <Button mnemonicParsing="false" onAction="#openSellItem" prefHeight="38.0" prefWidth="104.0" style="-fx-background-color: transparent; -fx-border-color: #ea580c; -fx-border-radius: 14; -fx-background-radius: 14; -fx-text-fill: #ea580c; -fx-font-weight: bold;" text="Sell item" />
@@ -40,7 +40,7 @@
                                 <Font name="System Bold" size="28.0" />
                             </font>
                         </Label>
-                        <Label text="Manange and review your won items" textFill="#64748b">
+                        <Label text="Manage and review your won items" textFill="#64748b">
                             <font>
                                 <Font size="14.0" />
                             </font>

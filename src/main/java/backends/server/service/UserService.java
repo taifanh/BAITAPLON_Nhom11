@@ -205,6 +205,7 @@ public final class UserService {
         }
 
         if (userId == null || userId.isBlank()) {
+            System.err.println("[UserService] Missing user id in fetchBuyerItemHistory");
             ObjectNode error = mapper.createObjectNode();
             error.put("type", "BUY_ITEM_RESPONSE");
             error.put("error", "Missing user id");
@@ -212,13 +213,15 @@ public final class UserService {
             return null;
         }
 
+        System.out.println("[UserService] Fetching bought items for user: " + userId);
         AuctionDAO auctionDAO = new AuctionDAO();
         BuyerItemResponse response = new BuyerItemResponse();
         response.type = "BUY_ITEM_RESPONSE";
         response.itemlist = new ArrayList<>();
 
-        // lấy item từ auction của người thắng rồi lấy thông tin của item và các thông tin khác ở auction
         List<Auction> wonAuctions = auctionDAO.getAuctionsByHighestBidder(userId);
+        System.out.println("[UserService] Retrieved " + wonAuctions.size() + " won auctions for user: " + userId);
+        
         for (Auction auction : wonAuctions) {
             ItemRecordDto dto = new ItemRecordDto();
             Item item = auction.getItem();

@@ -8,7 +8,6 @@ public class FetchBuyerToAuctionRequest {
     public String requestType ;
 
     public FetchBuyerToAuctionRequest() {
-        this.type = MessageType.FETCH_BUYER_ITEM.getValue();
     }
 
     public FetchBuyerToAuctionRequest(String UserId, String requestType) {

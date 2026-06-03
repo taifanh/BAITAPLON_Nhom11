@@ -107,7 +107,10 @@ public class AuctionDAO {
                 List<Auction> auctions = new ArrayList<>();
                 InventoryDAO inventoryDAO = new InventoryDAO();
                 while (resultSet.next()) {
-                    auctions.add(mapAuction(resultSet, inventoryDAO));
+                    Auction auction = mapAuction(resultSet, inventoryDAO);
+                    if (auction != null) {
+                        auctions.add(auction);
+                    }
                 }
                 return auctions;
             }
@@ -130,7 +133,10 @@ public class AuctionDAO {
                 List<Auction> auctions = new ArrayList<>();
                 InventoryDAO inventoryDAO = new InventoryDAO();
                 while (resultSet.next()) {
-                    auctions.add(mapAuction(resultSet, inventoryDAO));
+                    Auction auction = mapAuction(resultSet, inventoryDAO);
+                    if (auction != null) {
+                        auctions.add(auction);
+                    }
                 }
                 return auctions;
             }
@@ -196,7 +202,8 @@ public class AuctionDAO {
         String itemId = resultSet.getString("ItemId");
         Item item = inventoryDAO.findById(itemId);
         if (item == null) {
-            throw new IOException("Khong tim thay item cua auction: " + itemId);
+            System.err.println("[AuctionDAO] Khong tim thay item " + itemId + " trong inventory, bo qua auction " + resultSet.getString("auctionId"));
+            return null;
         }
 
         return Auction.restore(

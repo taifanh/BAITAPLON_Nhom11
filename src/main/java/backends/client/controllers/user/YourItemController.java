@@ -45,31 +45,6 @@ public class YourItemController  extends BaseController  {
         if(getItemHandler !=null) MessageBus.getInstance().unsubscribe(getItemHandler);
     }
 
-    @FXML
-    public void backHome() {
-        // Navigate back to home
-    }
-
-    @FXML
-    public void openProfile() {
-        // Navigate to profile
-    }
-
-    @FXML
-    public void openBiddingSpace() {
-        // Navigate to bidding space
-    }
-
-    @FXML
-    public void openSellItem() {
-        // Navigate to sell item
-    }
-
-    @FXML
-    public void openHistory() {
-        // Navigate to history
-    }
-
     public void sendGetItemRequest() throws IOException {
         User currentUser = UserSession.getCurrentUser();
         if(currentUser ==null){
