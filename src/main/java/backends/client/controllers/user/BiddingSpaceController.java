@@ -317,29 +317,18 @@ public class BiddingSpaceController extends BaseController {
 
     private void handleAuctionResult(String raw) throws Exception {
         AuctionResultMessage result = MAPPER.readValue(raw, AuctionResultMessage.class);
+        String userId = UserSession.getCurrentUser().getId();
         boolean match = result.auctionId.equals(currentAuctionId) || result.auctionId.equals(lastAuctionId);
         if (!match) return;
         Platform.runLater(() -> {
-            String userId = UserSession.getCurrentUser() != null ? UserSession.getCurrentUser().getId() : null;
             if (!result.hasBidder) {
                 showAlert(Alert.AlertType.INFORMATION, "Auction ended with no bids.");
                 return;
             }
-            if (result.winnerId.equals(userId)) {
-                showAlert(Alert.AlertType.INFORMATION,
-                        "Congratulations! You won!\n" +
-                                "Item: "   + result.itemName     + "\n" +
-                                "Amount: " + result.winningAmount);
-            } else if(result.sellerId.equals(userId)) {
-                showAlert(Alert.AlertType.INFORMATION,
-                        "Your item has been successfully sold at auction !\n" +
-                                "Item: "   + result.itemName     + "\n" +
-                                "Amount received: " + result.winningAmount);
-            } else {
+            if(!userId.equals(result.winnerId)) {
                 showAlert(Alert.AlertType.INFORMATION,
                         "Winner: " + result.winnerName   + "\n" +
-                                "Amount: " + result.winningAmount + "\n" +
-                                "Item: "   + result.itemName);
+                                "Amount: " + result.winningAmount);
             }
         });
     }
