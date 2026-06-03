@@ -124,7 +124,7 @@ public class SignUpController {
                             Alert alert = new Alert(Alert.AlertType.INFORMATION);
                             alert.setTitle("Successful !");
                             alert.setHeaderText(null);
-                            alert.setContentText("Sign up successful !");
+                            alert.setContentText("Sign up successfully !");
                             alert.setOnHidden(e -> {
                                 pendingStage.setScene(sceneMain);
                                 pendingStage.setTitle("Sign in");

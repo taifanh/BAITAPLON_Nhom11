@@ -126,6 +126,7 @@ public class ServerAuctionManager {
             InventoryDAO inventoryDAO = new InventoryDAO();
             result.sellerId = inventoryDAO.getUserIdByItemId(itemId);
             result.itemId = itemId;
+            result.auctionId = auctionId;
             result.itemName = auction.getItem().getName();
             BidTransactionDAO bidDb = new BidTransactionDAO();
             ServerBidRespond maxBidder = bidDb.getMaxBidder(auction.getAuctionId());

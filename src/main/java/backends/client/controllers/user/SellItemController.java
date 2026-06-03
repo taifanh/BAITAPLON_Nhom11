@@ -9,6 +9,7 @@ import backends.common.messages.Common.Message;
 import backends.common.messages.Common.RemoveRequestPayload;
 import backends.common.messages.Common.*;
 import backends.common.messages.Common.MessageType;
+import backends.common.messages.MsgAuction.AuctionResultMessage;
 import backends.common.messages.MsgData.FetchUserRequestsRequest;
 import backends.common.messages.MsgData.RequestRecordDto;
 import backends.common.messages.MsgData.UserRequestListResponse;
@@ -40,6 +41,7 @@ public class SellItemController extends BaseController {
     private static final String MSG_REJECTED        = "REJECTED_SUCCESS";
     private static final String MSG_SCHEDULED       = "SCHEDULED_SUCCESS";
     private static final String MSG_LOADREQUEST     = "USER_REQUEST_LIST_DATA";
+    private static final String MSG_AUCTION_RESULT  = "AUCTION_RESULT";
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -51,6 +53,7 @@ public class SellItemController extends BaseController {
     private Consumer<String> acceptedHandler;
     private Consumer<String> rejectedHandler;
     private Consumer<String> scheduledHandler;
+    private Consumer<String> auctionResultHandler;
     private Consumer<String> loadUserHandler;
     @FXML
     public void initialize() throws IOException {
@@ -60,6 +63,7 @@ public class SellItemController extends BaseController {
         subscribeAccepted();
         subscribeRejected();
         subscribeScheduled();
+        subscribeAuctionResult();
         loadUserRequest();
 
     }
@@ -71,6 +75,7 @@ public class SellItemController extends BaseController {
         if (acceptedHandler   != null) MessageBus.getInstance().unsubscribe(acceptedHandler);
         if (rejectedHandler   != null) MessageBus.getInstance().unsubscribe(rejectedHandler);
         if (scheduledHandler  != null) MessageBus.getInstance().unsubscribe(scheduledHandler);
+        if (auctionResultHandler != null) MessageBus.getInstance().unsubscribe(auctionResultHandler);
         if (loadUserHandler   != null) MessageBus.getInstance().unsubscribe(loadUserHandler);
     }
 
@@ -184,6 +189,32 @@ public class SellItemController extends BaseController {
             }
         };
         MessageBus.getInstance().subscribe(scheduledHandler);
+    }
+
+    private void subscribeAuctionResult() {
+        auctionResultHandler = raw -> {
+            try {
+                JsonNode node = MAPPER.readTree(raw);
+                if (!MSG_AUCTION_RESULT.equals(node.path("type").asText())) return;
+
+                AuctionResultMessage result = MAPPER.readValue(raw, AuctionResultMessage.class);
+                User current = UserSession.getCurrentUser();
+                if (current == null || result.sellerId == null || !current.getId().equals(result.sellerId)) {
+                    return;
+                }
+
+                Platform.runLater(() -> {
+                    try {
+                        loadUserRequest();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        };
+        MessageBus.getInstance().subscribe(auctionResultHandler);
     }
 
     // ── UI helpers ────────────────────────────────────────────────
