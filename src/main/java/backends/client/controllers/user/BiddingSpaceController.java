@@ -92,7 +92,7 @@ public class BiddingSpaceController extends BaseController {
     private final Map<String, Long>   endTimeByItemId    = new HashMap<>();
     private final Map<String, String> auctionIdByItemId  = new HashMap<>();
     private final Set<String> inProgressItemIds = new HashSet<>();
-
+    private String lastAuctionId;
 
     private Item   selectedItem;
     private String currentAuctionId;
@@ -317,7 +317,8 @@ public class BiddingSpaceController extends BaseController {
 
     private void handleAuctionResult(String raw) throws Exception {
         AuctionResultMessage result = MAPPER.readValue(raw, AuctionResultMessage.class);
-        if(!result.auctionId.equals(currentAuctionId)) return;
+        boolean match = result.auctionId.equals(currentAuctionId) || result.auctionId.equals(lastAuctionId);
+        if (!match) return;
         Platform.runLater(() -> {
             String userId = UserSession.getCurrentUser() != null ? UserSession.getCurrentUser().getId() : null;
             if (!result.hasBidder) {
@@ -394,6 +395,7 @@ public class BiddingSpaceController extends BaseController {
     }
 
     private void applyEndedStatus(String itemId) {
+        lastAuctionId = currentAuctionId;
         currentAuctionId = null;
         auctionEndTime   = null;
         resetClock();

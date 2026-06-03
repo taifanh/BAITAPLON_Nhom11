@@ -69,7 +69,7 @@ public class SignInController {
         String password = passwordField.getText() == null ? "" : passwordField.getText().trim();
 
         if (phoneNumber.isBlank() || password.isBlank()) {
-            showAlert(Alert.AlertType.WARNING, "Loi", null, "Vui long nhap day du so dien thoai va mat khau.");
+            showAlert(Alert.AlertType.WARNING, "Loi", null, "Please fill all the information !");
             return;
         }
         // lấy stage hiên tại để thay đổi mà hình khi sign in thành công
@@ -90,8 +90,8 @@ public class SignInController {
                 if ("SIGNIN_FAIL".equals(type)) {
                     Platform.runLater(() ->
                             showAlert(Alert.AlertType.ERROR, "Loi",
-                                    "Dang nhap that bai",
-                                    "Sai tai khoan hoac mat khau."));
+                                    "Sign in failed",
+                                    "Wrong phone number or password."));
                     return;
                 }
 
@@ -150,7 +150,7 @@ public class SignInController {
 
         Stage window = (Stage) ((Node) event.getSource()).getScene().getWindow();
         window.setScene(sceneSignup);
-        window.setTitle("Dang ky tai khoan");
+        window.setTitle("Sign up !");
         window.setWidth(SignUpController.SIGNUP_WIDTH);
         window.setHeight(SignUpController.SIGNUP_HEIGHT);
         window.centerOnScreen();

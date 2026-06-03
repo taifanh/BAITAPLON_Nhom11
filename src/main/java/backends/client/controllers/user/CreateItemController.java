@@ -75,7 +75,7 @@ public class CreateItemController {
             @Override
             public void onCreateSuccess() {
                 Platform.runLater(() -> {
-                    showAlert(Alert.AlertType.INFORMATION, "Successful", "add item successful!");
+                    showAlert(Alert.AlertType.INFORMATION, "Successful", "Add item successfully!");
                     closeWindow();
                 });
             }
