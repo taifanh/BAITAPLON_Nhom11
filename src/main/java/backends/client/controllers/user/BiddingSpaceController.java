@@ -325,7 +325,7 @@ public class BiddingSpaceController extends BaseController {
                 showAlert(Alert.AlertType.INFORMATION, "Auction ended with no bids.");
                 return;
             }
-            if(!userId.equals(result.winnerId)) {
+            if(!userId.equals(result.winnerId) && !userId.equals(result.sellerId)) {
                 showAlert(Alert.AlertType.INFORMATION,
                         "Winner: " + result.winnerName   + "\n" +
                                 "Amount: " + result.winningAmount);

@@ -1,6 +1,8 @@
 package backends.client.network;
 
 import backends.client.session.UserSession;
+import backends.common.messages.Common.Message;
+import backends.common.messages.Common.MessageType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -63,6 +65,7 @@ public final class GlobalMessageHandler {
                 );
                 alert.show();
             });
+            requestLatestBalance(userId);
         }
 
         if (hasBidder && userId.equals(winnerId)) {
@@ -77,5 +80,16 @@ public final class GlobalMessageHandler {
                 alert.show();
             });
         }
+    }
+
+    private static void requestLatestBalance(String userId) {
+        if (userId == null || userId.isBlank() || UserSession.getConnection() == null) {
+            return;
+        }
+
+        Message msg = new Message();
+        msg.messageType = MessageType.GET_BALANCE.getValue();
+        msg.Id_user = userId;
+        UserSession.getConnection().send(msg);
     }
 }

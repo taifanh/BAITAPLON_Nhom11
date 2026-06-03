@@ -138,9 +138,6 @@ public class ServerAuctionManager {
                 result.sellerId = inventoryDAO.getUserIdByItemId(itemId);
                 User winner = userDAO.getUser(maxBidder.userId);
                 result.winnerName = (winner != null) ? winner.getName() : maxBidder.userId;
-                
-                // Gửi thông báo refresh vật phẩm cho người thắng
-                AuctionRoom.sendToUser(maxBidder.userId, mapper.writeValueAsString(result));
             } else {
                 result.hasBidder = false;
                 result.winnerName = "Không có người thắng";
