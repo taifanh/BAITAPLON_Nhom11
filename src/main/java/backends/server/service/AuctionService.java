@@ -62,6 +62,14 @@ public final class AuctionService {
         auctionDAO.saveAuction(auction);
         registerActiveAuction(auction);
         scheduleAutoClose(auction, duration);
+        
+        // Cập nhật request status khi bắt đầu đấu giá
+        MyRequestDAO myRequestDAO = new MyRequestDAO();
+        String requestId = inventoryDAO.getRequestIdbyItem(itemAuction.getId());
+        if (requestId != null) {
+            myRequestDAO.updateRequestStatus(requestId, MyRequestDAO.STATUS_IN_PROGRESS);
+        }
+        
         return auction;
     }
 
@@ -82,7 +90,10 @@ public final class AuctionService {
         InventoryDAO inventoryDAO = new InventoryDAO();
         inventoryDAO.updateItemStatus(item.getId(), InventoryDAO.STATUS_IN_PROGRESS);
         MyRequestDAO myRequestDAO = new MyRequestDAO();
-        myRequestDAO.updateRequestStatus(item.getId(), MyRequestDAO.STATUS_IN_PROGRESS);
+        String requestId = inventoryDAO.getRequestIdbyItem(item.getId());
+        if (requestId != null) {
+            myRequestDAO.updateRequestStatus(requestId, MyRequestDAO.STATUS_IN_PROGRESS);
+        }
 
         Auction auction = new Auction(item);
         LocalDateTime now = LocalDateTime.now();
